@@ -2,7 +2,6 @@
 #define EUSER_H
 
 #include <QtCore>
-#include "edbconnection.h"
 
 class EUser
 {
@@ -50,7 +49,6 @@ private:
     QString phone;
     QString email;
     UserType  type;
-    EDBconnection* db;
 //    QDateTime regdate;
 };
 

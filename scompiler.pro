@@ -1,45 +1,28 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2011-02-13T22:55:59
+# Project created by QtCreator 2011-11-28T22:55:59
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT     += core gui
 CONFIG += qt warn_on debug
 
 TARGET = scompiler
 TEMPLATE = app
 
-
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    loginform.cpp \
+    mainwindow.cpp \
     euser.cpp \
-    eclient.cpp \
-    esupplier.cpp \
-#    eauthor.cpp \
-    edbconnection.cpp \
-    eoperator.cpp \
-    eadmin.cpp
+    eclient.cpp
 
-HEADERS  += mainwindow.h \
-    loginform.h \
+HEADERS += mainwindow.h \
     euser.h \
-    eclient.h \
-    esupplier.h \
-#    eauthor.h \
-    edbconnection.h \
-    eoperator.h \
-    eadmin.h
+    eclient.h
 
-FORMS    += mainwindow.ui \
-    loginform.ui \
-    esupplier.ui \
-    eclient.ui \
-    eoperator.ui \
-    eadmin.ui
+FORMS += mainwindow.ui \
+    eclient.ui
 
-RESOURCES += \
-    scompiler.qrc
+RESOURCES += scompiler.qrc
 
 RC_FILE = scompiler.rc
+

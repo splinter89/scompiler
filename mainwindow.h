@@ -2,11 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtSql>
-#include "esupplier.h"
 #include "eclient.h"
-#include "eoperator.h"
-#include "eadmin.h"
 
 namespace Ui {
     class MainWindow;
@@ -23,9 +19,6 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    EOperator *e_operator;
-    ESupplier *supplier;
-    EAdmin *admin;
     EClient *client;
 
 public slots:

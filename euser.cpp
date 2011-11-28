@@ -23,17 +23,9 @@ EUser& EUser::operator=( const EUser& rhs)
 
 EUser::EUser(long _id)
 {
-    db = EDBconnection::getInstance();
-    QString query = QString("SELECT " \
-                            "id, login, password, lastname, name, address, phone, email, type, reg_date " \
-                            "FROM users WHERE id='%1'").arg(_id);
-    QList<QStringList> List = db->get(query);
-
-    if (List.isEmpty()/* || List[0].isEmpty()*/) {
-        qDebug("EUser constructor error: List is empty");
-    } else {
-        setUserInfo(List);
-    }
+//    QString query = QString("SELECT " \
+//                            "id, login, password, lastname, name, address, phone, email, type, reg_date " \
+//                            "FROM users WHERE id='%1'").arg(_id);
 }
 
 EUser::EUser(QString _login)
