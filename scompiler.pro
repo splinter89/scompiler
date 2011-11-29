@@ -22,3 +22,7 @@ FORMS += mainwindow.ui
 RESOURCES += scompiler.qrc
 
 RC_FILE = scompiler.rc
+
+
+
+

@@ -4,21 +4,24 @@
 #include "slexer.h"
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+    this->ui->setupUi(this);
 
     setFixedSize(width(), height());
     this->statusBar()->showMessage(trUtf8("Статус: ок"));
+
+    this->base_window_title = this->windowTitle();
 }
 
 MainWindow::~MainWindow()
 {
 //    qDebug("MainWindow destructor");
-    delete ui;
+    delete this->ui;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -35,14 +38,26 @@ void MainWindow::closeEvent(QCloseEvent* event)
 }
 
 
-void MainWindow::openFile()
+void MainWindow::openFile(QString filename)
 {
-    qDebug()<<"openFile";
+    qDebug()<<"openFile: "<<filename;
+
+    QFile source(filename);
+    if (!source.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(this, "Error", source.errorString());
+    }
+    ui->source_te->setPlainText(source.readAll());
+    source.close();
+
+    QFileInfo fi(filename);
+    this->statusBar()->showMessage(trUtf8("Статус: файл \"%1\" загружен.").arg(fi.fileName()));
+    this->setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(this->base_window_title));
 }
 
-void MainWindow::saveFile()
+void MainWindow::saveFile(QString filename)
 {
-    qDebug()<<"saveFile";
+    qDebug()<<"saveFile: "<<filename;
+
 }
 
 void MainWindow::run()
@@ -53,12 +68,22 @@ void MainWindow::run()
 
 void MainWindow::on_open_triggered()
 {
-    this->openFile();
+    QString fileName = QFileDialog::getOpenFileName(
+                this,
+                trUtf8("Загрузить исходный код..."),
+                QCoreApplication::applicationDirPath(),
+                trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
+    this->openFile(fileName);
 }
 
 void MainWindow::on_save_triggered()
 {
-    this->saveFile();
+    QString fileName = QFileDialog::getSaveFileName(
+                this,
+                trUtf8("Сохранить исходный код..."),
+                QCoreApplication::applicationDirPath(),
+                trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
+    this->saveFile(fileName);
 }
 
 void MainWindow::on_run_triggered()
