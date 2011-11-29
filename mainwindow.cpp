@@ -10,18 +10,18 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    this->ui->setupUi(this);
+    ui->setupUi(this);
 
     setFixedSize(width(), height());
-    this->statusBar()->showMessage(trUtf8("Статус: ок"));
+    statusBar()->showMessage(trUtf8("Статус: ок"));
 
-    this->base_window_title = this->windowTitle();
+    base_window_title = windowTitle();
+
 }
 
 MainWindow::~MainWindow()
 {
-//    qDebug("MainWindow destructor");
-    delete this->ui;
+    delete ui;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -40,24 +40,32 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::openFile(QString filename)
 {
-    qDebug()<<"openFile: "<<filename;
-
-    QFile source(filename);
-    if (!source.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(this, "Error", source.errorString());
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        statusBar()->showMessage(trUtf8("Ошибка при открытии: %1").arg(file.errorString()));
     }
-    ui->source_te->setPlainText(source.readAll());
-    source.close();
+    QTextStream in(&file);
+    ui->source_te->setPlainText(in.readAll());
+    file.close();
 
     QFileInfo fi(filename);
-    this->statusBar()->showMessage(trUtf8("Статус: файл \"%1\" загружен.").arg(fi.fileName()));
-    this->setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(this->base_window_title));
+    statusBar()->showMessage(trUtf8("Статус: файл \"%1\" загружен.").arg(fi.fileName()));
+    setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(base_window_title));
 }
 
 void MainWindow::saveFile(QString filename)
 {
-    qDebug()<<"saveFile: "<<filename;
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        statusBar()->showMessage(trUtf8("Ошибка при сохранении: %1").arg(file.errorString()));
+    }
+    QTextStream out(&file);
+    QString content = ui->source_te->toPlainText();
+    out << content;
+    file.close();
 
+    QFileInfo fi(filename);
+    statusBar()->showMessage(trUtf8("Статус: файл \"%1\" успешно сохранен.").arg(fi.fileName()));
 }
 
 void MainWindow::run()
@@ -73,7 +81,7 @@ void MainWindow::on_open_triggered()
                 trUtf8("Загрузить исходный код..."),
                 QCoreApplication::applicationDirPath(),
                 trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
-    this->openFile(fileName);
+    openFile(fileName);
 }
 
 void MainWindow::on_save_triggered()
@@ -83,10 +91,10 @@ void MainWindow::on_save_triggered()
                 trUtf8("Сохранить исходный код..."),
                 QCoreApplication::applicationDirPath(),
                 trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
-    this->saveFile(fileName);
+    saveFile(fileName);
 }
 
 void MainWindow::on_run_triggered()
 {
-    this->run();
+    run();
 }

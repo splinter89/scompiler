@@ -15,15 +15,16 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void openFile(QString filename);
+    void saveFile(QString filename);
+    void run(void);
+
 private:
     Ui::MainWindow *ui;
     QString base_window_title;
 
 public slots:
     void closeEvent(QCloseEvent *event);
-    void openFile(QString filename);
-    void saveFile(QString filename);
-    void run(void);
 
 private slots:
     void on_open_triggered();
