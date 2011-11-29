@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "eclient.h"
 
 namespace Ui {
     class MainWindow;
@@ -19,14 +18,14 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    EClient *client;
-
 public slots:
-    void startP(long user_id);
     void closeEvent(QCloseEvent *event);
+    void openFile(void);
+    void saveFile(void);
+    void run(void);
 
-signals:
-    void exitWorkplace(void);
+private slots:
+    void on_open_triggered();
 };
 
 #endif // MAINWINDOW_H

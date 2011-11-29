@@ -12,17 +12,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     mainwindow.cpp \
-    euser.cpp \
-    eclient.cpp
+    slexer.cpp
 
 HEADERS += mainwindow.h \
-    euser.h \
-    eclient.h
+    slexer.h
 
-FORMS += mainwindow.ui \
-    eclient.ui
+FORMS += mainwindow.ui
 
 RESOURCES += scompiler.qrc
 
 RC_FILE = scompiler.rc
-
