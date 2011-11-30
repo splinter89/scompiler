@@ -121,7 +121,7 @@ void CodeEditor::highlightCurrentLine()
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
         
-        QColor lineColor = QColor(Qt::yellow).lighter(160);
+        QColor lineColor = QColor(215, 215, 230);
 
         selection.format.setBackground(lineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);

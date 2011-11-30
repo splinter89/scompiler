@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "codeeditor.h"
 
 namespace Ui {
     class MainWindow;
@@ -21,6 +22,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    CodeEditor *editor;
     QString base_window_title;
 
 public slots:
