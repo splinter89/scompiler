@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setFixedSize(width(), height());
     statusBar()->showMessage(trUtf8("Статус: ок"));
+    ui->source_te->setTabStopWidth(20);
 
     base_window_title = windowTitle();
 

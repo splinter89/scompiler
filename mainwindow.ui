@@ -118,6 +118,9 @@
    <property name="text">
     <string>Открыть...</string>
    </property>
+   <property name="toolTip">
+    <string>Открыть (Ctrl+O)</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
@@ -130,6 +133,9 @@
    <property name="text">
     <string>Сохранить...</string>
    </property>
+   <property name="toolTip">
+    <string>Сохранить (Ctrl+S)</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
@@ -141,6 +147,9 @@
    </property>
    <property name="text">
     <string>Запуск</string>
+   </property>
+   <property name="toolTip">
+    <string>Запуск (Ctrl+R)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
