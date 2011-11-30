@@ -12,16 +12,20 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     mainwindow.cpp \
-    slexer.cpp
+    slexer.cpp \
+    codeeditor.cpp
 
 HEADERS += mainwindow.h \
-    slexer.h
+    slexer.h \
+    codeeditor.h
 
 FORMS += mainwindow.ui
 
 RESOURCES += scompiler.qrc
 
 RC_FILE = scompiler.rc
+
+
 
 
 
