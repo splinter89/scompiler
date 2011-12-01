@@ -29,8 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget *tab_sint = new QWidget();
     QTabWidget *tab_main = new QTabWidget();
     tab_main->addTab(tab_lex, trUtf8("Лексический анализ"));
-    tab_main->addTab(tab_sint, trUtf8("..."));
-
         QWidget *tab_lex_1 = new QWidget();
         QWidget *tab_lex_2 = new QWidget();
         QTabWidget *tab_lex_main = new QTabWidget();
@@ -40,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QGridLayout *grid_lex = new QGridLayout();
         grid_lex->addWidget(tab_lex_main);
         tab_lex->setLayout(grid_lex);
+    tab_main->addTab(tab_sint, trUtf8("..."));
 
     QGridLayout *grid_main = new QGridLayout();
     grid_main->addWidget(editor, 0, 0);
@@ -113,7 +112,7 @@ void MainWindow::on_open_triggered()
                 this,
                 trUtf8("Загрузить исходный код..."),
                 QCoreApplication::applicationDirPath(),
-                trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
+                trUtf8("C++ source file (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         openFile(fileName);
     }
@@ -125,7 +124,7 @@ void MainWindow::on_save_triggered()
                 this,
                 trUtf8("Сохранить исходный код..."),
                 QCoreApplication::applicationDirPath(),
-                trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
+                trUtf8("C++ source file (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         saveFile(fileName);
     }
