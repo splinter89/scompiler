@@ -10,16 +10,37 @@ SLexer::~SLexer() {
 }
 
 void SLexer::setSource(const QString code) {
-    source = QString();
-
     QChar c;
-    for (int i = 0; i < code.length(); i++) {
+    TokenType type;
+    ConstType const_type;
+    QVariant const_value;
+    QString identifier;
+    Keyword keyword;
+    Separator separator;
+    int i, start;
+
+    for (i = 0; i < code.length(); i++) {
+        // main loop
         c = code.at(i);
         if (c == QChar('\n')) {
             tokens << "ok";
         }
     }
-    qDebug() << source;
+    switch (type) {
+    case T_ID:
+        addIdToken(start, i - start, identifier);
+        break;
+    case T_CONST:
+        addConstToken(start, i - start, const_type, const_value);
+        break;
+    case T_KEYWORD:
+        addKeywordToken(start, i - start, keyword);
+        break;
+    case T_SEPARATOR:
+        addSeparatorToken(start, i - start, separator);
+        break;
+    }
+    qDebug() << tokens.join(" ");
 }
 
 void SLexer::addIdToken(int start, int end, QString identifier) {

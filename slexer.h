@@ -7,7 +7,6 @@
 class SLexer
 {
 public:
-    SLexer();
     SLexer(const QString);
     virtual ~SLexer();
 
@@ -18,7 +17,6 @@ public:
 
     void setSource(const QString);
 
-    QString getSource() const { return source; }
     QStringList getAllTokens() const { return tokens; }
 
 private:
