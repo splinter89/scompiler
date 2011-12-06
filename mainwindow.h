@@ -1,8 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "basic_structs.h"
 #include <QMainWindow>
 #include "codeeditor.h"
+#include <QTabWidget>
+#include <QTableWidget>
 
 namespace Ui {
     class MainWindow;
@@ -22,7 +25,15 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
     CodeEditor *editor;
+    QTabWidget *tab_main;
+    QPlainTextEdit *edit_lex;
+    QTableWidget *table_lex_2;
+    QTableWidget *table_lex_3;
+    QTableWidget *table_lex_4;
+    QTableWidget *table_lex_5;
+
     QString base_window_title;
 
 public slots:

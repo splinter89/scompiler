@@ -17,13 +17,15 @@ SOURCES += main.cpp\
 
 HEADERS += mainwindow.h \
     slexer.h \
-    codeeditor.h
+    codeeditor.h \
+    basic_structs.h
 
 FORMS += mainwindow.ui
 
 RESOURCES += scompiler.qrc
 
 RC_FILE = scompiler.rc
+
 
 
 

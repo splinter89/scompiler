@@ -7,15 +7,15 @@
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QGridLayout>
-#include <QTabWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+    int header_num_width = 40;
 
-    resize(850, 650);
+    ui->setupUi(this);
+    resize(900, 650);
 //    setFixedSize(width(), height());
     statusBar()->showMessage(trUtf8("Статус: ок"));
     base_window_title = windowTitle();
@@ -27,13 +27,56 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QWidget *tab_lex = new QWidget();
     QWidget *tab_sint = new QWidget();
-    QTabWidget *tab_main = new QTabWidget();
+    tab_main = new QTabWidget();
     tab_main->addTab(tab_lex, trUtf8("Лексический анализ"));
         QWidget *tab_lex_1 = new QWidget();
         QWidget *tab_lex_2 = new QWidget();
+        QWidget *tab_lex_3 = new QWidget();
+        QWidget *tab_lex_4 = new QWidget();
+        QWidget *tab_lex_5 = new QWidget();
         QTabWidget *tab_lex_main = new QTabWidget();
-        tab_lex_main->addTab(tab_lex_1, trUtf8("Свертка"));
-        tab_lex_main->addTab(tab_lex_2, trUtf8("..."));
+        tab_lex_main->addTab(tab_lex_1, trUtf8("свертка"));
+            QGridLayout *grid_lex_1 = new QGridLayout();
+            edit_lex = new QPlainTextEdit();
+            edit_lex->setReadOnly(true);
+            grid_lex_1->addWidget(edit_lex);
+            tab_lex_1->setLayout(grid_lex_1);
+        tab_lex_main->addTab(tab_lex_2, trUtf8("#1 id's"));
+            QGridLayout *grid_lex_2 = new QGridLayout();
+            table_lex_2 = new QTableWidget(0, 2);
+            QStringList table_lex_2_headers;
+            table_lex_2_headers << trUtf8("#") << trUtf8("представление");
+            table_lex_2->setHorizontalHeaderLabels(table_lex_2_headers);
+            table_lex_2->setColumnWidth(0, header_num_width);
+            grid_lex_2->addWidget(table_lex_2);
+            tab_lex_2->setLayout(grid_lex_2);
+        tab_lex_main->addTab(tab_lex_3, trUtf8("#2 constants"));
+            QGridLayout *grid_lex_3 = new QGridLayout();
+            table_lex_3 = new QTableWidget(0, 4);
+            QStringList table_lex_3_headers;
+            table_lex_3_headers << trUtf8("#") << trUtf8("имя") << trUtf8("тип") << trUtf8("значение");
+            table_lex_3->setHorizontalHeaderLabels(table_lex_3_headers);
+            table_lex_3->setColumnWidth(0, header_num_width);
+            grid_lex_3->addWidget(table_lex_3);
+            tab_lex_3->setLayout(grid_lex_3);
+        tab_lex_main->addTab(tab_lex_4, trUtf8("#3 keywords"));
+            QGridLayout *grid_lex_4 = new QGridLayout();
+            table_lex_4 = new QTableWidget(0, 2);
+            QStringList table_lex_4_headers;
+            table_lex_4_headers << trUtf8("#") << trUtf8("представление");
+            table_lex_4->setHorizontalHeaderLabels(table_lex_4_headers);
+            table_lex_4->setColumnWidth(0, header_num_width);
+            grid_lex_4->addWidget(table_lex_4);
+            tab_lex_4->setLayout(grid_lex_4);
+        tab_lex_main->addTab(tab_lex_5, trUtf8("#4 separators"));
+            QGridLayout *grid_lex_5 = new QGridLayout();
+            table_lex_5 = new QTableWidget(0, 2);
+            QStringList table_lex_5_headers;
+            table_lex_5_headers << trUtf8("#") << trUtf8("представление");
+            table_lex_5->setHorizontalHeaderLabels(table_lex_5_headers);
+            table_lex_5->setColumnWidth(0, header_num_width);
+            grid_lex_5->addWidget(table_lex_5);
+            tab_lex_5->setLayout(grid_lex_5);
 
         QGridLayout *grid_lex = new QGridLayout();
         grid_lex->addWidget(tab_lex_main);
@@ -102,7 +145,20 @@ void MainWindow::saveFile(QString filename)
 
 void MainWindow::run()
 {
-    qDebug()<<"run!";
+    SLexer *lex;
+    QStringList tokens;
+
+    switch (tab_main->currentIndex()) {
+    case 0:
+        // lexical analysis
+        lex = new SLexer(editor->toPlainText());
+        tokens = lex->getAllTokens();
+        edit_lex->setPlainText(tokens.join(" "));
+        break;
+    case 1:
+        qDebug()<<"tab 2 active";
+        break;
+    }
 }
 
 
