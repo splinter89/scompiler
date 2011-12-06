@@ -69,21 +69,20 @@ static const QHash<Separator, QString> SeparatorCodes = initSeparatorValues();
 
 struct Table_item_id {
     int start, end;
-    QString code;
+    QString identifier;
 };
 struct Table_item_const {
     int start, end;
-    QString code;
     ConstType type;
     QVariant value;
 };
 struct Table_item_keyword {
     int start, end;
-    QString code;
+    Keyword type;
 };
 struct Table_item_separator {
     int start, end;
-    QString code;
+    Separator type;
 };
 
 #endif // BASIC_STRUCTS_H

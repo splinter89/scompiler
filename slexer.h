@@ -11,10 +11,10 @@ public:
     SLexer(const QString);
     virtual ~SLexer();
 
-    QList<Table_item_id *> Table_ids;
-    QList<Table_item_const *> Table_consts;
-    QList<Table_item_keyword *> Table_keywords;
-    QList<Table_item_separator *> Table_separators;
+    QList<Table_item_id> Table_ids;
+    QList<Table_item_const> Table_consts;
+    QList<Table_item_keyword> Table_keywords;
+    QList<Table_item_separator> Table_separators;
 
     void setSource(const QString);
 
@@ -25,10 +25,10 @@ private:
     QString source;
     QStringList tokens;
 
-    void addIdToken(int start, end, QString code);
-    void addConstToken(int start, end, QString code, ConstType type, QVariant value);
-    void addKeywordToken(int start, end, QString code);
-    void addSeparatorToken(int start, end, QString code);
+    void addIdToken(int start, int end, QString identifier);
+    void addConstToken(int start, int end, ConstType type, QVariant value);
+    void addKeywordToken(int start, int end, Keyword type);
+    void addSeparatorToken(int start, int end, Separator type);
 };
 
 #endif // SLEXER_H

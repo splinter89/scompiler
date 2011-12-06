@@ -22,21 +22,30 @@ void SLexer::setSource(const QString code) {
     qDebug() << source;
 }
 
-void SLexer::addIdToken(int start, end, QString code) {
-    Table_item_id new_item = {start, end, code};
+void SLexer::addIdToken(int start, int end, QString identifier) {
+    Table_item_id new_item = {start, end, identifier};
     Table_ids << new_item;
+    // new_token = array(table_num, index)
+    // tokens << new_token
+
+}
+void SLexer::addConstToken(int start, int end, ConstType type, QVariant value) {
+    Table_item_const new_item = {start, end, type, value};
+    Table_consts << new_item;
     // new_token = array(table_num, index)
     // tokens << new_token
 }
 
-void SLexer::addConstToken(int start, end, QString code, ConstType type, QVariant value) {
-
+void SLexer::addKeywordToken(int start, int end, Keyword type) {
+    Table_item_keyword new_item = {start, end, type};
+    Table_keywords << new_item;
+    // new_token = array(table_num, index)
+    // tokens << new_token
 }
 
-void SLexer::addKeywordToken(int start, end, QString code) {
-
-}
-
-void SLexer::addSeparatorToken(int start, end, QString code) {
-
+void SLexer::addSeparatorToken(int start, int end, Separator type) {
+    Table_item_separator new_item = {start, end, type};
+    Table_separators << new_item;
+    // new_token = array(table_num, index)
+    // tokens << new_token
 }
