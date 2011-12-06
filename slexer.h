@@ -8,7 +8,6 @@ class SLexer
 {
 public:
     SLexer(const QString);
-    virtual ~SLexer();
 
     QList<Table_item_id> Table_ids;
     QList<Table_item_const> Table_consts;

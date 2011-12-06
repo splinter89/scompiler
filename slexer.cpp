@@ -5,30 +5,52 @@ SLexer::SLexer(const QString code) {
     setSource(code);
 }
 
-SLexer::~SLexer() {
-    qDebug("SLexer destructor");
-}
-
 void SLexer::setSource(const QString code) {
-    QChar c;
+    QString sequence;
+
+    QList<QString> space_chars;
+    space_chars << " " << "\n" << "\t" << "\r";
+
     TokenType type;
     ConstType const_type;
     QVariant const_value;
-    QString identifier;
     Keyword keyword;
     Separator separator;
     int i, start;
 
+    // :TODO: calculate lines
     for (i = 0; i < code.length(); i++) {
         // main loop
-        c = code.at(i);
-        if (c == QChar('\n')) {
+        sequence = code.at(i);
+
+        if (space_chars.contains(sequence)) {
+
+        }
+
+        if (SeparatorCodes.contains(code.mid(i, 2))) {
+            start = i;
+            i++;
+            sequence += code.at(i);
+
+            type = T_SEPARATOR;
+            separator = SeparatorCodes.value(sequence);
+        } else if (SeparatorCodes.contains(sequence)) {
+            start = i;
+
+            type = T_SEPARATOR;
+            separator = SeparatorCodes.value(sequence);
+        } else if (SeparatorCodes.contains(sequence)) {
+            start = i;
+
+            type = T_SEPARATOR;
+            separator = SeparatorCodes.value(sequence);
+        } else if (sequence == QChar('\n')) {
             tokens << "ok";
         }
     }
     switch (type) {
     case T_ID:
-        addIdToken(start, i - start, identifier);
+        addIdToken(start, i - start, sequence);
         break;
     case T_CONST:
         addConstToken(start, i - start, const_type, const_value);
