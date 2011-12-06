@@ -14,58 +14,58 @@ enum Separator {S_PLUS, S_MINUS, S_MULT, S_DIV, S_NOT, S_MOD, S_AMP, S_OR, S_VBA
                  S_CURLY_CLOSE, S_SEMICOLON, S_COMMA, S_PERIOD, S_COLON, S_APOSTROPHE,
                  S_DOUBLE_QUOTE, S_TILDE};
 
-static QHash<Keyword, QString> initKeywordValues() {
-        QHash<Keyword, QString> hash;
-        hash.insert(K_IF, "if");
-        hash.insert(K_ELSE, "else");
-        hash.insert(K_FOR, "for");
-        hash.insert(K_WHILE, "while");
-        hash.insert(K_DO, "do");
-        hash.insert(K_RETURN, "return");
-        hash.insert(K_BREAK, "break");
-        hash.insert(K_CONTINUE, "continue");
-        hash.insert(K_CHAR, "char");
-        hash.insert(K_INT, "int");
-        hash.insert(K_DOUBLE, "double");
-        hash.insert(K_BOOL, "bool");
-        hash.insert(K_VOID, "void");
-        hash.insert(K_CONST, "const");
-        hash.insert(K_TRUE, "true");
-        hash.insert(K_FALSE, "false");
-        hash.insert(K_CLASS, "class");
-        hash.insert(K_PUBLIC, "public");
-        hash.insert(K_PRIVATE, "private");
+static QHash<QString, Keyword> initKeywordValues() {
+        QHash<QString, Keyword> hash;
+        hash.insert("if", K_IF);
+        hash.insert("else", K_ELSE);
+        hash.insert("for", K_FOR);
+        hash.insert("while", K_WHILE);
+        hash.insert("do", K_DO);
+        hash.insert("return", K_RETURN);
+        hash.insert("break", K_BREAK);
+        hash.insert("continue", K_CONTINUE);
+        hash.insert("char", K_CHAR);
+        hash.insert("int", K_INT);
+        hash.insert("double", K_DOUBLE);
+        hash.insert("bool", K_BOOL);
+        hash.insert("void", K_VOID);
+        hash.insert("const", K_CONST);
+        hash.insert("true", K_TRUE);
+        hash.insert("false", K_FALSE);
+        hash.insert("class", K_CLASS);
+        hash.insert("public", K_PUBLIC);
+        hash.insert("private", K_PRIVATE);
         return hash;
 }
-static const QHash<Keyword, QString> KeywordCodes = initKeywordValues();
+static const QHash<QString, Keyword> KeywordCodes = initKeywordValues();
 
-static QHash<Separator, QString> initSeparatorValues() {
-    QHash<Separator, QString> hash;
-    hash.insert(S_PLUS, "+");
-    hash.insert(S_MINUS, "-");
-    hash.insert(S_MULT, "*");
-    hash.insert(S_DIV, "/");
-    hash.insert(S_NOT, "!");
-    hash.insert(S_MOD, "%");
-    hash.insert(S_AMP, "&");
-    hash.insert(S_VBAR, "|");
-    hash.insert(S_LESS, "<");
-    hash.insert(S_GREATER, ">");
-    hash.insert(S_EQUAL, "=");
-    hash.insert(S_ROUND_OPEN, "(");
-    hash.insert(S_ROUND_CLOSE, ")");
-    hash.insert(S_CURLY_OPEN, "{");
-    hash.insert(S_CURLY_CLOSE, "}");
-    hash.insert(S_SEMICOLON, ";");
-    hash.insert(S_COMMA, ",");
-    hash.insert(S_PERIOD, ".");
-    hash.insert(S_COLON, ":");
-    hash.insert(S_APOSTROPHE, "'");
-    hash.insert(S_DOUBLE_QUOTE, "\"");
-    hash.insert(S_TILDE, "~");
+static QHash<QString, Separator> initSeparatorValues() {
+    QHash<QString, Separator> hash;
+    hash.insert("+", S_PLUS);
+    hash.insert("-", S_MINUS);
+    hash.insert("*", S_MULT);
+    hash.insert("/", S_DIV);
+    hash.insert("!", S_NOT);
+    hash.insert("%", S_MOD);
+    hash.insert("&", S_AMP);
+    hash.insert("|", S_VBAR);
+    hash.insert("<", S_LESS);
+    hash.insert(">", S_GREATER);
+    hash.insert("=", S_EQUAL);
+    hash.insert("(", S_ROUND_OPEN);
+    hash.insert(")", S_ROUND_CLOSE);
+    hash.insert("{", S_CURLY_OPEN);
+    hash.insert("}", S_CURLY_CLOSE);
+    hash.insert(";", S_SEMICOLON);
+    hash.insert(",", S_COMMA);
+    hash.insert(".", S_PERIOD);
+    hash.insert(":", S_COLON);
+    hash.insert("'", S_APOSTROPHE);
+    hash.insert("\"", S_DOUBLE_QUOTE);
+    hash.insert("~", S_TILDE);
     return hash;
 }
-static const QHash<Separator, QString> SeparatorCodes = initSeparatorValues();
+static const QHash<QString, Separator> SeparatorCodes = initSeparatorValues();
 
 struct Table_item_id {
     int start, end;
