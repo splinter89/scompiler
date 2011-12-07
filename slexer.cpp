@@ -23,11 +23,17 @@ void SLexer::setSource(const QString code) {
         // main loop
         sequence = code.at(i);
 
-        if (space_chars.contains(sequence)) {
+        if ((sequence == " ") || (sequence == "\t")) {
+            start = i;
+            sequence = code.at(i + 1);
+            while ((sequence == " ") || (sequence == "\t")) {
+                i++;
+                sequence = code.at(i + 1);
+            }
 
-        }
-
-        if (SeparatorCodes.contains(code.mid(i, 2))) {
+            type = T_SEPARATOR;
+            separator = S_SPACE;
+        } else if (SeparatorCodes.contains(code.mid(i, 2))) {
             start = i;
             i++;
             sequence += code.at(i);
