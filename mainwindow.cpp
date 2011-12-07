@@ -7,15 +7,22 @@
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QGridLayout>
+#include <QDesktopWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    int header_num_width = 40;
+    int header_num_width = 40, main_width = 900, main_height = 650;
 
     ui->setupUi(this);
-    resize(900, 650);
+    resize(main_width, main_height);
+    QRect desktop = QApplication::desktop()->availableGeometry();
+    if ((desktop.width() > main_width) && (desktop.height() > main_height + 10)) {
+        move((desktop.width() - main_width) / 2, (desktop.height() - main_height) / 2 - 20);
+    } else {
+        resize(main_width / 2, main_height / 2);
+    }
 //    setFixedSize(width(), height());
     statusBar()->showMessage(trUtf8("Статус: ок"));
     base_window_title = windowTitle();
