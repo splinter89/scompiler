@@ -19,8 +19,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void openFile(QString filename);
-    void saveFile(QString filename);
+    void setStatusMsg(const QString text);
+    void setStatusError(const QString text);
+
+    void openFile(const QString filename);
+    void saveFile(const QString filename);
     void run(void);
 
 private:

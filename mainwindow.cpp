@@ -59,9 +59,9 @@ MainWindow::MainWindow(QWidget *parent) :
             tab_lex_2->setLayout(grid_lex_2);
         tab_lex_main->addTab(tab_lex_3, trUtf8("#2 constants"));
             QGridLayout *grid_lex_3 = new QGridLayout();
-            table_lex_3 = new QTableWidget(0, 4);
+            table_lex_3 = new QTableWidget(0, 3);
             QStringList table_lex_3_headers;
-            table_lex_3_headers << trUtf8("#") << trUtf8("имя") << trUtf8("тип") << trUtf8("значение");
+            table_lex_3_headers << trUtf8("#") << trUtf8("тип") << trUtf8("значение");
             table_lex_3->setHorizontalHeaderLabels(table_lex_3_headers);
             table_lex_3->setColumnWidth(0, header_num_width);
             grid_lex_3->addWidget(table_lex_3);
@@ -119,26 +119,36 @@ void MainWindow::closeEvent(QCloseEvent* event)
 }
 
 
-void MainWindow::openFile(QString filename)
+void MainWindow::setStatusMsg(const QString text) {
+    statusBar()->setStyleSheet("color: black;");
+    statusBar()->showMessage(trUtf8("Статус: ") + text);
+}
+void MainWindow::setStatusError(const QString text) {
+    statusBar()->setStyleSheet("color: red;");
+    statusBar()->showMessage(trUtf8("Ошибка: ") + text);
+}
+
+
+void MainWindow::openFile(const QString filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        statusBar()->showMessage(trUtf8("Ошибка при открытии: %1").arg(file.errorString()));
+        setStatusError(trUtf8("при открытии: %1").arg(file.errorString()));
     }
     QTextStream in(&file);
     editor->setPlainText(in.readAll());     // \n,\r\n,\r -> \n (automatically)
     file.close();
 
     QFileInfo fi(filename);
-    statusBar()->showMessage(trUtf8("Статус: файл \"%1\" загружен.").arg(fi.fileName()));
+    setStatusMsg(trUtf8("файл \"%1\" загружен").arg(fi.fileName()));
     setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(base_window_title));
 }
 
-void MainWindow::saveFile(QString filename)
+void MainWindow::saveFile(const QString filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        statusBar()->showMessage(trUtf8("Ошибка при сохранении: %1").arg(file.errorString()));
+        setStatusError(trUtf8("при сохранении. %1").arg(file.errorString()));
     }
     QTextStream out(&file);
     QString content = editor->toPlainText();
@@ -146,12 +156,17 @@ void MainWindow::saveFile(QString filename)
     file.close();
 
     QFileInfo fi(filename);
-    statusBar()->showMessage(trUtf8("Статус: файл \"%1\" успешно сохранен.").arg(fi.fileName()));
+    setStatusMsg(trUtf8("файл \"%1\" успешно сохранен").arg(fi.fileName()));
     setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(base_window_title));
 }
 
 void MainWindow::run()
 {
+    if (editor->toPlainText().length() == 0) {
+        setStatusError(trUtf8("введите код или загрузите его из файла (Ctrl+O)"));
+        return;
+    }
+
     SLexer *lex;
     QList<TokenPointer> tokens;
 
