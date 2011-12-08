@@ -57,7 +57,7 @@ static QHash<QString, Separator> initSeparatorValues() {
     hash.insert("!", S_NOT);
     hash.insert("%", S_MOD);
     hash.insert("&", S_AMP);
-    hash.insert("|", S_VBAR);
+//    hash.insert("|", S_VBAR);
     hash.insert("<", S_LESS);
     hash.insert(">", S_GREATER);
     hash.insert("=", S_ASSIGN);
@@ -93,22 +93,27 @@ static QHash<QString, Separator> initSeparatorValues() {
 }
 static const QHash<QString, Separator> SeparatorCodes = initSeparatorValues();
 
-struct Table_item_id {
+struct TableItem_id {
     int start, end;
     QString identifier;
 };
-struct Table_item_const {
+struct TableItem_const {
     int start, end;
     ConstType type;
     QVariant value;
 };
-struct Table_item_keyword {
+struct TableItem_keyword {
     int start, end;
     Keyword type;
 };
-struct Table_item_separator {
+struct TableItem_separator {
     int start, end;
     Separator type;
+};
+
+struct TokenPointer {
+    TokenType type;
+    int index;
 };
 
 #endif // BASIC_STRUCTS_H

@@ -126,7 +126,7 @@ void MainWindow::openFile(QString filename)
         statusBar()->showMessage(trUtf8("Ошибка при открытии: %1").arg(file.errorString()));
     }
     QTextStream in(&file);
-    editor->setPlainText(in.readAll());
+    editor->setPlainText(in.readAll());     // \n,\r\n,\r -> \n (automatically)
     file.close();
 
     QFileInfo fi(filename);
@@ -153,14 +153,14 @@ void MainWindow::saveFile(QString filename)
 void MainWindow::run()
 {
     SLexer *lex;
-    QStringList tokens;
+    QList<TokenPointer> tokens;
 
     switch (tab_main->currentIndex()) {
     case 0:
         // lexical analysis
         lex = new SLexer(editor->toPlainText());
         tokens = lex->getAllTokens();
-        edit_lex->setPlainText(tokens.join(" "));
+        edit_lex->setPlainText(QString::number(tokens.count()));
         break;
     case 1:
         qDebug()<<"tab 2 active";
