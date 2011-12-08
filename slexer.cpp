@@ -77,6 +77,43 @@ void SLexer::setSource(const QString code) {
             }
         } else if (code.at(i).isDigit() || code.at(i) == '.') {
             // number const
+            QString str = code.mid(i);
+
+            QRegExp rx_double("^(\\d+)?\\.(\\d+)?(?:(?:[eE]([+-]?(\\d+))))?");
+            QRegExp rx_hex("^0x([\\dabcdef]+)");
+            rx_hex.setCaseSensitivity(Qt::CaseInsensitive);
+            QRegExp rx_oct("^(0[01234567]+)");
+            QRegExp rx_dec("^(\\d+)");
+
+            if (rx_double.indexIn(str) > -1) {
+                // double const
+                const_value = rx_double.cap(1) + "." + rx_double.cap(2);
+                if (!rx_double.cap(3).isEmpty()) {
+                    // got an exponent
+                    const_value = const_value.toString() + "e" + rx_double.cap(3);
+                }
+                if (const_value == ".") {
+                    // :TODO: error ("." is invalid double)
+                }
+                const_value = const_value.toDouble();
+                const_type = CONST_DOUBLE;
+            } else if (rx_hex.indexIn(str) > -1) {
+                // hex const
+                const_value = rx_double.cap(1).toInt(0, 16);
+                const_type = CONST_INT;
+            } else if (rx_oct.indexIn(str) > -1) {
+                // oct const
+                const_value = rx_double.cap(1).toInt(0, 8);
+                const_type = CONST_INT;
+            } else if (rx_dec.indexIn(str) > -1) {
+                // dec const
+                const_value = rx_double.cap(1).toInt();
+                const_type = CONST_INT;
+            } else {
+                // :TODO: error (e.g. ".-" is wrong double)
+                // hex/oct/dec are always correct by this point
+            }
+            type = T_CONST;
         } else if (code.at(i) == '\'') {
             // char const
             while ((code.at(i + 1) != '\'') || (code.at(i) == '\\')) {
@@ -110,6 +147,8 @@ void SLexer::setSource(const QString code) {
                     .replace("\\t", "\t");
             type = T_CONST;
             const_type = CONST_STRING;
+        } else {
+            // :TODO: error (unknown token, e.g. after "3_" "_" is unknown)
         }
     }
     switch (type) {
@@ -133,6 +172,7 @@ void SLexer::setSource(const QString code) {
     qDebug() << tokens.count();
 }
 
+// TODO: add search for existing token in table!!!
 void SLexer::addIdToken(int start, int end, QString identifier) {
     TableItem_id new_item = {start, end, identifier};
     Table_ids << new_item;
@@ -141,6 +181,24 @@ void SLexer::addIdToken(int start, int end, QString identifier) {
     tokens << new_token;
 }
 void SLexer::addConstToken(int start, int end, ConstType type, QVariant value) {
+    if (((type == CONST_INT) || (type == CONST_DOUBLE))
+        && (tokens.length() >= 2) && (tokens.last().type == T_SEPARATOR)
+        && ((Table_separators.at(tokens.last().index).type == S_PLUS)
+            || (Table_separators.at(tokens.last().index).type == S_MINUS))
+        && (tokens.at(tokens.length() - 1).type == T_SEPARATOR)
+        && (Table_separators.at(tokens.at(tokens.length() - 1).index).type != S_ROUND_CLOSE)
+    ) {
+        // (some separator (excluding ")") -> unary plus/minus -> number) => (separator -> signed number)
+        if (Table_separators.at(tokens.last().index).type == S_MINUS) {
+            if (type == CONST_INT) {
+                value = -value.toInt();
+            } else {
+                value = -value.toDouble();
+            }
+        }
+        removeToken(tokens.length() - 1);   // remove that unary +/-
+    }
+
     TableItem_const new_item = {start, end, type, value};
     Table_consts << new_item;
 
@@ -170,7 +228,7 @@ void SLexer::addSeparatorToken(int start, int end, Separator type) {
         && (tokens.last().type == T_SEPARATOR)
         && (Table_separators.at(tokens.last().index).type == S_SPACE)
     ) {
-        tokens.removeLast();
+        removeToken(tokens.length() - 1);
     }
 
     TableItem_separator new_item = {start, end, type};
@@ -178,4 +236,38 @@ void SLexer::addSeparatorToken(int start, int end, Separator type) {
 
     TokenPointer new_token = {T_SEPARATOR, Table_separators.count() - 1};
     tokens << new_token;
+}
+
+void SLexer::removeToken(int list_index) {
+    TokenPointer token = tokens.at(list_index);
+
+    bool got_other_links = false;
+    for (int i = 0; i < tokens.length(); i++) {
+        if ((tokens.at(i).type == token.type) && (tokens.at(i).index == token.index)) {
+            got_other_links = true;
+            break;
+        }
+        if (!got_other_links) {
+            switch (token.type) {
+            case T_ID:
+                Table_ids.removeAt(token.index);
+                break;
+
+            case T_CONST:
+                Table_consts.removeAt(token.index);
+                break;
+
+            case T_KEYWORD:
+                Table_keywords.removeAt(token.index);
+                break;
+
+            case T_SEPARATOR:
+                Table_separators.removeAt(token.index);
+                break;
+
+            }
+        }
+    }
+
+    tokens.removeAt(list_index);
 }

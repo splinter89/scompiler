@@ -26,6 +26,8 @@ private:
     void addConstToken(int start, int end, ConstType type, QVariant value);
     void addKeywordToken(int start, int end, Keyword type);
     void addSeparatorToken(int start, int end, Separator type);
+
+    void removeToken(int index);
 };
 
 #endif // SLEXER_H
