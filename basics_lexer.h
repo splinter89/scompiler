@@ -1,5 +1,5 @@
-#ifndef BASIC_STRUCTS_H
-#define BASIC_STRUCTS_H
+#ifndef BASICS_LEXER_H
+#define BASICS_LEXER_H
 
 #include <QtCore>
 
@@ -113,4 +113,4 @@ struct TokenPointer {
     int start, length;
 };
 
-#endif // BASIC_STRUCTS_H
+#endif // BASICS_LEXER_H
