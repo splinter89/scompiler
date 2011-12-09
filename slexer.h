@@ -26,10 +26,15 @@ private:
     QString source;
     QList<TokenPointer> tokens;
 
-    void addIdToken(int start, int end, QString identifier);
-    void addConstToken(int start, int end, ConstType type, QVariant value);
-    void addKeywordToken(int start, int end, Keyword type);
-    void addSeparatorToken(int start, int end, Separator type);
+    void addIdToken(int start, int length, QString identifier);
+    void addConstToken(int start, int length, ConstType type, QVariant value);
+    void addKeywordToken(int start, int length, Keyword type);
+    void addSeparatorToken(int start, int length, Separator type);
+
+    int indexOfIdToken(TableItem_id item);
+    int indexOfConstToken(TableItem_const item);
+    int indexOfKeywordToken(TableItem_keyword item);
+    int indexOfSeparatorToken(TableItem_separator item);
 
     void removeToken(int index);
 };

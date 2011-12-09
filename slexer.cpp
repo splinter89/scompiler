@@ -6,8 +6,8 @@ SLexer::SLexer(const QString code) {
 }
 
 void SLexer::setSource(const QString code) {
-    QList<QString> space_chars;
-    space_chars << " " << "\n" << "\t" << "\r";
+//    QList<QString> space_chars;
+//    space_chars << " " << "\n" << "\t" << "\r";
 
     TokenType type;
     ConstType const_type;
@@ -26,16 +26,18 @@ void SLexer::setSource(const QString code) {
         // :TODO: calculate lines (do we really need this?)
         if (code.at(i) == '\n') {
             // newline
+            // TODO: insert space or ignore if prev.char == '\\'
             continue;
-        } else if (code.mid(i, 2) == "//") {
+        } else if ((i <= code.length() - 2) && (code.mid(i, 2) == "//")) {
             // single-line comment
             i++;
             while ((i < code.length() - 1) && (code.at(i + 1) != '\n')) {
                 i++;
             }
             continue;
-        } else if (code.mid(i, 2) == "/*") {
+        } else if ((i <= code.length() - 2) && (code.mid(i, 2) == "/*")) {
             // multi-line comment
+            // TODO: it may break token into 2 parts - is it ok?
             i++;
             while ((i < code.length() - 2) && (code.mid(i + 1, 2) != "*/")) {
                 i++;
@@ -55,7 +57,7 @@ void SLexer::setSource(const QString code) {
 
             type = T_SEPARATOR;
             separator = S_SPACE;
-        } else if (SeparatorCodes.contains(code.mid(i, 2))) {
+        } else if ((i <= code.length() - 2) && (SeparatorCodes.contains(code.mid(i, 2)))) {
             i++;
 
             type = T_SEPARATOR;
@@ -123,7 +125,7 @@ void SLexer::setSource(const QString code) {
                 const_value = rx_dec.cap(1).toInt();
                 const_type = CONST_INT;
             } else {
-                // :TODO: error (e.g. ".-" is wrong double)
+                // :TODO: error (e.g. ".-" is wrong double) - NaN && not "." in other words
                 // hex/oct/dec are always correct by this point
             }
             type = T_CONST;
@@ -189,24 +191,27 @@ void SLexer::setSource(const QString code) {
 
         }
     }
-    qDebug() << "total tokens: " << tokens.count();
 }
 
-// TODO: add search for existing token in table!!!
-void SLexer::addIdToken(int start, int end, QString identifier) {
-    TableItem_id new_item = {start, end, identifier};
-    Table_ids << new_item;
 
-    TokenPointer new_token = {T_ID, Table_ids.count() - 1};
+void SLexer::addIdToken(int start, int length, QString identifier) {
+    TableItem_id new_item = {identifier};
+    int index = indexOfIdToken(new_item);
+    if (index == -1) {
+        Table_ids << new_item;
+        index = Table_ids.length() - 1;
+    }
+
+    TokenPointer new_token = {T_ID, index, start, length};
     tokens << new_token;
 }
-void SLexer::addConstToken(int start, int end, ConstType type, QVariant value) {
+void SLexer::addConstToken(int start, int length, ConstType type, QVariant value) {
     if (((type == CONST_INT) || (type == CONST_DOUBLE))
         && (tokens.length() >= 2) && (tokens.last().type == T_SEPARATOR)
         && ((Table_separators.at(tokens.last().index).type == S_PLUS)
             || (Table_separators.at(tokens.last().index).type == S_MINUS))
-        && (tokens.at(tokens.length() - 1).type == T_SEPARATOR)
-        && (Table_separators.at(tokens.at(tokens.length() - 1).index).type != S_ROUND_CLOSE)
+        && (tokens.at(tokens.length() - 2).type == T_SEPARATOR)
+        && (Table_separators.at(tokens.at(tokens.length() - 2).index).type != S_ROUND_CLOSE)
     ) {
         // (some separator (excluding ")") -> unary plus/minus -> number) => (separator -> signed number)
         if (Table_separators.at(tokens.last().index).type == S_MINUS) {
@@ -219,22 +224,30 @@ void SLexer::addConstToken(int start, int end, ConstType type, QVariant value) {
         removeToken(tokens.length() - 1);   // remove that unary +/-
     }
 
-    TableItem_const new_item = {start, end, type, value};
-    Table_consts << new_item;
+    TableItem_const new_item = {type, value};
+    int index = indexOfConstToken(new_item);
+    if (index == -1) {
+        Table_consts << new_item;
+        index = Table_consts.length() - 1;
+    }
 
-    TokenPointer new_token = {T_CONST, Table_consts.count() - 1};
+    TokenPointer new_token = {T_CONST, index, start, length};
     tokens << new_token;
 }
 
-void SLexer::addKeywordToken(int start, int end, Keyword type) {
-    TableItem_keyword new_item = {start, end, type};
-    Table_keywords << new_item;
+void SLexer::addKeywordToken(int start, int length, Keyword type) {
+    TableItem_keyword new_item = {type};
+    int index = indexOfKeywordToken(new_item);
+    if (index == -1) {
+        Table_keywords << new_item;
+        index = Table_keywords.length() - 1;
+    }
 
-    TokenPointer new_token = {T_KEYWORD, Table_keywords.count() - 1};
+    TokenPointer new_token = {T_KEYWORD, index, start, length};
     tokens << new_token;
 }
 
-void SLexer::addSeparatorToken(int start, int end, Separator type) {
+void SLexer::addSeparatorToken(int start, int length, Separator type) {
     // don't add space after separator
     if (type == S_SPACE
         && !tokens.isEmpty()
@@ -251,12 +264,63 @@ void SLexer::addSeparatorToken(int start, int end, Separator type) {
         removeToken(tokens.length() - 1);
     }
 
-    TableItem_separator new_item = {start, end, type};
-    Table_separators << new_item;
+    TableItem_separator new_item = {type};
+    int index = indexOfSeparatorToken(new_item);
+    if (index == -1) {
+        Table_separators << new_item;
+        index = Table_separators.length() - 1;
+    }
 
-    TokenPointer new_token = {T_SEPARATOR, Table_separators.count() - 1};
+    TokenPointer new_token = {T_SEPARATOR, index, start, length};
     tokens << new_token;
 }
+
+
+int SLexer::indexOfIdToken(TableItem_id item) {
+    int i, res = -1;
+    for (i = 0; i < Table_ids.length(); i++) {
+        if (item.identifier == Table_ids.at(i).identifier) {
+            res = i;
+            break;
+        }
+    }
+    return res;
+}
+
+int SLexer::indexOfConstToken(TableItem_const item) {
+    int i, res = -1;
+    for (i = 0; i < Table_consts.length(); i++) {
+        if ((item.type == Table_consts.at(i).type)
+                && (item.value.toString() == Table_consts.at(i).value.toString())) {
+            res = i;
+            break;
+        }
+    }
+    return res;
+}
+
+int SLexer::indexOfKeywordToken(TableItem_keyword item) {
+    int i, res = -1;
+    for (i = 0; i < Table_keywords.length(); i++) {
+        if (item.type == Table_keywords.at(i).type) {
+            res = i;
+            break;
+        }
+    }
+    return res;
+}
+
+int SLexer::indexOfSeparatorToken(TableItem_separator item) {
+    int i, res = -1;
+    for (i = 0; i < Table_separators.length(); i++) {
+        if (item.type == Table_separators.at(i).type) {
+            res = i;
+            break;
+        }
+    }
+    return res;
+}
+
 
 void SLexer::removeToken(int list_index) {
     TokenPointer token = tokens.at(list_index);
@@ -264,29 +328,30 @@ void SLexer::removeToken(int list_index) {
     bool got_other_links = false;
     for (int i = 0; i < tokens.length(); i++) {
         if ((tokens.at(i).type == token.type) && (tokens.at(i).index == token.index)) {
+            // we can't remove token from table
             got_other_links = true;
             break;
         }
-        if (!got_other_links) {
-            switch (token.type) {
-            case T_ID:
-                Table_ids.removeAt(token.index);
-                break;
+    }
+    if (!got_other_links) {
+        switch (token.type) {
+        case T_ID:
+            Table_ids.removeAt(token.index);
+            break;
 
-            case T_CONST:
-                Table_consts.removeAt(token.index);
-                break;
+        case T_CONST:
+            Table_consts.removeAt(token.index);
+            break;
 
-            case T_KEYWORD:
-                Table_keywords.removeAt(token.index);
-                break;
+        case T_KEYWORD:
+            Table_keywords.removeAt(token.index);
+            break;
 
-            case T_SEPARATOR:
-                Table_separators.removeAt(token.index);
-                break;
-            default:
-                break;
-            }
+        case T_SEPARATOR:
+            Table_separators.removeAt(token.index);
+            break;
+        default:
+            break;
         }
     }
 

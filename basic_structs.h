@@ -3,7 +3,7 @@
 
 #include <QtCore>
 
-enum TokenType {T_ID, T_CONST, T_KEYWORD, T_SEPARATOR, T_UNKNOWN};
+enum TokenType {T_UNKNOWN, T_ID, T_CONST, T_KEYWORD, T_SEPARATOR};
 enum ConstType {CONST_BOOL, CONST_INT, CONST_DOUBLE, CONST_CHAR, CONST_STRING};
 
 enum Keyword {
@@ -94,26 +94,23 @@ static QHash<QString, Separator> initSeparatorValues() {
 static const QHash<QString, Separator> SeparatorCodes = initSeparatorValues();
 
 struct TableItem_id {
-    int start, length;
     QString identifier;
 };
 struct TableItem_const {
-    int start, length;
     ConstType type;
     QVariant value;
 };
 struct TableItem_keyword {
-    int start, length;
     Keyword type;
 };
 struct TableItem_separator {
-    int start, length;
     Separator type;
 };
 
 struct TokenPointer {
     TokenType type;
     int index;
+    int start, length;
 };
 
 #endif // BASIC_STRUCTS_H

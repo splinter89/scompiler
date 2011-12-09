@@ -32,11 +32,11 @@ private:
     CodeEditor *editor;
     QTabWidget *tab_main;
     QTabWidget *tab_lex_main;
-    QPlainTextEdit *edit_lex;
-    QTableWidget *table_lex_2;
-    QTableWidget *table_lex_3;
-    QTableWidget *table_lex_4;
-    QTableWidget *table_lex_5;
+    QTableWidget *table_lex_0;  // convolution
+    QTableWidget *table_lex_1;  // id's
+    QTableWidget *table_lex_2;  // const's
+    QTableWidget *table_lex_3;  // keywords
+    QTableWidget *table_lex_4;  // separators
 
     QString base_window_title;
 
