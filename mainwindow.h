@@ -46,7 +46,7 @@ private:
 
 public slots:
     void closeEvent(QCloseEvent *event);
-    void displayError(int pos, ErrorType type, QString param);
+    void displayError(int pos, QString msg);
 
 private slots:
     void on_open_triggered();

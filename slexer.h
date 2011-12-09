@@ -11,7 +11,7 @@ class SLexer : public QObject
     Q_OBJECT
 
 public:
-    SLexer(const QString);
+    SLexer(QObject * parent = 0);
     ~SLexer();
 
     QList<TableItem_id> Table_ids;
@@ -19,7 +19,7 @@ public:
     QList<TableItem_keyword> Table_keywords;
     QList<TableItem_separator> Table_separators;
 
-    void setSource(const QString);
+    bool processSource(const QString);
 
     QList<TokenPointer> getAllTokens() const { return tokens; }
     QList<TableItem_id> getTableIds() const { return Table_ids; }
@@ -44,7 +44,7 @@ private:
     void removeToken(int index);
 
 signals:
-    void lex_error(int pos, ErrorType type, QString param);
+    void lex_error(int pos, QString msg);
 };
 
 #endif // SLEXER_H

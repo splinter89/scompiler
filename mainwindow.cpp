@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
         resize(main_width / 2, main_height / 2);
     }
 //    setFixedSize(width(), height());
-    statusBar()->showMessage(trUtf8("Статус: ок"));
+    statusBar()->showMessage(trUtf8("Статус: ok"));
     base_window_title = windowTitle();
 
     // now draw interface
@@ -116,12 +116,10 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //        event->ignore();
 //    }
 }
-void MainWindow::displayError(int pos, ErrorType type, QString param)
+void MainWindow::displayError(int pos, QString msg)
 {
-    QString err_msg = ErrorCodes.value(type).arg(param);
     // :TODO: calc (line, col)
-    setStatusError("[pos " + QString::number(pos) + "] " + err_msg);
-    qDebug() << "ERROR : " << ("[pos " + QString::number(pos) + "] " + err_msg);
+    setStatusError("[pos " + QString::number(pos) + "] " + msg);
 }
 
 
@@ -223,16 +221,19 @@ void MainWindow::run()
     // --------------------------------------------------------------------------------
     int i, row;
 
-    SLexer *lex = new SLexer(editor->toPlainText());
-    //QObject::connect(lex, SIGNAL(lex_error(int,ErrorType,QString)),
-    //                 this, SLOT(displayError(int,ErrorType,QString)));
-    connect(lex, SIGNAL(lex_error()), this, SLOT(displayError()));
+    SLexer *lex = new SLexer();
+    connect(lex, SIGNAL(lex_error(int,QString)),
+            this, SLOT(displayError(int,QString)));
+    if (lex->processSource(editor->toPlainText())) {
+        setStatusMsg("ok");
+    }
 
     QList<TokenPointer>        tokens           = lex->getAllTokens();
     QList<TableItem_id>        table_ids        = lex->getTableIds();
     QList<TableItem_const>     table_consts     = lex->getTableConsts();
     QList<TableItem_keyword>   table_keywords   = lex->getTableKeywords();
     QList<TableItem_separator> table_separators = lex->getTableSeparators();
+
 
     clearLexTables();
     for (i = 0; i < tokens.length(); i++) {

@@ -1,9 +1,9 @@
 #include "slexer.h"
 #include <QDebug>
 
-SLexer::SLexer(const QString code)
+SLexer::SLexer(QObject * parent)
 {
-    setSource(code);
+    this->setParent(parent);
 }
 
 SLexer::~SLexer()
@@ -11,7 +11,7 @@ SLexer::~SLexer()
     // bye
 }
 
-void SLexer::setSource(const QString code)
+bool SLexer::processSource(const QString code)
 {
 //    QList<QString> space_chars;
 //    space_chars << " " << "\n" << "\t" << "\r";
@@ -191,8 +191,8 @@ void SLexer::setSource(const QString code)
             break;
 
         case T_UNKNOWN:
-            emit lex_error(i, E_UNKNOWN_TOKEN_ERROR, "");
-            return;
+            emit lex_error(i, error_msg(E_UNKNOWN_TOKEN_ERROR));
+            return false;
 //            qDebug() << "unknown token at position" << start;
             break;
 
@@ -208,6 +208,8 @@ void SLexer::setSource(const QString code)
            && Table_separators.at(tokens.last().index).type == S_SPACE) {
         removeToken(tokens.length() - 1);
     }
+
+    return true;
 }
 
 
