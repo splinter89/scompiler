@@ -25,9 +25,8 @@ void SLexer::setSource(const QString code) {
 
         // :TODO: calculate lines (do we really need this?)
         if (code.at(i) == '\n') {
-            // newline
-            // TODO: insert space or ignore if prev.char == '\\'
-            continue;
+            type = T_SEPARATOR;
+            separator = S_SPACE;
         } else if ((i <= code.length() - 2) && (code.mid(i, 2) == "//")) {
             // single-line comment
             i++;
@@ -188,6 +187,16 @@ void SLexer::setSource(const QString code) {
             break;
 
         }
+    }
+
+    // trim spaces
+    while ((tokens.first().type == T_SEPARATOR)
+           && Table_separators.at(tokens.first().index).type == S_SPACE) {
+        removeToken(0);
+    }
+    while ((tokens.last().type == T_SEPARATOR)
+           && Table_separators.at(tokens.last().index).type == S_SPACE) {
+        removeToken(tokens.length() - 1);
     }
 }
 
