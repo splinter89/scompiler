@@ -58,12 +58,10 @@ void SLexer::setSource(const QString code) {
             type = T_SEPARATOR;
             separator = S_SPACE;
         } else if ((i <= code.length() - 2) && (SeparatorCodes.contains(code.mid(i, 2)))) {
-            i++;
-
             type = T_SEPARATOR;
             separator = SeparatorCodes.value(code.mid(i, 2));
+            i++;
         } else if (SeparatorCodes.contains(code.at(i))) {
-
             type = T_SEPARATOR;
             separator = SeparatorCodes.value(code.at(i));
         } else if (code.at(i).isLetter()) {
