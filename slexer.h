@@ -2,12 +2,17 @@
 #define SLEXER_H
 
 #include <QtCore>
-#include "basic_structs.h"
+#include <QObject>
+#include "basics_errors.h"
+#include "basics_lexer.h"
 
-class SLexer
+class SLexer : public QObject
 {
+    Q_OBJECT
+
 public:
     SLexer(const QString);
+    ~SLexer();
 
     QList<TableItem_id> Table_ids;
     QList<TableItem_const> Table_consts;
@@ -37,6 +42,9 @@ private:
     int indexOfSeparatorToken(TableItem_separator item);
 
     void removeToken(int index);
+
+signals:
+    void lex_error(int pos, ErrorType type, QString param);
 };
 
 #endif // SLEXER_H

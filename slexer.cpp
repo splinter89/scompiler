@@ -1,11 +1,18 @@
 #include "slexer.h"
 #include <QDebug>
 
-SLexer::SLexer(const QString code) {
+SLexer::SLexer(const QString code)
+{
     setSource(code);
 }
 
-void SLexer::setSource(const QString code) {
+SLexer::~SLexer()
+{
+    // bye
+}
+
+void SLexer::setSource(const QString code)
+{
 //    QList<QString> space_chars;
 //    space_chars << " " << "\n" << "\t" << "\r";
 
@@ -43,6 +50,7 @@ void SLexer::setSource(const QString code) {
             }
             if (i >= code.length() - 2) {
                 // TODO: error (comment not closed by the end of code)
+
             } else {
                 i += 2; // */
             }
@@ -162,7 +170,7 @@ void SLexer::setSource(const QString code) {
             type = T_CONST;
             const_type = CONST_STRING;
         } else {
-            // :TODO: error (unknown token, e.g. after "3_" "_" is unknown)
+            // error (unknown token, e.g. after "3_" (or "123?") "_" (or "?") is unknown)
         }
 
         switch (type) {
@@ -183,7 +191,9 @@ void SLexer::setSource(const QString code) {
             break;
 
         case T_UNKNOWN:
-            qDebug() << "unknown token from" << start << "to" << i;
+            emit lex_error(i, E_UNKNOWN_TOKEN_ERROR, "");
+            return;
+//            qDebug() << "unknown token at position" << start;
             break;
 
         }
@@ -201,7 +211,8 @@ void SLexer::setSource(const QString code) {
 }
 
 
-void SLexer::addIdToken(int start, int length, QString identifier) {
+void SLexer::addIdToken(int start, int length, QString identifier)
+{
     TableItem_id new_item = {identifier};
     int index = indexOfIdToken(new_item);
     if (index == -1) {
@@ -212,7 +223,9 @@ void SLexer::addIdToken(int start, int length, QString identifier) {
     TokenPointer new_token = {T_ID, index, start, length};
     tokens << new_token;
 }
-void SLexer::addConstToken(int start, int length, ConstType type, QVariant value) {
+
+void SLexer::addConstToken(int start, int length, ConstType type, QVariant value)
+{
     if (((type == CONST_INT) || (type == CONST_DOUBLE))
         && (tokens.length() >= 2) && (tokens.last().type == T_SEPARATOR)
         && ((Table_separators.at(tokens.last().index).type == S_PLUS)
@@ -242,7 +255,8 @@ void SLexer::addConstToken(int start, int length, ConstType type, QVariant value
     tokens << new_token;
 }
 
-void SLexer::addKeywordToken(int start, int length, Keyword type) {
+void SLexer::addKeywordToken(int start, int length, Keyword type)
+{
     TableItem_keyword new_item = {type};
     int index = indexOfKeywordToken(new_item);
     if (index == -1) {
@@ -254,7 +268,8 @@ void SLexer::addKeywordToken(int start, int length, Keyword type) {
     tokens << new_token;
 }
 
-void SLexer::addSeparatorToken(int start, int length, Separator type) {
+void SLexer::addSeparatorToken(int start, int length, Separator type)
+{
     // don't add space after separator
     if (type == S_SPACE
         && !tokens.isEmpty()
@@ -283,7 +298,8 @@ void SLexer::addSeparatorToken(int start, int length, Separator type) {
 }
 
 
-int SLexer::indexOfIdToken(TableItem_id item) {
+int SLexer::indexOfIdToken(TableItem_id item)
+{
     int i, res = -1;
     for (i = 0; i < Table_ids.length(); i++) {
         if (item.identifier == Table_ids.at(i).identifier) {
@@ -294,7 +310,8 @@ int SLexer::indexOfIdToken(TableItem_id item) {
     return res;
 }
 
-int SLexer::indexOfConstToken(TableItem_const item) {
+int SLexer::indexOfConstToken(TableItem_const item)
+{
     int i, res = -1;
     for (i = 0; i < Table_consts.length(); i++) {
         if ((item.type == Table_consts.at(i).type)
@@ -306,7 +323,8 @@ int SLexer::indexOfConstToken(TableItem_const item) {
     return res;
 }
 
-int SLexer::indexOfKeywordToken(TableItem_keyword item) {
+int SLexer::indexOfKeywordToken(TableItem_keyword item)
+{
     int i, res = -1;
     for (i = 0; i < Table_keywords.length(); i++) {
         if (item.type == Table_keywords.at(i).type) {
@@ -317,7 +335,8 @@ int SLexer::indexOfKeywordToken(TableItem_keyword item) {
     return res;
 }
 
-int SLexer::indexOfSeparatorToken(TableItem_separator item) {
+int SLexer::indexOfSeparatorToken(TableItem_separator item)
+{
     int i, res = -1;
     for (i = 0; i < Table_separators.length(); i++) {
         if (item.type == Table_separators.at(i).type) {
@@ -329,7 +348,8 @@ int SLexer::indexOfSeparatorToken(TableItem_separator item) {
 }
 
 
-void SLexer::removeToken(int list_index) {
+void SLexer::removeToken(int list_index)
+{
     TokenPointer token = tokens.at(list_index);
 
     bool got_other_links = false;

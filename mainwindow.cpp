@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    // first - '#' column; second - 'index', 'start', 'length'
+    // first width is for '#' column; second - 'index', 'start', 'length'
     int header_num_width = 40, header_index_width = 60;
     int main_width = 1050, main_height = 650;
 
@@ -116,18 +116,28 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //        event->ignore();
 //    }
 }
+void MainWindow::displayError(int pos, ErrorType type, QString param)
+{
+    QString err_msg = ErrorCodes.value(type).arg(param);
+    // :TODO: calc (line, col)
+    setStatusError("[pos " + QString::number(pos) + "] " + err_msg);
+    qDebug() << "ERROR : " << ("[pos " + QString::number(pos) + "] " + err_msg);
+}
 
 
-void MainWindow::setStatusMsg(const QString text) {
+void MainWindow::setStatusMsg(const QString text)
+{
     statusBar()->setStyleSheet("color: black;");
     statusBar()->showMessage(trUtf8("Статус: ") + text);
 }
-void MainWindow::setStatusError(const QString text) {
+void MainWindow::setStatusError(const QString text)
+{
     statusBar()->setStyleSheet("color: red;");
     statusBar()->showMessage(trUtf8("Ошибка: ") + text);
 }
 
-void MainWindow::setLexTableHeaders() {
+void MainWindow::setLexTableHeaders()
+{
     QStringList table_lex_0_headers;
     table_lex_0_headers << trUtf8("#") << trUtf8("код") << trUtf8("тип")
                         << trUtf8("ссылка") << trUtf8("начало") << trUtf8("длина");
@@ -150,7 +160,8 @@ void MainWindow::setLexTableHeaders() {
     table_lex_4->setHorizontalHeaderLabels(table_lex_4_headers);
 }
 
-void MainWindow::clearLexTables() {
+void MainWindow::clearLexTables()
+{
     while (table_lex_0->rowCount() > 0) {
         table_lex_0->removeRow(0);
     }
@@ -220,6 +231,8 @@ void MainWindow::run()
     case 0:
         // lexical analysis
         lex = new SLexer(editor->toPlainText());
+        QObject::connect(lex, SIGNAL(lex_error(int,ErrorType,QString)),
+                         this, SLOT(displayError(int,ErrorType,QString)));
 
         tokens = lex->getAllTokens();
         table_ids = lex->getTableIds();

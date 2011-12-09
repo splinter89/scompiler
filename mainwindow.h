@@ -1,9 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "basic_structs.h"
-#include <QMainWindow>
 #include "codeeditor.h"
+#include "basics_errors.h"
+#include "basics_lexer.h"
+#include <QMainWindow>
 #include <QTabWidget>
 #include <QTableWidget>
 
@@ -45,6 +46,7 @@ private:
 
 public slots:
     void closeEvent(QCloseEvent *event);
+    void displayError(int pos, ErrorType type, QString param);
 
 private slots:
     void on_open_triggered();
