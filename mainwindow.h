@@ -31,6 +31,7 @@ private:
 
     CodeEditor *editor;
     QTabWidget *tab_main;
+    QTabWidget *tab_lex_main;
     QPlainTextEdit *edit_lex;
     QTableWidget *table_lex_2;
     QTableWidget *table_lex_3;
@@ -38,6 +39,9 @@ private:
     QTableWidget *table_lex_5;
 
     QString base_window_title;
+
+    void clearLexTables();
+    void setLexTableHeaders();
 
 public slots:
     void closeEvent(QCloseEvent *event);

@@ -17,6 +17,10 @@ public:
     void setSource(const QString);
 
     QList<TokenPointer> getAllTokens() const { return tokens; }
+    QList<TableItem_id> getTableIds() const { return Table_ids; }
+    QList<TableItem_const> getTableConsts() const { return Table_consts; }
+    QList<TableItem_keyword> getTableKeywords() const { return Table_keywords; }
+    QList<TableItem_separator> getTableSeparators() const { return Table_separators; }
 
 private:
     QString source;

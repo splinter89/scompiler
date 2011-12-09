@@ -21,7 +21,9 @@ void SLexer::setSource(const QString code) {
     // main loop
     for (i = 0; i < code.length(); i++) {
         start = i;
-        // :TODO: calculate lines
+        type = T_UNKNOWN;
+
+        // :TODO: calculate lines (do we really need this?)
         if (code.at(i) == '\n') {
             // newline
             continue;
@@ -61,7 +63,7 @@ void SLexer::setSource(const QString code) {
             while (code.at(i + 1).isLetterOrNumber() || (code.at(i + 1) == '_')) {
                 i++;
             }
-            identifier = code.mid(start, i - start);
+            identifier = code.mid(start, i - start + 1);
             if (KeywordCodes.contains(identifier)) {
                 // keyword
                 type = T_KEYWORD;
@@ -150,26 +152,31 @@ void SLexer::setSource(const QString code) {
         } else {
             // :TODO: error (unknown token, e.g. after "3_" "_" is unknown)
         }
+
+        switch (type) {
+        case T_ID:
+            addIdToken(start, i - start + 1, identifier);
+            break;
+
+        case T_CONST:
+            addConstToken(start, i - start + 1, const_type, const_value);
+            break;
+
+        case T_KEYWORD:
+            addKeywordToken(start, i - start + 1, keyword);
+            break;
+
+        case T_SEPARATOR:
+            addSeparatorToken(start, i - start + 1, separator);
+            break;
+
+        case T_UNKNOWN:
+            qDebug() << "unknown token from" << start << "to" << i;
+            break;
+
+        }
     }
-    switch (type) {
-    case T_ID:
-        addIdToken(start, i - start, identifier);
-        break;
-
-    case T_CONST:
-        addConstToken(start, i - start, const_type, const_value);
-        break;
-
-    case T_KEYWORD:
-        addKeywordToken(start, i - start, keyword);
-        break;
-
-    case T_SEPARATOR:
-        addSeparatorToken(start, i - start, separator);
-        break;
-
-    }
-    qDebug() << tokens.count();
+    qDebug() << "total tokens: " << tokens.count();
 }
 
 // TODO: add search for existing token in table!!!
@@ -264,7 +271,8 @@ void SLexer::removeToken(int list_index) {
             case T_SEPARATOR:
                 Table_separators.removeAt(token.index);
                 break;
-
+            default:
+                break;
             }
         }
     }
