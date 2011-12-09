@@ -49,8 +49,9 @@ bool SLexer::processSource(const QString code)
                 i++;
             }
             if (i >= code.length() - 2) {
-                // TODO: error (comment not closed by the end of code)
-
+                // error (comment not closed by the end of code)
+                emit lex_error(code.length(), error_msg(E_COMMENT_NOT_CLOSED));
+                return false;
             } else {
                 i += 2; // */
             }
@@ -109,7 +110,9 @@ bool SLexer::processSource(const QString code)
                     const_value = const_value.toString() + "e" + rx_double.cap(3);
                 }
                 if (const_value == ".") {
-                    // :TODO: error ("." is invalid double)
+                    // error ("." is invalid double)
+                    emit lex_error(i, error_msg(E_INVALID_DOUBLE));
+                    return false;
                 }
                 i += const_value.toString().length() - 1;
                 const_value = const_value.toDouble();
@@ -130,8 +133,10 @@ bool SLexer::processSource(const QString code)
                 const_value = rx_dec.cap(1).toInt();
                 const_type = CONST_INT;
             } else {
-                // :TODO: error (e.g. ".-" is wrong double) - NaN && not "." in other words
+                // error (e.g. ".-" is wrong double) - NaN && not "." in other words
                 // hex/oct/dec are always correct by this point
+                emit lex_error(i, error_msg(E_INVALID_DOUBLE));
+                return false;
             }
             type = T_CONST;
         } else if (code.at(i) == '\'') {
@@ -152,7 +157,8 @@ bool SLexer::processSource(const QString code)
             } else if (identifier.length() == 1) {
                 const_value = identifier.at(1);
             } else {
-                // :TODO: error
+                emit lex_error(i, error_msg(E_INVALID_CHAR));
+                return false;
             }
             type = T_CONST;
             const_type = CONST_CHAR;
@@ -193,7 +199,6 @@ bool SLexer::processSource(const QString code)
         case T_UNKNOWN:
             emit lex_error(i, error_msg(E_UNKNOWN_TOKEN_ERROR));
             return false;
-//            qDebug() << "unknown token at position" << start;
             break;
 
         }
