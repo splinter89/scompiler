@@ -42,6 +42,8 @@ void SLexer::setSource(const QString code) {
             }
             if (i >= code.length() - 2) {
                 // TODO: error (comment not closed by the end of code)
+            } else {
+                i += 2; // */
             }
             continue;
         } else if ((code.at(i) == ' ') || (code.at(i) == '\t')) {
