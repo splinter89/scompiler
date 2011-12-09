@@ -48,28 +48,28 @@ MainWindow::MainWindow(QWidget *parent) :
             edit_lex->setReadOnly(true);
             grid_lex_1->addWidget(edit_lex);
             tab_lex_1->setLayout(grid_lex_1);
-        tab_lex_main->addTab(tab_lex_2, trUtf8("#1 id's"));
+        tab_lex_main->addTab(tab_lex_2, trUtf8("id's"));
             QGridLayout *grid_lex_2 = new QGridLayout();
             table_lex_2 = new QTableWidget(0, 4);
             table_lex_2->setColumnWidth(0, header_num_width);
             table_lex_2->verticalHeader()->setVisible(false);
             grid_lex_2->addWidget(table_lex_2);
             tab_lex_2->setLayout(grid_lex_2);
-        tab_lex_main->addTab(tab_lex_3, trUtf8("#2 constants"));
+        tab_lex_main->addTab(tab_lex_3, trUtf8("constants"));
             QGridLayout *grid_lex_3 = new QGridLayout();
             table_lex_3 = new QTableWidget(0, 5);
             table_lex_3->setColumnWidth(0, header_num_width);
             table_lex_3->verticalHeader()->setVisible(false);
             grid_lex_3->addWidget(table_lex_3);
             tab_lex_3->setLayout(grid_lex_3);
-        tab_lex_main->addTab(tab_lex_4, trUtf8("#3 keywords"));
+        tab_lex_main->addTab(tab_lex_4, trUtf8("keywords"));
             QGridLayout *grid_lex_4 = new QGridLayout();
             table_lex_4 = new QTableWidget(0, 4);
             table_lex_4->setColumnWidth(0, header_num_width);
             table_lex_4->verticalHeader()->setVisible(false);
             grid_lex_4->addWidget(table_lex_4);
             tab_lex_4->setLayout(grid_lex_4);
-        tab_lex_main->addTab(tab_lex_5, trUtf8("#4 separators"));
+        tab_lex_main->addTab(tab_lex_5, trUtf8("separators"));
             QGridLayout *grid_lex_5 = new QGridLayout();
             table_lex_5 = new QTableWidget(0, 4);
             table_lex_5->setColumnWidth(0, header_num_width);
@@ -206,6 +206,7 @@ void MainWindow::run()
     QList<TableItem_keyword> table_keywords;
     QList<TableItem_separator> table_separators;
     int i, row;
+    QString convolution, token_type_temp;
 
     switch (tab_main->currentIndex()) {
     case 0:
@@ -213,7 +214,30 @@ void MainWindow::run()
         lex = new SLexer(editor->toPlainText());
 
         tokens = lex->getAllTokens();
-        edit_lex->setPlainText(QString::number(tokens.count()));
+        for (i = 0; i < tokens.length(); i++) {
+            switch (tokens.at(i).type) {
+            case T_ID:
+                token_type_temp = "id";
+                break;
+
+            case T_CONST:
+                token_type_temp = "const";
+                break;
+
+            case T_KEYWORD:
+                token_type_temp = "keyword";
+                break;
+
+            case T_SEPARATOR:
+                token_type_temp = "separator";
+                break;
+
+            default:
+                break;
+            }
+            convolution += token_type_temp + "\t" + QString::number(tokens.at(i).index) + "\n";
+        }
+        edit_lex->setPlainText(convolution);
 
         table_ids = lex->getTableIds();
         table_consts = lex->getTableConsts();
@@ -319,10 +343,14 @@ void MainWindow::run()
         }
         setLexTableHeaders();
 
-        tab_lex_main->setTabText(1, "#1 id's (" + QString::number(table_ids.length()) + ")");
-        tab_lex_main->setTabText(2, "#2 constants (" + QString::number(table_consts.length()) + ")");
-        tab_lex_main->setTabText(3, "#3 keywords (" + QString::number(table_keywords.length()) + ")");
-        tab_lex_main->setTabText(4, "#4 separators (" + QString::number(table_separators.length()) + ")");
+        tab_lex_main->setTabText(0, trUtf8("свертка (")
+                                 + QString::number(table_ids.length() + table_consts.length()
+                                                   + table_keywords.length() + table_separators.length())
+                                 + ")");
+        tab_lex_main->setTabText(1, "id's (" + QString::number(table_ids.length()) + ")");
+        tab_lex_main->setTabText(2, "constants (" + QString::number(table_consts.length()) + ")");
+        tab_lex_main->setTabText(3, "keywords (" + QString::number(table_keywords.length()) + ")");
+        tab_lex_main->setTabText(4, "separators (" + QString::number(table_separators.length()) + ")");
         break;
     case 1:
         qDebug()<<"tab 2 active";
