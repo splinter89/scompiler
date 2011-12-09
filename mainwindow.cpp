@@ -120,6 +120,11 @@ void MainWindow::displayError(int pos, QString msg)
 {
     // :TODO: calc (line, col)
     setStatusError("[pos " + QString::number(pos) + "] " + msg);
+
+    // move cursor to position
+    QTextCursor cursor(editor->textCursor());
+    cursor.setPosition(pos);
+    editor->setTextCursor(cursor);
 }
 
 
@@ -278,8 +283,10 @@ void MainWindow::run()
         item_3->setTextAlignment(Qt::AlignCenter);
         item_4->setTextAlignment(Qt::AlignCenter);
         item_5->setTextAlignment(Qt::AlignCenter);
-        QFont bold("Helvetica", 10, QFont::Bold);
-        item_1->setFont(bold);
+        if (code_temp != "[space]") {
+            QFont bold("Helvetica", 10, QFont::Bold);
+            item_1->setFont(bold);
+        }
 
         item_0->setText(QString::number(i));
         item_1->setText(code_temp);
