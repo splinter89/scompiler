@@ -30,20 +30,24 @@ void SLexer::setSource(const QString code) {
         } else if (code.mid(i, 2) == "//") {
             // single-line comment
             i++;
-            while ((code.at(i + 1) != '\n')) {
+            while ((i < code.length() - 1) && (code.at(i + 1) != '\n')) {
                 i++;
             }
             continue;
         } else if (code.mid(i, 2) == "/*") {
             // multi-line comment
             i++;
-            while ((code.mid(i + 1, 2) != "*/")) {
+            while ((i < code.length() - 2) && (code.mid(i + 1, 2) != "*/")) {
                 i++;
+            }
+            if (i >= code.length() - 2) {
+                // TODO: error (comment not closed by the end of code)
             }
             continue;
         } else if ((code.at(i) == ' ') || (code.at(i) == '\t')) {
             // space (have special behavior)
-            while ((code.at(i + 1) == ' ') || (code.at(i + 1) == '\t')) {
+            while ((i < code.length() - 1)
+                   && ((code.at(i + 1) == ' ') || (code.at(i + 1) == '\t'))) {
                 i++;
             }
 
@@ -60,7 +64,8 @@ void SLexer::setSource(const QString code) {
             separator = SeparatorCodes.value(code.at(i));
         } else if (code.at(i).isLetter()) {
 
-            while (code.at(i + 1).isLetterOrNumber() || (code.at(i + 1) == '_')) {
+            while ((i < code.length() - 1)
+                    &&(code.at(i + 1).isLetterOrNumber() || (code.at(i + 1) == '_'))) {
                 i++;
             }
             identifier = code.mid(start, i - start + 1);
@@ -81,7 +86,7 @@ void SLexer::setSource(const QString code) {
             // number const
             QString str = code.mid(i);
 
-            QRegExp rx_double("^(\\d+)?\\.(\\d+)?(?:(?:[eE]([+-]?(\\d+))))?");
+            QRegExp rx_double("^(\\d+)?\\.(\\d+)?(?:[eE]([+-]?(\\d+)))?");
             QRegExp rx_hex("^0x([\\dabcdef]+)");
             rx_hex.setCaseSensitivity(Qt::CaseInsensitive);
             QRegExp rx_oct("^(0[01234567]+)");
@@ -97,19 +102,23 @@ void SLexer::setSource(const QString code) {
                 if (const_value == ".") {
                     // :TODO: error ("." is invalid double)
                 }
+                i += const_value.toString().length() - 1;
                 const_value = const_value.toDouble();
                 const_type = CONST_DOUBLE;
             } else if (rx_hex.indexIn(str) > -1) {
                 // hex const
-                const_value = rx_double.cap(1).toInt(0, 16);
+                i += rx_hex.cap(1).length() + 2 - 1;    // 0x
+                const_value = rx_hex.cap(1).toInt(0, 16);
                 const_type = CONST_INT;
             } else if (rx_oct.indexIn(str) > -1) {
                 // oct const
-                const_value = rx_double.cap(1).toInt(0, 8);
+                i += rx_oct.cap(1).length() - 1;
+                const_value = rx_oct.cap(1).toInt(0, 8);
                 const_type = CONST_INT;
             } else if (rx_dec.indexIn(str) > -1) {
                 // dec const
-                const_value = rx_double.cap(1).toInt();
+                i += rx_dec.cap(1).length() - 1;
+                const_value = rx_dec.cap(1).toInt();
                 const_type = CONST_INT;
             } else {
                 // :TODO: error (e.g. ".-" is wrong double)
@@ -118,7 +127,8 @@ void SLexer::setSource(const QString code) {
             type = T_CONST;
         } else if (code.at(i) == '\'') {
             // char const
-            while ((code.at(i + 1) != '\'') || (code.at(i) == '\\')) {
+            while ((i < code.length() - 1)
+                    && ((code.at(i + 1) != '\'') || (code.at(i) == '\\'))) {
                 i++;
             }
             identifier = code.mid(start, i - start);
@@ -139,7 +149,8 @@ void SLexer::setSource(const QString code) {
             const_type = CONST_CHAR;
         } else if (code.at(i) == '"') {
             // string const
-            while ((code.at(i + 1) != '\"') || (code.at(i) == '\\')) {
+            while ((i < code.length() - 1)
+                   && ((code.at(i + 1) != '\"') || (code.at(i) == '\\'))) {
                 i++;
             }
             const_value = code.mid(start, i - start)
