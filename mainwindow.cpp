@@ -218,185 +218,176 @@ void MainWindow::run()
         return;
     }
 
-    SLexer *lex;
-    QList<TokenPointer> tokens;
-    QList<TableItem_id> table_ids;
-    QList<TableItem_const> table_consts;
-    QList<TableItem_keyword> table_keywords;
-    QList<TableItem_separator> table_separators;
-
+    // --------------------------------------------------------------------------------
+    // lexical analysis ---------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     int i, row;
 
-    switch (tab_main->currentIndex()) {
-    case 0:
-        // lexical analysis
-        lex = new SLexer(editor->toPlainText());
-        QObject::connect(lex, SIGNAL(lex_error(int,ErrorType,QString)),
-                         this, SLOT(displayError(int,ErrorType,QString)));
+    SLexer *lex = new SLexer(editor->toPlainText());
+    //QObject::connect(lex, SIGNAL(lex_error(int,ErrorType,QString)),
+    //                 this, SLOT(displayError(int,ErrorType,QString)));
+    connect(lex, SIGNAL(lex_error()), this, SLOT(displayError()));
 
-        tokens = lex->getAllTokens();
-        table_ids = lex->getTableIds();
-        table_consts = lex->getTableConsts();
-        table_keywords = lex->getTableKeywords();
-        table_separators = lex->getTableSeparators();
+    QList<TokenPointer>        tokens           = lex->getAllTokens();
+    QList<TableItem_id>        table_ids        = lex->getTableIds();
+    QList<TableItem_const>     table_consts     = lex->getTableConsts();
+    QList<TableItem_keyword>   table_keywords   = lex->getTableKeywords();
+    QList<TableItem_separator> table_separators = lex->getTableSeparators();
 
+    clearLexTables();
+    for (i = 0; i < tokens.length(); i++) {
+        row = table_lex_0->rowCount();
+        table_lex_0->insertRow(row);
 
-        clearLexTables();
-        for (i = 0; i < tokens.length(); i++) {
-            row = table_lex_0->rowCount();
-            table_lex_0->insertRow(row);
+        QString token_type_temp, code_temp;
+        switch (tokens.at(i).type) {
+        case T_ID:
+            token_type_temp = "id";
+            code_temp = table_ids.at(tokens.at(i).index).identifier;
+            break;
 
-            QString token_type_temp, code_temp;
-            switch (tokens.at(i).type) {
-            case T_ID:
-                token_type_temp = "id";
-                code_temp = table_ids.at(tokens.at(i).index).identifier;
-                break;
+        case T_CONST:
+            token_type_temp = "const";
+            code_temp = table_consts.at(tokens.at(i).index).value.toString();
+            break;
 
-            case T_CONST:
-                token_type_temp = "const";
-                code_temp = table_consts.at(tokens.at(i).index).value.toString();
-                break;
+        case T_KEYWORD:
+            token_type_temp = "keyword";
+            code_temp = KeywordCodes.key(table_keywords.at(tokens.at(i).index).type);
+            break;
 
-            case T_KEYWORD:
-                token_type_temp = "keyword";
-                code_temp = KeywordCodes.key(table_keywords.at(tokens.at(i).index).type);
-                break;
+        case T_SEPARATOR:
+            token_type_temp = "separator";
+            code_temp = (SeparatorCodes.key(table_separators.at(tokens.at(i).index).type) == " ")
+                    ? "[space]"
+                    : SeparatorCodes.key(table_separators.at(tokens.at(i).index).type);
+            break;
 
-            case T_SEPARATOR:
-                token_type_temp = "separator";
-                code_temp = (SeparatorCodes.key(table_separators.at(tokens.at(i).index).type) == " ")
-                        ? "[space]"
-                        : SeparatorCodes.key(table_separators.at(tokens.at(i).index).type);
-                break;
-
-            default:
-                break;
-            }
-
-            QTableWidgetItem *item_0 = new QTableWidgetItem;
-            QTableWidgetItem *item_1 = new QTableWidgetItem;
-            QTableWidgetItem *item_2 = new QTableWidgetItem;
-            QTableWidgetItem *item_3 = new QTableWidgetItem;
-            QTableWidgetItem *item_4 = new QTableWidgetItem;
-            QTableWidgetItem *item_5 = new QTableWidgetItem;
-            item_0->setTextAlignment(Qt::AlignCenter);
-            item_3->setTextAlignment(Qt::AlignCenter);
-            item_4->setTextAlignment(Qt::AlignCenter);
-            item_5->setTextAlignment(Qt::AlignCenter);
-            QFont bold("Helvetica", 10, QFont::Bold);
-            item_1->setFont(bold);
-
-            item_0->setText(QString::number(i));
-            item_1->setText(code_temp);
-            item_2->setText(token_type_temp);
-            item_3->setText(QString::number(tokens.at(i).index));
-            item_4->setText(QString::number(tokens.at(i).start));
-            item_5->setText(QString::number(tokens.at(i).length));
-            table_lex_0->setItem(row, 0, item_0);
-            table_lex_0->setItem(row, 1, item_1);
-            table_lex_0->setItem(row, 2, item_2);
-            table_lex_0->setItem(row, 3, item_3);
-            table_lex_0->setItem(row, 4, item_4);
-            table_lex_0->setItem(row, 5, item_5);
+        default:
+            break;
         }
 
-        for (i = 0; i < table_ids.length(); i++) {
-            row = table_lex_1->rowCount();
-            table_lex_1->insertRow(row);
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        QTableWidgetItem *item_2 = new QTableWidgetItem;
+        QTableWidgetItem *item_3 = new QTableWidgetItem;
+        QTableWidgetItem *item_4 = new QTableWidgetItem;
+        QTableWidgetItem *item_5 = new QTableWidgetItem;
+        item_0->setTextAlignment(Qt::AlignCenter);
+        item_3->setTextAlignment(Qt::AlignCenter);
+        item_4->setTextAlignment(Qt::AlignCenter);
+        item_5->setTextAlignment(Qt::AlignCenter);
+        QFont bold("Helvetica", 10, QFont::Bold);
+        item_1->setFont(bold);
 
-            QTableWidgetItem *item_0 = new QTableWidgetItem;
-            QTableWidgetItem *item_1 = new QTableWidgetItem;
-            item_0->setTextAlignment(Qt::AlignCenter);
-
-            item_0->setText(QString::number(i));
-            item_1->setText(table_ids.at(i).identifier);
-            table_lex_1->setItem(row, 0, item_0);
-            table_lex_1->setItem(row, 1, item_1);
-        }
-        for (i = 0; i < table_consts.length(); i++) {
-            row = table_lex_2->rowCount();
-            table_lex_2->insertRow(row);
-
-            QString const_type_temp;
-            switch (table_consts.at(i).type) {
-            case CONST_BOOL:
-                const_type_temp = "bool";
-                break;
-
-            case CONST_INT:
-                const_type_temp = "int";
-                break;
-
-            case CONST_DOUBLE:
-                const_type_temp = "double";
-                break;
-
-            case CONST_CHAR:
-                const_type_temp = "char";
-                break;
-
-            case CONST_STRING:
-                const_type_temp = "string";
-                break;
-
-            }
-
-            QTableWidgetItem *item_0 = new QTableWidgetItem;
-            QTableWidgetItem *item_1 = new QTableWidgetItem;
-            QTableWidgetItem *item_2 = new QTableWidgetItem;
-            item_0->setTextAlignment(Qt::AlignCenter);
-
-            item_0->setText(QString::number(i));
-            item_1->setText(const_type_temp);
-            item_2->setText(table_consts.at(i).value.toString());
-
-            table_lex_2->setItem(row, 0, item_0);
-            table_lex_2->setItem(row, 1, item_1);
-            table_lex_2->setItem(row, 2, item_2);
-        }
-        for (i = 0; i < table_keywords.length(); i++) {
-            row = table_lex_3->rowCount();
-            table_lex_3->insertRow(row);
-
-            QTableWidgetItem *item_0 = new QTableWidgetItem;
-            QTableWidgetItem *item_1 = new QTableWidgetItem;
-            item_0->setTextAlignment(Qt::AlignCenter);
-
-            item_0->setText(QString::number(i));
-            item_1->setText(KeywordCodes.key(table_keywords.at(i).type));
-
-            table_lex_3->setItem(row, 0, item_0);
-            table_lex_3->setItem(row, 1, item_1);
-        }
-        for (i = 0; i < table_separators.length(); i++) {
-            row = table_lex_4->rowCount();
-            table_lex_4->insertRow(row);
-
-            QTableWidgetItem *item_0 = new QTableWidgetItem;
-            QTableWidgetItem *item_1 = new QTableWidgetItem;
-            item_0->setTextAlignment(Qt::AlignCenter);
-
-            item_0->setText(QString::number(i));
-            item_1->setText((SeparatorCodes.key(table_separators.at(i).type) == " ")
-                            ? "[space]"
-                            : SeparatorCodes.key(table_separators.at(i).type));
-
-            table_lex_4->setItem(row, 0, item_0);
-            table_lex_4->setItem(row, 1, item_1);
-        }
-        setLexTableHeaders();
-
-        tab_lex_main->setTabText(0, trUtf8("свертка (") + QString::number(tokens.length()) + ")");
-        tab_lex_main->setTabText(1, "id's (" + QString::number(table_ids.length()) + ")");
-        tab_lex_main->setTabText(2, "constants (" + QString::number(table_consts.length()) + ")");
-        tab_lex_main->setTabText(3, "keywords (" + QString::number(table_keywords.length()) + ")");
-        tab_lex_main->setTabText(4, "separators (" + QString::number(table_separators.length()) + ")");
-        break;
-    case 1:
-        qDebug()<<"tab 2 active";
-        break;
+        item_0->setText(QString::number(i));
+        item_1->setText(code_temp);
+        item_2->setText(token_type_temp);
+        item_3->setText(QString::number(tokens.at(i).index));
+        item_4->setText(QString::number(tokens.at(i).start));
+        item_5->setText(QString::number(tokens.at(i).length));
+        table_lex_0->setItem(row, 0, item_0);
+        table_lex_0->setItem(row, 1, item_1);
+        table_lex_0->setItem(row, 2, item_2);
+        table_lex_0->setItem(row, 3, item_3);
+        table_lex_0->setItem(row, 4, item_4);
+        table_lex_0->setItem(row, 5, item_5);
     }
+    for (i = 0; i < table_ids.length(); i++) {
+        row = table_lex_1->rowCount();
+        table_lex_1->insertRow(row);
+
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        item_0->setTextAlignment(Qt::AlignCenter);
+
+        item_0->setText(QString::number(i));
+        item_1->setText(table_ids.at(i).identifier);
+        table_lex_1->setItem(row, 0, item_0);
+        table_lex_1->setItem(row, 1, item_1);
+    }
+    for (i = 0; i < table_consts.length(); i++) {
+        row = table_lex_2->rowCount();
+        table_lex_2->insertRow(row);
+
+        QString const_type_temp;
+        switch (table_consts.at(i).type) {
+        case CONST_BOOL:
+            const_type_temp = "bool";
+            break;
+
+        case CONST_INT:
+            const_type_temp = "int";
+            break;
+
+        case CONST_DOUBLE:
+            const_type_temp = "double";
+            break;
+
+        case CONST_CHAR:
+            const_type_temp = "char";
+            break;
+
+        case CONST_STRING:
+            const_type_temp = "string";
+            break;
+
+        }
+
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        QTableWidgetItem *item_2 = new QTableWidgetItem;
+        item_0->setTextAlignment(Qt::AlignCenter);
+
+        item_0->setText(QString::number(i));
+        item_1->setText(const_type_temp);
+        item_2->setText(table_consts.at(i).value.toString());
+
+        table_lex_2->setItem(row, 0, item_0);
+        table_lex_2->setItem(row, 1, item_1);
+        table_lex_2->setItem(row, 2, item_2);
+    }
+    for (i = 0; i < table_keywords.length(); i++) {
+        row = table_lex_3->rowCount();
+        table_lex_3->insertRow(row);
+
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        item_0->setTextAlignment(Qt::AlignCenter);
+
+        item_0->setText(QString::number(i));
+        item_1->setText(KeywordCodes.key(table_keywords.at(i).type));
+
+        table_lex_3->setItem(row, 0, item_0);
+        table_lex_3->setItem(row, 1, item_1);
+    }
+    for (i = 0; i < table_separators.length(); i++) {
+        row = table_lex_4->rowCount();
+        table_lex_4->insertRow(row);
+
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        item_0->setTextAlignment(Qt::AlignCenter);
+
+        item_0->setText(QString::number(i));
+        item_1->setText((SeparatorCodes.key(table_separators.at(i).type) == " ")
+                        ? "[space]"
+                        : SeparatorCodes.key(table_separators.at(i).type));
+
+        table_lex_4->setItem(row, 0, item_0);
+        table_lex_4->setItem(row, 1, item_1);
+    }
+    setLexTableHeaders();
+
+    tab_lex_main->setTabText(0, trUtf8("свертка (") + QString::number(tokens.length()) + ")");
+    tab_lex_main->setTabText(1, "id's (" + QString::number(table_ids.length()) + ")");
+    tab_lex_main->setTabText(2, "constants (" + QString::number(table_consts.length()) + ")");
+    tab_lex_main->setTabText(3, "keywords (" + QString::number(table_keywords.length()) + ")");
+    tab_lex_main->setTabText(4, "separators (" + QString::number(table_separators.length()) + ")");
+
+    // --------------------------------------------------------------------------------
+    // syntax analysis... -------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 }
 
 
