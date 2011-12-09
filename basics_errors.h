@@ -10,12 +10,12 @@ enum ErrorType {E_UNKNOWN_ERROR,
 
 static QHash<ErrorType, QString> initErrorCodes() {
         QHash<ErrorType, QString> hash;
-        hash.insert(E_UNKNOWN_ERROR,        "Unknown error");
+        hash.insert(E_UNKNOWN_ERROR,        "Unknown error occured...");
         hash.insert(E_UNKNOWN_TOKEN_ERROR,  "Unknown token found");
 
         hash.insert(E_COMMENT_NOT_CLOSED,   "Multi-line comment not closed");
-        hash.insert(E_INVALID_DOUBLE,       "Invalid double constant");
-        hash.insert(E_INVALID_CHAR,         "Invalid char constant");
+        hash.insert(E_INVALID_DOUBLE,       "Invalid 'double' constant");
+        hash.insert(E_INVALID_CHAR,         "Invalid 'char' constant - it must be a single character");
         return hash;
 }
 static const QHash<ErrorType, QString> ErrorCodes = initErrorCodes();

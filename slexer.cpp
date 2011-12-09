@@ -145,7 +145,7 @@ bool SLexer::processSource(const QString code)
                     && ((code.at(i + 1) != '\'') || (code.at(i) == '\\'))) {
                 i++;
             }
-            identifier = code.mid(start, i - start);
+            identifier = code.mid(start + 1, i - start);    // +1 because of opening apostrophe
             if (identifier == "\\'") {
                 const_value = '\'';
             } else if (identifier == "\\\"") {
@@ -155,11 +155,12 @@ bool SLexer::processSource(const QString code)
             } else if (identifier == "\\t") {
                 const_value = '\t';
             } else if (identifier.length() == 1) {
-                const_value = identifier.at(1);
+                const_value = identifier.at(0);
             } else {
                 emit lex_error(i, error_msg(E_INVALID_CHAR));
                 return false;
             }
+            i++;    // closing apostrophe
             type = T_CONST;
             const_type = CONST_CHAR;
         } else if (code.at(i) == '"') {
@@ -168,11 +169,12 @@ bool SLexer::processSource(const QString code)
                    && ((code.at(i + 1) != '\"') || (code.at(i) == '\\'))) {
                 i++;
             }
-            const_value = code.mid(start, i - start)
+            const_value = code.mid(start + 1, i - start)    // +1 because of opening double quotes
                     .replace("\\'", "'")
                     .replace("\\\"", "\"")
                     .replace("\\n", "\n")
                     .replace("\\t", "\t");
+            i++;    // closing double quotes
             type = T_CONST;
             const_type = CONST_STRING;
         } else {
@@ -200,7 +202,6 @@ bool SLexer::processSource(const QString code)
             emit lex_error(i, error_msg(E_UNKNOWN_TOKEN_ERROR));
             return false;
             break;
-
         }
     }
 

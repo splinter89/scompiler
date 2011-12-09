@@ -142,7 +142,7 @@ void MainWindow::setStatusError(const QString text)
 void MainWindow::setLexTableHeaders()
 {
     QStringList table_lex_0_headers;
-    table_lex_0_headers << trUtf8("#") << trUtf8("код") << trUtf8("тип")
+    table_lex_0_headers << trUtf8("#") << trUtf8("представление") << trUtf8("тип")
                         << trUtf8("ссылка") << trUtf8("начало") << trUtf8("длина");
     table_lex_0->setHorizontalHeaderLabels(table_lex_0_headers);
 
@@ -245,7 +245,7 @@ void MainWindow::run()
         row = table_lex_0->rowCount();
         table_lex_0->insertRow(row);
 
-        QString token_type_temp, code_temp;
+        QString token_type_temp, const_type_temp, code_temp;
         switch (tokens.at(i).type) {
         case T_ID:
             token_type_temp = "id";
@@ -253,7 +253,30 @@ void MainWindow::run()
             break;
 
         case T_CONST:
-            token_type_temp = "const";
+            switch (table_consts.at(tokens.at(i).index).type) {
+            case CONST_BOOL:
+                const_type_temp = "bool";
+                break;
+
+            case CONST_INT:
+                const_type_temp = "int";
+                break;
+
+            case CONST_DOUBLE:
+                const_type_temp = "double";
+                break;
+
+            case CONST_CHAR:
+                const_type_temp = "char";
+                break;
+
+            case CONST_STRING:
+                const_type_temp = "string";
+                break;
+
+            }
+
+            token_type_temp = "const (" + const_type_temp + ")";
             code_temp = table_consts.at(tokens.at(i).index).value.toString();
             break;
 
@@ -339,7 +362,6 @@ void MainWindow::run()
         case CONST_STRING:
             const_type_temp = "string";
             break;
-
         }
 
         QTableWidgetItem *item_0 = new QTableWidgetItem;
