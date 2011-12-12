@@ -14,7 +14,7 @@ static QHash<ErrorType, QString> initErrorCodes() {
         hash.insert(E_UNKNOWN_TOKEN_ERROR,  "Unknown token found");
 
         hash.insert(E_COMMENT_NOT_CLOSED,   "Multi-line comment not closed");
-        hash.insert(E_INVALID_DOUBLE,       "Invalid 'double' constant");
+//        hash.insert(E_INVALID_DOUBLE,       "Invalid 'double' constant");
         hash.insert(E_INVALID_CHAR,         "Invalid 'char' constant - it must be a single character");
         return hash;
 }

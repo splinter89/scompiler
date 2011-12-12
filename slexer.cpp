@@ -65,13 +65,6 @@ bool SLexer::processSource(const QString code)
 
             type = T_SEPARATOR;
             separator = S_SPACE;
-        } else if ((i <= code.length() - 2) && (SeparatorCodes.contains(code.mid(i, 2)))) {
-            type = T_SEPARATOR;
-            separator = SeparatorCodes.value(code.mid(i, 2));
-            i++;
-        } else if (SeparatorCodes.contains(code.at(i))) {
-            type = T_SEPARATOR;
-            separator = SeparatorCodes.value(code.at(i));
         } else if (code.at(i).isLetter()) {
 
             while ((i < code.length() - 1)
@@ -94,9 +87,10 @@ bool SLexer::processSource(const QString code)
             }
         } else if (code.at(i).isDigit() || code.at(i) == '.') {
             // number const
-            QString str = code.mid(i);
+            type = T_CONST;
 
-            QRegExp rx_double("^(\\d+)?\\.(\\d+)?(?:[eE]([+-]?(\\d+)))?");
+            QString str = code.mid(i);
+            QRegExp rx_double("^(\\d+)?\\.(\\d+)?(?:[eE]([+-]?\\d+))?");
             QRegExp rx_hex("^0x([\\dabcdef]+)");
             rx_hex.setCaseSensitivity(Qt::CaseInsensitive);
             QRegExp rx_oct("^(0[01234567]+)");
@@ -105,18 +99,22 @@ bool SLexer::processSource(const QString code)
             if (rx_double.indexIn(str) > -1) {
                 // double const
                 const_value = rx_double.cap(1) + "." + rx_double.cap(2);
-                if (!rx_double.cap(3).isEmpty()) {
-                    // got an exponent
-                    const_value = const_value.toString() + "e" + rx_double.cap(3);
-                }
                 if (const_value == ".") {
-                    // error ("." is invalid double)
-                    emit lex_error(i, error_msg(E_INVALID_DOUBLE));
-                    return false;
+                    // error ("." is invalid double, but it's valid separator)
+//                    emit lex_error(i, error_msg(E_INVALID_DOUBLE));
+//                    return false;
+                    type = T_SEPARATOR;
+                    separator = S_PERIOD;
+                } else {
+                    // correct double
+                    if (!rx_double.cap(3).isEmpty()) {
+                        // got an exponent
+                        const_value = const_value.toString() + "e" + rx_double.cap(3);
+                    }
+                    i += const_value.toString().length() - 1;
+                    const_value = const_value.toDouble();
+                    const_type = CONST_DOUBLE;
                 }
-                i += const_value.toString().length() - 1;
-                const_value = const_value.toDouble();
-                const_type = CONST_DOUBLE;
             } else if (rx_hex.indexIn(str) > -1) {
                 // hex const
                 i += rx_hex.cap(1).length() + 2 - 1;    // 0x
@@ -132,13 +130,19 @@ bool SLexer::processSource(const QString code)
                 i += rx_dec.cap(1).length() - 1;
                 const_value = rx_dec.cap(1).toInt();
                 const_type = CONST_INT;
-            } else {
+            }/* else {
                 // error (e.g. ".-" is wrong double) - NaN && not "." in other words
                 // hex/oct/dec are always correct by this point
                 emit lex_error(i, error_msg(E_INVALID_DOUBLE));
                 return false;
-            }
-            type = T_CONST;
+            }*/
+        } else if ((i <= code.length() - 2) && (SeparatorCodes.contains(code.mid(i, 2)))) {
+            type = T_SEPARATOR;
+            separator = SeparatorCodes.value(code.mid(i, 2));
+            i++;
+        } else if (SeparatorCodes.contains(code.at(i))) {
+            type = T_SEPARATOR;
+            separator = SeparatorCodes.value(code.at(i));
         } else if (code.at(i) == '\'') {
             // char const
             while ((i < code.length() - 1)
