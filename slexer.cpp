@@ -50,6 +50,7 @@ bool SLexer::processSource(const QString code)
             }
             if (i >= code.length() - 2) {
                 // error (comment not closed by the end of code)
+                tokens.clear();
                 emit lex_error(code.length(), error_msg(E_COMMENT_NOT_CLOSED));
                 return false;
             } else {
@@ -90,19 +91,16 @@ bool SLexer::processSource(const QString code)
             type = T_CONST;
 
             QString str = code.mid(i);
+            bool ok;   // error flag while converting string to int/double
+
             QRegExp rx_double("^(\\d+)?\\.(\\d+)?(?:[eE]([+-]?\\d+))?");
-            QRegExp rx_hex("^0x([\\dabcdef]+)");
-            rx_hex.setCaseSensitivity(Qt::CaseInsensitive);
-            QRegExp rx_oct("^(0[01234567]+)");
-            QRegExp rx_dec("^(\\d+)");
+            QRegExp rx_int("^((?:0x[\\dabcdef]+)|(?:0[01234567]+)|(?:\\d+))");
+            rx_int.setCaseSensitivity(Qt::CaseInsensitive);
 
             if (rx_double.indexIn(str) > -1) {
                 // double const
                 const_value = rx_double.cap(1) + "." + rx_double.cap(2);
                 if (const_value == ".") {
-                    // error ("." is invalid double, but it's valid separator)
-//                    emit lex_error(i, error_msg(E_INVALID_DOUBLE));
-//                    return false;
                     type = T_SEPARATOR;
                     separator = S_PERIOD;
                 } else {
@@ -112,30 +110,26 @@ bool SLexer::processSource(const QString code)
                         const_value = const_value.toString() + "e" + rx_double.cap(3);
                     }
                     i += const_value.toString().length() - 1;
-                    const_value = const_value.toDouble();
+                    const_value = const_value.toDouble(&ok);
                     const_type = CONST_DOUBLE;
                 }
-            } else if (rx_hex.indexIn(str) > -1) {
-                // hex const
-                i += rx_hex.cap(1).length() + 2 - 1;    // 0x
-                const_value = rx_hex.cap(1).toInt(0, 16);
+            } else if (rx_int.indexIn(str) > -1) {
+                // int (hex/oct/dec) const
+                i += rx_int.cap(1).length() - 1;
+                const_value = rx_int.cap(1).toInt(&ok, 0);
                 const_type = CONST_INT;
-            } else if (rx_oct.indexIn(str) > -1) {
-                // oct const
-                i += rx_oct.cap(1).length() - 1;
-                const_value = rx_oct.cap(1).toInt(0, 8);
-                const_type = CONST_INT;
-            } else if (rx_dec.indexIn(str) > -1) {
-                // dec const
-                i += rx_dec.cap(1).length() - 1;
-                const_value = rx_dec.cap(1).toInt();
-                const_type = CONST_INT;
-            }/* else {
-                // error (e.g. ".-" is wrong double) - NaN && not "." in other words
-                // hex/oct/dec are always correct by this point
-                emit lex_error(i, error_msg(E_INVALID_DOUBLE));
+            }
+
+            // check value for min/max range
+            if (!ok && (const_type == CONST_DOUBLE)) {
+                tokens.clear();
+                emit lex_error(i + 1, error_msg(E_INVALID_DOUBLE));
                 return false;
-            }*/
+            } else if (!ok && (const_type == CONST_INT)) {
+                tokens.clear();
+                emit lex_error(i + 1, error_msg(E_INVALID_INT));
+                return false;
+            }
         } else if ((i <= code.length() - 2) && (SeparatorCodes.contains(code.mid(i, 2)))) {
             type = T_SEPARATOR;
             separator = SeparatorCodes.value(code.mid(i, 2));
@@ -161,6 +155,7 @@ bool SLexer::processSource(const QString code)
             } else if (identifier.length() == 1) {
                 const_value = identifier.at(0);
             } else {
+                tokens.clear();
                 emit lex_error(i, error_msg(E_INVALID_CHAR));
                 return false;
             }
@@ -203,6 +198,7 @@ bool SLexer::processSource(const QString code)
             break;
 
         case T_UNKNOWN:
+            tokens.clear();
             emit lex_error(i, error_msg(E_UNKNOWN_TOKEN_ERROR));
             return false;
             break;
@@ -239,11 +235,16 @@ void SLexer::addIdToken(int start, int length, QString identifier)
 void SLexer::addConstToken(int start, int length, ConstType type, QVariant value)
 {
     if (((type == CONST_INT) || (type == CONST_DOUBLE))
-        && (tokens.length() >= 2) && (tokens.last().type == T_SEPARATOR)
+        && (tokens.length() >= 1)
+        && (tokens.last().type == T_SEPARATOR)
         && ((Table_separators.at(tokens.last().index).type == S_PLUS)
             || (Table_separators.at(tokens.last().index).type == S_MINUS))
-        && (tokens.at(tokens.length() - 2).type == T_SEPARATOR)
-        && (Table_separators.at(tokens.at(tokens.length() - 2).index).type != S_ROUND_CLOSE)
+        && ((tokens.length() == 1)
+            || ((tokens.length() >= 2)
+                && (tokens.at(tokens.length() - 2).type == T_SEPARATOR)
+                && (Table_separators.at(tokens.at(tokens.length() - 2).index).type != S_ROUND_CLOSE)
+            )
+        )
     ) {
         // (some separator (excluding ")") -> unary plus/minus -> number) => (separator -> signed number)
         if (Table_separators.at(tokens.last().index).type == S_MINUS) {
