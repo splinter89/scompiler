@@ -15,9 +15,9 @@ static QHash<ErrorType, QString> initErrorCodes() {
         hash.insert(E_UNKNOWN_TOKEN_ERROR,  "Unknown token found");
 
         hash.insert(E_COMMENT_NOT_CLOSED,   "Multi-line comment not closed");
-        hash.insert(E_INVALID_DOUBLE,       "Invalid Double! Constant is out of range");
-        hash.insert(E_INVALID_INT,          "Invalid Integer! Constant is out of range");
-        hash.insert(E_INVALID_CHAR,         "Invalid Char constant! It must be a single character");
+        hash.insert(E_INVALID_DOUBLE,       "Double constant is out of range");
+        hash.insert(E_INVALID_INT,          "Integer constant is out of range");
+        hash.insert(E_INVALID_CHAR,         "Char constant must contain a single character");
         return hash;
 }
 static const QHash<ErrorType, QString> ErrorCodes = initErrorCodes();

@@ -441,6 +441,9 @@ void MainWindow::on_save_triggered()
                 QCoreApplication::applicationDirPath(),
                 trUtf8("C++ source file (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
     if (!fileName.isEmpty()) {
+        if (fileName.indexOf(".") == -1) {
+            fileName += ".cpp";
+        }
         saveFile(fileName);
     }
 }

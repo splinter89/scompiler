@@ -43,8 +43,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="open"/>
-   <addaction name="run"/>
    <addaction name="save"/>
+   <addaction name="run"/>
   </widget>
   <action name="open">
    <property name="icon">
@@ -52,7 +52,7 @@
      <normaloff>:/icons/icons/open.png</normaloff>:/icons/icons/open.png</iconset>
    </property>
    <property name="text">
-    <string>Открыть...</string>
+    <string>Открыть…</string>
    </property>
    <property name="toolTip">
     <string>Открыть (Ctrl+O)</string>
@@ -67,7 +67,7 @@
      <normaloff>:/icons/icons/save.png</normaloff>:/icons/icons/save.png</iconset>
    </property>
    <property name="text">
-    <string>Сохранить...</string>
+    <string>Сохранить…</string>
    </property>
    <property name="toolTip">
     <string>Сохранить (Ctrl+S)</string>
