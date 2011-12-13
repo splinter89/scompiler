@@ -30,8 +30,6 @@ static QHash<QString, Keyword> initKeywordValues() {
         hash.insert("while", K_WHILE);
         hash.insert("do", K_DO);
         hash.insert("return", K_RETURN);
-        hash.insert("break", K_BREAK);
-        hash.insert("continue", K_CONTINUE);
         hash.insert("char", K_CHAR);
         hash.insert("int", K_INT);
         hash.insert("double", K_DOUBLE);
