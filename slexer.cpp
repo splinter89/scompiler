@@ -140,14 +140,27 @@ bool SLexer::processSource(const QString code)
         } else if (code.at(i) == '\'') {
             // char const
             while ((i < code.length() - 1)
-                    && ((code.at(i + 1) != '\'') || (code.at(i) == '\\'))) {
+                   && ((code.at(i + 1) != '\'')
+                       || ((code.at(i - 1) != '\\')
+                           && (code.at(i) == '\\')
+                           )
+                       )
+            ) {
                 i++;
             }
+            if (i == code.length() - 1) {
+                tokens.clear();
+                emit lex_error(i + 1, error_msg(E_CHAR_NOT_CLOSED));
+                return false;
+            }
+
             identifier = code.mid(start + 1, i - start);    // +1 because of opening apostrophe
             if (identifier == "\\'") {
                 const_value = '\'';
             } else if (identifier == "\\\"") {
                 const_value = '\"';
+            } else if (identifier == "\\\\") {
+                const_value = '\\';
             } else if (identifier == "\\n") {
                 const_value = '\n';
             } else if (identifier == "\\t") {
@@ -156,7 +169,7 @@ bool SLexer::processSource(const QString code)
                 const_value = identifier.at(0);
             } else {
                 tokens.clear();
-                emit lex_error(i, error_msg(E_INVALID_CHAR));
+                emit lex_error(i + 2, error_msg(E_INVALID_CHAR));
                 return false;
             }
             i++;    // closing apostrophe
@@ -165,12 +178,24 @@ bool SLexer::processSource(const QString code)
         } else if (code.at(i) == '"') {
             // string const
             while ((i < code.length() - 1)
-                   && ((code.at(i + 1) != '\"') || (code.at(i) == '\\'))) {
+                   && ((code.at(i + 1) != '\"')
+                       || ((code.at(i - 1) != '\\')
+                           && (code.at(i) == '\\')
+                           )
+                       )
+            ) {
                 i++;
             }
+            if (i == code.length() - 1) {
+                tokens.clear();
+                emit lex_error(i + 1, error_msg(E_STRING_NOT_CLOSED));
+                return false;
+            }
+
             const_value = code.mid(start + 1, i - start)    // +1 because of opening double quotes
                     .replace("\\'", "'")
                     .replace("\\\"", "\"")
+                    .replace("\\\\", "\\")
                     .replace("\\n", "\n")
                     .replace("\\t", "\t");
             i++;    // closing double quotes

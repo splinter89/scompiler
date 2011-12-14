@@ -6,7 +6,8 @@
 enum ErrorType {E_UNKNOWN_ERROR,
                 // lexer errors
                 E_UNKNOWN_TOKEN_ERROR, E_COMMENT_NOT_CLOSED,
-                E_INVALID_DOUBLE, E_INVALID_INT, E_INVALID_CHAR
+                E_INVALID_DOUBLE, E_INVALID_INT, E_INVALID_CHAR,
+                E_CHAR_NOT_CLOSED, E_STRING_NOT_CLOSED
                };
 
 static QHash<ErrorType, QString> initErrorCodes() {
@@ -14,10 +15,12 @@ static QHash<ErrorType, QString> initErrorCodes() {
         hash.insert(E_UNKNOWN_ERROR,        "Unknown error occured...");
         hash.insert(E_UNKNOWN_TOKEN_ERROR,  "Unknown token found");
 
-        hash.insert(E_COMMENT_NOT_CLOSED,   "Multi-line comment not closed");
+        hash.insert(E_COMMENT_NOT_CLOSED,   "Multi-line comment is not closed");
         hash.insert(E_INVALID_DOUBLE,       "Double constant is out of range");
         hash.insert(E_INVALID_INT,          "Integer constant is out of range");
         hash.insert(E_INVALID_CHAR,         "Char constant must contain a single character");
+        hash.insert(E_CHAR_NOT_CLOSED,      "Char constant is not closed");
+        hash.insert(E_STRING_NOT_CLOSED,    "String constant is not closed");
         return hash;
 }
 static const QHash<ErrorType, QString> ErrorCodes = initErrorCodes();
