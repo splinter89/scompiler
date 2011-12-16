@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT     += core gui
-CONFIG += qt warn_on debug
+CONFIG += qt warn_on
 
 TARGET = scompiler
 TEMPLATE = app

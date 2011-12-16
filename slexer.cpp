@@ -224,7 +224,7 @@ bool SLexer::processSource(const QString code)
 
         case T_UNKNOWN:
             tokens.clear();
-            emit lex_error(i, error_msg(E_UNKNOWN_TOKEN_ERROR));
+            emit lex_error(i + 1, error_msg(E_UNKNOWN_TOKEN_ERROR));
             return false;
             break;
         }
