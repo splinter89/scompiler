@@ -2,8 +2,8 @@
 #define MAINWINDOW_H
 
 #include "codeeditor.h"
-#include "basics_errors.h"
-#include "basics_lexer.h"
+#include "errors.h"
+#include "basics.h"
 #include <QMainWindow>
 #include <QTabWidget>
 #include <QTableWidget>

@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "slexer.h"
+#include "slexicalanalyzer.h"
 
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -231,18 +231,18 @@ void MainWindow::run()
     // --------------------------------------------------------------------------------
     int i, row;
 
-    SLexer *lex = new SLexer();
-    connect(lex, SIGNAL(lex_error(int,QString)),
+    SLexicalAnalyzer *lex_an = new SLexicalAnalyzer();
+    connect(lex_an, SIGNAL(lex_error(int,QString)),
             this, SLOT(displayError(int,QString)));
-    if (lex->processSource(editor->toPlainText())) {
+    if (lex_an->processSource(editor->toPlainText())) {
         setStatusMsg("ok");
     }
 
-    QList<TokenPointer>        tokens           = lex->getAllTokens();
-    QList<TableItem_id>        table_ids        = lex->getTableIds();
-    QList<TableItem_const>     table_consts     = lex->getTableConsts();
-    QList<TableItem_keyword>   table_keywords   = lex->getTableKeywords();
-    QList<TableItem_separator> table_separators = lex->getTableSeparators();
+    QList<TokenPointer>        tokens           = lex_an->getAllTokens();
+    QList<TableItem_id>        table_ids        = lex_an->getTableIds();
+    QList<TableItem_const>     table_consts     = lex_an->getTableConsts();
+    QList<TableItem_keyword>   table_keywords   = lex_an->getTableKeywords();
+    QList<TableItem_separator> table_separators = lex_an->getTableSeparators();
 
 
     clearLexTables();
@@ -446,7 +446,7 @@ void MainWindow::on_save_triggered()
                 QCoreApplication::applicationDirPath(),
                 trUtf8("C++ source file (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
     if (!fileName.isEmpty()) {
-        if (fileName.indexOf(".") == -1) {
+        if (fileName.indexOf(".cpp") == -1) {
             fileName += ".cpp";
         }
         saveFile(fileName);

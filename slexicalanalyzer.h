@@ -1,18 +1,18 @@
-#ifndef SLEXER_H
-#define SLEXER_H
+#ifndef S_LEXICAL_ANALYZER_H
+#define S_LEXICAL_ANALYZER_H
 
 #include <QtCore>
 #include <QObject>
-#include "basics_errors.h"
-#include "basics_lexer.h"
+#include "errors.h"
+#include "basics.h"
 
-class SLexer : public QObject
+class SLexicalAnalyzer : public QObject
 {
     Q_OBJECT
 
 public:
-    SLexer(QObject * parent = 0);
-    ~SLexer();
+    SLexicalAnalyzer(QObject * parent = 0);
+    ~SLexicalAnalyzer();
 
     QList<TableItem_id> Table_ids;
     QList<TableItem_const> Table_consts;
@@ -47,4 +47,4 @@ signals:
     void lex_error(int pos, QString msg);
 };
 
-#endif // SLEXER_H
+#endif // S_LEXICAL_ANALYZER_H

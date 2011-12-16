@@ -12,14 +12,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     mainwindow.cpp \
-    slexer.cpp \
-    codeeditor.cpp
+    codeeditor.cpp \
+    slexicalanalyzer.cpp
 
 HEADERS += mainwindow.h \
-    slexer.h \
     codeeditor.h \
-    basics_lexer.h \
-    basics_errors.h
+    errors.h \
+    basics.h \
+    slexicalanalyzer.h
 
 FORMS += mainwindow.ui
 

@@ -1,13 +1,14 @@
-#ifndef BASICS_ERRORS_H
-#define BASICS_ERRORS_H
+#ifndef ERRORS_H
+#define ERRORS_H
 
 #include <QtCore>
 
 enum ErrorType {E_UNKNOWN_ERROR,
-                // lexer errors
+                // lexical errors
                 E_UNKNOWN_TOKEN_ERROR, E_COMMENT_NOT_CLOSED,
                 E_INVALID_DOUBLE, E_INVALID_INT, E_INVALID_CHAR,
                 E_CHAR_NOT_CLOSED, E_STRING_NOT_CLOSED
+                // syntactic error
                };
 
 static QHash<ErrorType, QString> initErrorCodes() {
@@ -32,4 +33,4 @@ inline QString error_msg(ErrorType type) {
     return res;
 }
 
-#endif // BASICS_ERRORS_H
+#endif // ERRORS_H
