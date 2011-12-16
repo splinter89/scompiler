@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QFileDialog>
+#include <QSplitter>
 #include <QGridLayout>
 #include <QDesktopWidget>
 
@@ -89,14 +90,18 @@ MainWindow::MainWindow(QWidget *parent) :
         tab_lex->setLayout(grid_lex);
     tab_main->addTab(tab_sint, trUtf8("..."));
 
-    QGridLayout *grid_main = new QGridLayout();
-    grid_main->addWidget(editor, 0, 0);
-    grid_main->addWidget(tab_main, 0, 1);
+//    QGridLayout *grid_main = new QGridLayout();
+//    grid_main->addWidget(editor, 0, 0);
+//    grid_main->addWidget(tab_main, 0, 1);
 
+//    QWidget *central_widget = new QWidget();
+//    central_widget->setLayout(grid_main);
+//    setCentralWidget(central_widget);
 
-    QWidget *central_widget = new QWidget();
-    central_widget->setLayout(grid_main);
-    setCentralWidget(central_widget);
+    QSplitter *splitter = new QSplitter(Qt::Horizontal);
+    splitter->addWidget(editor);
+    splitter->addWidget(tab_main);
+    setCentralWidget(splitter);
 }
 
 MainWindow::~MainWindow()
