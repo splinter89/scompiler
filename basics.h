@@ -4,8 +4,10 @@
 #include <QtCore>
 
 enum Token {
-    UNKNOWN,
-    TERMINAL, NON_TERMINAL, LAMBDA,
+    UNKNOWN,        // MUST BE FIRST(!)
+    TERMINAL, NON_TERMINAL,
+    LAMBDA,         // empty token
+    DOT_TOKEN,      // separator in LR-situation
 
     // terminals
     T_ID, T_CONST, T_KEYWORD, T_SEPARATOR,
@@ -25,7 +27,8 @@ enum Token {
     S_ARROW, S_SCOPE,
 
     // non-terminals
-    N_S, N_E, N_T, N_F
+    N_S, N_E, N_T, N_F,
+    EOF_TOKEN      // end of input string (MUST BE LAST(!))
 };
 
 enum ConstType {CONST_BOOL, CONST_INT, CONST_DOUBLE, CONST_CHAR, CONST_STRING};
@@ -145,9 +148,45 @@ struct TokenPointer {
     int start, length;
 };
 
+// [A -> .B, a]
+struct Situation {
+    Token left_token;
+    QList<Token> right_side;
+    Token look_ahead_token;
+};
+
+// crazy stuff...
+inline bool operator==(const Situation &e1, const Situation &e2) {
+    return ((e1.left_token == e2.left_token)
+        && (e1.right_side == e2.right_side)
+        && (e1.look_ahead_token == e2.look_ahead_token));
+}
+inline uint qHash(const QList<Token> &key)
+{
+    uint result = 0;
+    foreach (const Token &token, key) {
+        result ^= qHash(token);
+    }
+    return result;
+}
+inline uint qHash(const Situation &key)
+{
+    return key.left_token ^ qHash(key.right_side) ^ key.look_ahead_token;
+}
+inline uint qHash(const QSet<Situation> &key)
+{
+    uint result = 0;
+    foreach (const Situation &situation, key) {
+        result ^= qHash(situation);
+    }
+    return result;
+}
+
 bool isTokenTerminal(Token token);
 bool isTokenKeyword(Token token);
 bool isTokenSeparator(Token token);
 bool isTokenNonTerminal(Token token);
+
+QSet<Token> getAllGrammarTokens();
 
 #endif // BASICS_H

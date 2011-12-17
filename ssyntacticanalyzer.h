@@ -17,8 +17,12 @@ public:
 private:
 //    QString source_;
 
-    QSet<Token> first(Token token);
-    QSet<Token> first(QList<Token> tokens);
+    QSet<Token> first(const Token token);
+    QSet<Token> first(const QList<Token> tokens);
+
+    QSet<Situation> closure(QSet<Situation> i);
+    QSet<Situation> makeStep(const QSet<Situation> i, const Token x);
+    QSet<QSet<Situation> > generateSetOfSituations();
 
 signals:
     void syntax_error(int pos, QString msg);

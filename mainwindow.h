@@ -25,7 +25,7 @@ public:
 
     void openFile(const QString filename);
     void saveFile(const QString filename);
-    void run(void);
+    void run();
 
 private:
     Ui::MainWindow *ui_;

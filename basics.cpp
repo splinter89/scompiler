@@ -2,14 +2,14 @@
 #include <QDebug>
 
 bool isTokenTerminal(Token token) {
-    QList<Token> list;
+    QSet<Token> list;
     list << TERMINAL
          << T_ID << T_CONST << T_KEYWORD << T_SEPARATOR;
     return (list.contains(token) || isTokenKeyword(token) || isTokenSeparator(token));
 }
 
 bool isTokenKeyword(Token token) {
-    QList<Token> list;
+    QSet<Token> list;
     list << T_KEYWORD
          << K_IF << K_ELSE << K_FOR << K_WHILE << K_DO << K_RETURN << K_BREAK
          << K_CONTINUE << K_CHAR << K_INT << K_DOUBLE << K_BOOL << K_VOID
@@ -18,7 +18,7 @@ bool isTokenKeyword(Token token) {
 }
 
 bool isTokenSeparator(Token token) {
-    QList<Token> list;
+    QSet<Token> list;
     list << T_SEPARATOR
          << S_SPACE << S_PLUS << S_MINUS << S_MULT << S_DIV << S_NOT
          << S_MOD << S_AMP << S_LESS << S_GREATER << S_ASSIGN
@@ -31,8 +31,23 @@ bool isTokenSeparator(Token token) {
 }
 
 bool isTokenNonTerminal(Token token) {
-    QList<Token> list;
+    QSet<Token> list;
     list << NON_TERMINAL
          << N_S << N_E << N_T << N_F;
     return list.contains(token);
+}
+
+QSet<Token> getAllGrammarTokens() {
+    QSet<Token> result;
+    for (int token = UNKNOWN; token != EOF_TOKEN; token++) {
+        if ((token == T_ID) || (token == T_CONST) || (token == EOF_TOKEN)
+            || isTokenKeyword((Token)token)
+            || isTokenSeparator((Token)token)
+            || isTokenNonTerminal((Token)token)
+        ) {
+            result << (Token)token;
+        }
+    }
+
+    return result;
 }

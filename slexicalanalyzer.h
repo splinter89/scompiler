@@ -32,16 +32,17 @@ private:
     QList<TokenSeparator> table_separators_;
 
     // add id, const, keyword/separator
-    void addToken(int start, int length, Token type, QString identifier);
-    void addToken(int start, int length, Token type, ConstType const_type, QVariant value);
-    void addToken(int start, int length, Token type, Token token);
+    void addToken(const int start, const int length, const Token type, const QString identifier);
+    void addToken(const int start, const int length, const Token type, const ConstType const_type,
+                  QVariant value);
+    void addToken(const int start, const int length, const Token type, const Token token);
 
-    int indexOfTokenItem(TokenId item);
-    int indexOfTokenItem(TokenConst item);
-    int indexOfTokenItem(TokenKeyword item);
-    int indexOfTokenItem(TokenSeparator item);
+    int indexOfTokenItem(const TokenId item);
+    int indexOfTokenItem(const TokenConst item);
+    int indexOfTokenItem(const TokenKeyword item);
+    int indexOfTokenItem(const TokenSeparator item);
 
-    void removeToken(int index);
+    void removeToken(const int index);
 
 signals:
     void lexical_error(int pos, QString msg);

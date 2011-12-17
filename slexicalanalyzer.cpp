@@ -240,12 +240,15 @@ bool SLexicalAnalyzer::processSource(const QString code)
         removeToken(tokens_.length() - 1);
     }
 
+    TokenPointer new_token = {EOF_TOKEN, -1, -1, -1};
+    tokens_ << new_token;
+
     return true;
 }
 
 
 // add id
-void SLexicalAnalyzer::addToken(int start, int length, Token type, QString identifier)
+void SLexicalAnalyzer::addToken(const int start, const int length, const Token type, const QString identifier)
 {
     if (type == T_ID) {
         TokenId new_item = {identifier};
@@ -261,7 +264,8 @@ void SLexicalAnalyzer::addToken(int start, int length, Token type, QString ident
 }
 
 // add const
-void SLexicalAnalyzer::addToken(int start, int length, Token type, ConstType const_type, QVariant value)
+void SLexicalAnalyzer::addToken(const int start, const int length, const Token type, const ConstType const_type,
+                                QVariant value)
 {
     if (type == T_CONST) {
         if (((const_type == CONST_INT) || (const_type == CONST_DOUBLE))
@@ -300,7 +304,7 @@ void SLexicalAnalyzer::addToken(int start, int length, Token type, ConstType con
 }
 
 // add keyword/separator
-void SLexicalAnalyzer::addToken(int start, int length, Token type, Token token)
+void SLexicalAnalyzer::addToken(const int start, const int length, const Token type, const Token token)
 {
     if (type == T_KEYWORD) {
         TokenKeyword new_item = {token};
@@ -342,7 +346,7 @@ void SLexicalAnalyzer::addToken(int start, int length, Token type, Token token)
 }
 
 
-int SLexicalAnalyzer::indexOfTokenItem(TokenId item)
+int SLexicalAnalyzer::indexOfTokenItem(const TokenId item)
 {
     int i, res = -1;
     for (i = 0; i < table_ids_.length(); i++) {
@@ -354,7 +358,7 @@ int SLexicalAnalyzer::indexOfTokenItem(TokenId item)
     return res;
 }
 
-int SLexicalAnalyzer::indexOfTokenItem(TokenConst item)
+int SLexicalAnalyzer::indexOfTokenItem(const TokenConst item)
 {
     int i, res = -1;
     for (i = 0; i < table_consts_.length(); i++) {
@@ -367,7 +371,7 @@ int SLexicalAnalyzer::indexOfTokenItem(TokenConst item)
     return res;
 }
 
-int SLexicalAnalyzer::indexOfTokenItem(TokenKeyword item)
+int SLexicalAnalyzer::indexOfTokenItem(const TokenKeyword item)
 {
     int i, res = -1;
     for (i = 0; i < table_keywords_.length(); i++) {
@@ -379,7 +383,7 @@ int SLexicalAnalyzer::indexOfTokenItem(TokenKeyword item)
     return res;
 }
 
-int SLexicalAnalyzer::indexOfTokenItem(TokenSeparator item)
+int SLexicalAnalyzer::indexOfTokenItem(const TokenSeparator item)
 {
     int i, res = -1;
     for (i = 0; i < table_separators_.length(); i++) {
@@ -392,7 +396,7 @@ int SLexicalAnalyzer::indexOfTokenItem(TokenSeparator item)
 }
 
 
-void SLexicalAnalyzer::removeToken(int list_index)
+void SLexicalAnalyzer::removeToken(const int list_index)
 {
     TokenPointer token = tokens_.at(list_index);
 
