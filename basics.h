@@ -5,7 +5,7 @@
 
 enum Token {
     UNKNOWN,
-    TERMINAL, NON_TERMINAL,
+    TERMINAL, NON_TERMINAL, LAMBDA,
 
     // terminals
     T_ID, T_CONST, T_KEYWORD, T_SEPARATOR,
@@ -104,15 +104,20 @@ static QList<Token> EmptyTokenList() {
     QList<Token> list;
     return list;
 }
-static QHash< Token, QList<Token> > initGrammarRules() {
-    QHash< Token, QList<Token> > hash;
+static QMultiHash<Token, QList<Token> > initGrammarRules() {
+    QMultiHash<Token, QList<Token> > hash;
 
     // grammar rules here
     hash.insert(N_S, EmptyTokenList() << N_E);
+    hash.insert(N_E, EmptyTokenList() << N_E << S_PLUS << N_T);
+    hash.insert(N_E, EmptyTokenList() << N_T);
+    hash.insert(N_T, EmptyTokenList() << N_T << S_MULT << N_F);
+    hash.insert(N_T, EmptyTokenList() << N_F);
+    hash.insert(N_F, EmptyTokenList() << T_ID);
 
     return hash;
 }
-static const QHash< Token, QList<Token> > Grammar = initGrammarRules();
+static const QMultiHash<Token, QList<Token> > Grammar = initGrammarRules();
 
 
 // items of token tables

@@ -17,7 +17,8 @@ public:
 private:
 //    QString source_;
 
-    QList<Token> first(Token token);
+    QSet<Token> first(Token token);
+    QSet<Token> first(QList<Token> tokens);
 
 signals:
     void syntax_error(int pos, QString msg);
