@@ -232,18 +232,18 @@ void MainWindow::run()
     // --------------------------------------------------------------------------------
     int i, row;
 
-    SLexicalAnalyzer *lex_an = new SLexicalAnalyzer();
-    connect(lex_an, SIGNAL(lex_error(int,QString)),
+    SLexicalAnalyzer *lexical_analyzer = new SLexicalAnalyzer();
+    connect(lexical_analyzer, SIGNAL(lexical_error(int,QString)),
             this, SLOT(displayError(int,QString)));
-    if (lex_an->processSource(editor_->toPlainText())) {
+    if (lexical_analyzer->processSource(editor_->toPlainText())) {
         setStatusMsg("ok");
     }
 
-    QList<TokenPointer>        tokens           = lex_an->getAllTokens();
-    QList<TableItem_id>        table_ids        = lex_an->getTableIds();
-    QList<TableItem_const>     table_consts     = lex_an->getTableConsts();
-    QList<TableItem_keyword>   table_keywords   = lex_an->getTableKeywords();
-    QList<TableItem_separator> table_separators = lex_an->getTableSeparators();
+    QList<TokenPointer>   tokens           = lexical_analyzer->getAllTokens();
+    QList<TokenId>        table_ids        = lexical_analyzer->getTableIds();
+    QList<TokenConst>     table_consts     = lexical_analyzer->getTableConsts();
+    QList<TokenKeyword>   table_keywords   = lexical_analyzer->getTableKeywords();
+    QList<TokenSeparator> table_separators = lexical_analyzer->getTableSeparators();
 
 
     clearLexTables();
@@ -259,7 +259,7 @@ void MainWindow::run()
             break;
 
         case T_CONST:
-            switch (table_consts.at(tokens.at(i).index).type) {
+            switch (table_consts.at(tokens.at(i).index).const_type) {
             case CONST_BOOL:
                 const_type_temp = "bool";
                 break;
@@ -348,7 +348,7 @@ void MainWindow::run()
         table_lex_2_->insertRow(row);
 
         QString const_type_temp;
-        switch (table_consts.at(i).type) {
+        switch (table_consts.at(i).const_type) {
         case CONST_BOOL:
             const_type_temp = "bool";
             break;

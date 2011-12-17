@@ -4,6 +4,7 @@
 SSyntacticAnalyzer::SSyntacticAnalyzer(QObject * parent)
 {
     this->setParent(parent);
+    qDebug() << "ok";
 }
 
 SSyntacticAnalyzer::~SSyntacticAnalyzer()
@@ -11,8 +12,14 @@ SSyntacticAnalyzer::~SSyntacticAnalyzer()
     // bye
 }
 
-//bool SSyntacticAnalyzer::processSource(const QString code)
-//{
-//    return true;
-//}
+QList<Token> SSyntacticAnalyzer::first(Token token) {
+    QList<Token> first;
+    if (isTokenTerminal(token)) {
+        first << token;
 
+
+    } else {
+
+    }
+    return first;
+}

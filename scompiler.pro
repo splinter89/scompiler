@@ -14,7 +14,9 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     codeeditor.cpp \
     slexicalanalyzer.cpp \
-    ssyntacticanalyzer.cpp
+    ssyntacticanalyzer.cpp \
+    errors.cpp \
+    basics.cpp
 
 HEADERS += mainwindow.h \
     codeeditor.h \

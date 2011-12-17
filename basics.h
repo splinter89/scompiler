@@ -3,50 +3,62 @@
 
 #include <QtCore>
 
-enum TokenType {T_UNKNOWN, T_ID, T_CONST, T_KEYWORD, T_SEPARATOR};
-enum ConstType {CONST_BOOL, CONST_INT, CONST_DOUBLE, CONST_CHAR, CONST_STRING};
+enum Token {
+    UNKNOWN,
+    TERMINAL, NON_TERMINAL,
 
-enum Keyword {
+    // terminals
+    T_ID, T_CONST, T_KEYWORD, T_SEPARATOR,
+
+    // keywords
     K_IF, K_ELSE, K_FOR, K_WHILE, K_DO, K_RETURN, K_BREAK, K_CONTINUE,
     K_CHAR, K_INT, K_DOUBLE, K_BOOL, K_VOID, K_CONST, K_TRUE, K_FALSE,
-    K_CLASS, K_PUBLIC, K_PRIVATE
-};
-enum Separator {
-    S_SPACE, S_PLUS, S_MINUS, S_MULT, S_DIV, S_NOT, S_MOD, S_AMP, S_VBAR,
-    S_LESS, S_GREATER, S_ASSIGN, S_ROUND_OPEN, S_ROUND_CLOSE, S_CURLY_OPEN,
-    S_CURLY_CLOSE, S_SEMICOLON, S_COMMA, S_PERIOD, S_COLON, /*S_APOSTROPHE,
-    S_DOUBLE_QUOTE,*/ S_TILDE,
+    K_CLASS, K_PUBLIC, K_PRIVATE,
 
+    // separators (1x)
+    S_SPACE, S_PLUS, S_MINUS, S_MULT, S_DIV, S_NOT, S_MOD, S_AMP,
+    S_LESS, S_GREATER, S_ASSIGN, S_ROUND_OPEN, S_ROUND_CLOSE, S_CURLY_OPEN,
+    S_CURLY_CLOSE, S_SEMICOLON, S_COMMA, S_PERIOD, S_COLON, S_TILDE,
+    // separators (2x)
     S_DECREMENT, S_INCREMENT, S_AND, S_OR, S_LE, S_GE, S_EQ, S_NOT_EQ,
     S_MULT_ASSIGN, S_DIV_ASSIGN, S_MOD_ASSIGN, S_ADD_ASSIGN, S_SUB_ASSIGN,
-    S_ARROW, S_SCOPE
+    S_ARROW, S_SCOPE,
+
+    // non-terminals
+    N_S, N_E, N_T, N_F
 };
 
-static QHash<QString, Keyword> initKeywordValues() {
-        QHash<QString, Keyword> hash;
-        hash.insert("if", K_IF);
-        hash.insert("else", K_ELSE);
-        hash.insert("for", K_FOR);
-        hash.insert("while", K_WHILE);
-        hash.insert("do", K_DO);
-        hash.insert("return", K_RETURN);
-        hash.insert("char", K_CHAR);
-        hash.insert("int", K_INT);
-        hash.insert("double", K_DOUBLE);
-        hash.insert("bool", K_BOOL);
-        hash.insert("void", K_VOID);
-        hash.insert("const", K_CONST);
-        hash.insert("true", K_TRUE);
-        hash.insert("false", K_FALSE);
-        hash.insert("class", K_CLASS);
-        hash.insert("public", K_PUBLIC);
-        hash.insert("private", K_PRIVATE);
-        return hash;
-}
-static const QHash<QString, Keyword> KeywordCodes = initKeywordValues();
+enum ConstType {CONST_BOOL, CONST_INT, CONST_DOUBLE, CONST_CHAR, CONST_STRING};
 
-static QHash<QString, Separator> initSeparatorValues() {
-    QHash<QString, Separator> hash;
+
+static QHash<QString, Token> initKeywordCodes() {
+    QHash<QString, Token> hash;
+
+    hash.insert("if", K_IF);
+    hash.insert("else", K_ELSE);
+    hash.insert("for", K_FOR);
+    hash.insert("while", K_WHILE);
+    hash.insert("do", K_DO);
+    hash.insert("return", K_RETURN);
+    hash.insert("char", K_CHAR);
+    hash.insert("int", K_INT);
+    hash.insert("double", K_DOUBLE);
+    hash.insert("bool", K_BOOL);
+    hash.insert("void", K_VOID);
+    hash.insert("const", K_CONST);
+    hash.insert("true", K_TRUE);
+    hash.insert("false", K_FALSE);
+    hash.insert("class", K_CLASS);
+    hash.insert("public", K_PUBLIC);
+    hash.insert("private", K_PRIVATE);
+
+    return hash;
+}
+static const QHash<QString, Token> KeywordCodes = initKeywordCodes();
+
+static QHash<QString, Token> initSeparatorCodes() {
+    QHash<QString, Token> hash;
+
     hash.insert(" ", S_SPACE);
     hash.insert("+", S_PLUS);
     hash.insert("-", S_MINUS);
@@ -55,7 +67,6 @@ static QHash<QString, Separator> initSeparatorValues() {
     hash.insert("!", S_NOT);
     hash.insert("%", S_MOD);
     hash.insert("&", S_AMP);
-//    hash.insert("|", S_VBAR);
     hash.insert("<", S_LESS);
     hash.insert(">", S_GREATER);
     hash.insert("=", S_ASSIGN);
@@ -67,8 +78,6 @@ static QHash<QString, Separator> initSeparatorValues() {
     hash.insert(",", S_COMMA);
     hash.insert(".", S_PERIOD);
     hash.insert(":", S_COLON);
-//    hash.insert("'", S_APOSTROPHE); // char
-//    hash.insert("\"", S_DOUBLE_QUOTE); // string
     hash.insert("~", S_TILDE);
 
     hash.insert("--", S_DECREMENT);
@@ -89,26 +98,51 @@ static QHash<QString, Separator> initSeparatorValues() {
 
     return hash;
 }
-static const QHash<QString, Separator> SeparatorCodes = initSeparatorValues();
+static const QHash<QString, Token> SeparatorCodes = initSeparatorCodes();
 
-struct TableItem_id {
+static QList<Token> EmptyTokenList() {
+    QList<Token> list;
+    return list;
+}
+static QHash< Token, QList<Token> > initGrammarRules() {
+    QHash< Token, QList<Token> > hash;
+
+    // grammar rules here
+    hash.insert(N_S, EmptyTokenList() << N_E);
+
+    return hash;
+}
+static const QHash< Token, QList<Token> > Grammar = initGrammarRules();
+
+
+// items of token tables
+struct TokenId {
     QString identifier;
 };
-struct TableItem_const {
-    ConstType type;
+struct TokenConst {
+    ConstType const_type;
     QVariant value;
 };
-struct TableItem_keyword {
-    Keyword type;
+struct TokenKeyword {
+    Token type;
 };
-struct TableItem_separator {
-    Separator type;
+struct TokenSeparator {
+    Token type;
 };
+/*struct TokenNonTerminal {
+    Token type;
+};*/
 
+// lexical convolution item
 struct TokenPointer {
-    TokenType type;
+    Token type;
     int index;
     int start, length;
 };
+
+bool isTokenTerminal(Token token);
+bool isTokenKeyword(Token token);
+bool isTokenSeparator(Token token);
+bool isTokenNonTerminal(Token token);
 
 #endif // BASICS_H

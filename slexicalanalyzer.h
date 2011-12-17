@@ -14,32 +14,32 @@ public:
     SLexicalAnalyzer(QObject * parent = 0);
     ~SLexicalAnalyzer();
 
-    QList<TableItem_id> Table_ids;
-    QList<TableItem_const> Table_consts;
-    QList<TableItem_keyword> Table_keywords;
-    QList<TableItem_separator> Table_separators;
-
     bool processSource(const QString);
 
     QList<TokenPointer> getAllTokens() const { return tokens_; }
-    QList<TableItem_id> getTableIds() const { return Table_ids; }
-    QList<TableItem_const> getTableConsts() const { return Table_consts; }
-    QList<TableItem_keyword> getTableKeywords() const { return Table_keywords; }
-    QList<TableItem_separator> getTableSeparators() const { return Table_separators; }
+    QList<TokenId> getTableIds() const { return table_ids_; }
+    QList<TokenConst> getTableConsts() const { return table_consts_; }
+    QList<TokenKeyword> getTableKeywords() const { return table_keywords_; }
+    QList<TokenSeparator> getTableSeparators() const { return table_separators_; }
 
 private:
     QString source_;
     QList<TokenPointer> tokens_;
 
-    void addIdToken(int start, int length, QString identifier);
-    void addConstToken(int start, int length, ConstType type, QVariant value);
-    void addKeywordToken(int start, int length, Keyword type);
-    void addSeparatorToken(int start, int length, Separator type);
+    QList<TokenId> table_ids_;
+    QList<TokenConst> table_consts_;
+    QList<TokenKeyword> table_keywords_;
+    QList<TokenSeparator> table_separators_;
 
-    int indexOfIdToken(TableItem_id item);
-    int indexOfConstToken(TableItem_const item);
-    int indexOfKeywordToken(TableItem_keyword item);
-    int indexOfSeparatorToken(TableItem_separator item);
+    // add id, const, keyword/separator
+    void addToken(int start, int length, Token type, QString identifier);
+    void addToken(int start, int length, Token type, ConstType const_type, QVariant value);
+    void addToken(int start, int length, Token type, Token token);
+
+    int indexOfTokenItem(TokenId item);
+    int indexOfTokenItem(TokenConst item);
+    int indexOfTokenItem(TokenKeyword item);
+    int indexOfTokenItem(TokenSeparator item);
 
     void removeToken(int index);
 
