@@ -4,7 +4,8 @@
 SSyntacticAnalyzer::SSyntacticAnalyzer(QObject * parent)
 {
     this->setParent(parent);
-    qDebug() << "ok";
+
+    ultimate_set_c_ = generateSetOfSituations();
 }
 
 SSyntacticAnalyzer::~SSyntacticAnalyzer()

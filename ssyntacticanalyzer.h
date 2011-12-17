@@ -15,7 +15,7 @@ public:
     ~SSyntacticAnalyzer();
 
 private:
-//    QString source_;
+    QSet<QSet<Situation> > ultimate_set_c_;
 
     QSet<Token> first(const Token token);
     QSet<Token> first(const QList<Token> tokens);
