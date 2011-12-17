@@ -28,18 +28,18 @@ public:
     void run(void);
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *ui_;
 
-    CodeEditor *editor;
-    QTabWidget *tab_main;
-    QTabWidget *tab_lex_main;
-    QTableWidget *table_lex_0;  // convolution
-    QTableWidget *table_lex_1;  // id's
-    QTableWidget *table_lex_2;  // const's
-    QTableWidget *table_lex_3;  // keywords
-    QTableWidget *table_lex_4;  // separators
+    CodeEditor *editor_;
+    QTabWidget *tab_main_;
+    QTabWidget *tab_lex_main_;
+    QTableWidget *table_lex_0_;  // convolution
+    QTableWidget *table_lex_1_;  // id's
+    QTableWidget *table_lex_2_;  // const's
+    QTableWidget *table_lex_3_;  // keywords
+    QTableWidget *table_lex_4_;  // separators
 
-    QString base_window_title;
+    QString base_window_title_;
 
     void clearLexTables();
     void setLexTableHeaders();

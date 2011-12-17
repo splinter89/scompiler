@@ -50,8 +50,8 @@ bool SLexicalAnalyzer::processSource(const QString code)
             }
             if (i >= code.length() - 2) {
                 // error (comment not closed by the end of code)
-                tokens.clear();
-                emit lex_error(code.length(), error_msg(E_COMMENT_NOT_CLOSED));
+                tokens_.clear();
+                emit lexical_error(code.length(), error_msg(E_COMMENT_NOT_CLOSED));
                 return false;
             } else {
                 i += 2; // */
@@ -122,12 +122,12 @@ bool SLexicalAnalyzer::processSource(const QString code)
 
             // check value for min/max range
             if (!ok && (const_type == CONST_DOUBLE)) {
-                tokens.clear();
-                emit lex_error(i + 1, error_msg(E_INVALID_DOUBLE));
+                tokens_.clear();
+                emit lexical_error(i + 1, error_msg(E_INVALID_DOUBLE));
                 return false;
             } else if (!ok && (const_type == CONST_INT)) {
-                tokens.clear();
-                emit lex_error(i + 1, error_msg(E_INVALID_INT));
+                tokens_.clear();
+                emit lexical_error(i + 1, error_msg(E_INVALID_INT));
                 return false;
             }
         } else if ((i <= code.length() - 2) && (SeparatorCodes.contains(code.mid(i, 2)))) {
@@ -149,8 +149,8 @@ bool SLexicalAnalyzer::processSource(const QString code)
                 i++;
             }
             if (i == code.length() - 1) {
-                tokens.clear();
-                emit lex_error(i + 1, error_msg(E_CHAR_NOT_CLOSED));
+                tokens_.clear();
+                emit lexical_error(i + 1, error_msg(E_CHAR_NOT_CLOSED));
                 return false;
             }
 
@@ -168,8 +168,8 @@ bool SLexicalAnalyzer::processSource(const QString code)
             } else if (identifier.length() == 1) {
                 const_value = identifier.at(0);
             } else {
-                tokens.clear();
-                emit lex_error(i + 2, error_msg(E_INVALID_CHAR));
+                tokens_.clear();
+                emit lexical_error(i + 2, error_msg(E_INVALID_CHAR));
                 return false;
             }
             i++;    // closing apostrophe
@@ -187,8 +187,8 @@ bool SLexicalAnalyzer::processSource(const QString code)
                 i++;
             }
             if (i == code.length() - 1) {
-                tokens.clear();
-                emit lex_error(i + 1, error_msg(E_STRING_NOT_CLOSED));
+                tokens_.clear();
+                emit lexical_error(i + 1, error_msg(E_STRING_NOT_CLOSED));
                 return false;
             }
 
@@ -223,21 +223,21 @@ bool SLexicalAnalyzer::processSource(const QString code)
             break;
 
         case T_UNKNOWN:
-            tokens.clear();
-            emit lex_error(i + 1, error_msg(E_UNKNOWN_TOKEN_ERROR));
+            tokens_.clear();
+            emit lexical_error(i + 1, error_msg(E_UNKNOWN_TOKEN_ERROR));
             return false;
             break;
         }
     }
 
     // trim spaces
-    while ((tokens.first().type == T_SEPARATOR)
-           && Table_separators.at(tokens.first().index).type == S_SPACE) {
+    while ((tokens_.first().type == T_SEPARATOR)
+           && Table_separators.at(tokens_.first().index).type == S_SPACE) {
         removeToken(0);
     }
-    while ((tokens.last().type == T_SEPARATOR)
-           && Table_separators.at(tokens.last().index).type == S_SPACE) {
-        removeToken(tokens.length() - 1);
+    while ((tokens_.last().type == T_SEPARATOR)
+           && Table_separators.at(tokens_.last().index).type == S_SPACE) {
+        removeToken(tokens_.length() - 1);
     }
 
     return true;
@@ -254,32 +254,32 @@ void SLexicalAnalyzer::addIdToken(int start, int length, QString identifier)
     }
 
     TokenPointer new_token = {T_ID, index, start, length};
-    tokens << new_token;
+    tokens_ << new_token;
 }
 
 void SLexicalAnalyzer::addConstToken(int start, int length, ConstType type, QVariant value)
 {
     if (((type == CONST_INT) || (type == CONST_DOUBLE))
-        && (tokens.length() >= 1)
-        && (tokens.last().type == T_SEPARATOR)
-        && ((Table_separators.at(tokens.last().index).type == S_PLUS)
-            || (Table_separators.at(tokens.last().index).type == S_MINUS))
-        && ((tokens.length() == 1)
-            || ((tokens.length() >= 2)
-                && (tokens.at(tokens.length() - 2).type == T_SEPARATOR)
-                && (Table_separators.at(tokens.at(tokens.length() - 2).index).type != S_ROUND_CLOSE)
+        && (tokens_.length() >= 1)
+        && (tokens_.last().type == T_SEPARATOR)
+        && ((Table_separators.at(tokens_.last().index).type == S_PLUS)
+            || (Table_separators.at(tokens_.last().index).type == S_MINUS))
+        && ((tokens_.length() == 1)
+            || ((tokens_.length() >= 2)
+                && (tokens_.at(tokens_.length() - 2).type == T_SEPARATOR)
+                && (Table_separators.at(tokens_.at(tokens_.length() - 2).index).type != S_ROUND_CLOSE)
             )
         )
     ) {
         // (some separator (excluding ")") -> unary plus/minus -> number) => (separator -> signed number)
-        if (Table_separators.at(tokens.last().index).type == S_MINUS) {
+        if (Table_separators.at(tokens_.last().index).type == S_MINUS) {
             if (type == CONST_INT) {
                 value = -value.toInt();
             } else {
                 value = -value.toDouble();
             }
         }
-        removeToken(tokens.length() - 1);   // remove that unary +/-
+        removeToken(tokens_.length() - 1);   // remove that unary +/-
     }
 
     TableItem_const new_item = {type, value};
@@ -290,7 +290,7 @@ void SLexicalAnalyzer::addConstToken(int start, int length, ConstType type, QVar
     }
 
     TokenPointer new_token = {T_CONST, index, start, length};
-    tokens << new_token;
+    tokens_ << new_token;
 }
 
 void SLexicalAnalyzer::addKeywordToken(int start, int length, Keyword type)
@@ -303,25 +303,25 @@ void SLexicalAnalyzer::addKeywordToken(int start, int length, Keyword type)
     }
 
     TokenPointer new_token = {T_KEYWORD, index, start, length};
-    tokens << new_token;
+    tokens_ << new_token;
 }
 
 void SLexicalAnalyzer::addSeparatorToken(int start, int length, Separator type)
 {
     // don't add space after separator
     if (type == S_SPACE
-        && !tokens.isEmpty()
-        && (tokens.last().type == T_SEPARATOR)
+        && !tokens_.isEmpty()
+        && (tokens_.last().type == T_SEPARATOR)
     ) {
         return;
     }
 
     // remove space before separator
-    if (!tokens.isEmpty()
-        && (tokens.last().type == T_SEPARATOR)
-        && (Table_separators.at(tokens.last().index).type == S_SPACE)
+    if (!tokens_.isEmpty()
+        && (tokens_.last().type == T_SEPARATOR)
+        && (Table_separators.at(tokens_.last().index).type == S_SPACE)
     ) {
-        removeToken(tokens.length() - 1);
+        removeToken(tokens_.length() - 1);
     }
 
     TableItem_separator new_item = {type};
@@ -332,7 +332,7 @@ void SLexicalAnalyzer::addSeparatorToken(int start, int length, Separator type)
     }
 
     TokenPointer new_token = {T_SEPARATOR, index, start, length};
-    tokens << new_token;
+    tokens_ << new_token;
 }
 
 
@@ -388,11 +388,11 @@ int SLexicalAnalyzer::indexOfSeparatorToken(TableItem_separator item)
 
 void SLexicalAnalyzer::removeToken(int list_index)
 {
-    TokenPointer token = tokens.at(list_index);
+    TokenPointer token = tokens_.at(list_index);
 
     bool got_other_links = false;
-    for (int i = 0; i < tokens.length(); i++) {
-        if ((tokens.at(i).type == token.type) && (tokens.at(i).index == token.index)) {
+    for (int i = 0; i < tokens_.length(); i++) {
+        if ((tokens_.at(i).type == token.type) && (tokens_.at(i).index == token.index)) {
             // we can't remove token from table
             got_other_links = true;
             break;
@@ -420,5 +420,5 @@ void SLexicalAnalyzer::removeToken(int list_index)
         }
     }
 
-    tokens.removeAt(list_index);
+    tokens_.removeAt(list_index);
 }

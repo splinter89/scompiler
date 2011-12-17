@@ -13,13 +13,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
     mainwindow.cpp \
     codeeditor.cpp \
-    slexicalanalyzer.cpp
+    slexicalanalyzer.cpp \
+    ssyntacticanalyzer.cpp
 
 HEADERS += mainwindow.h \
     codeeditor.h \
     errors.h \
     basics.h \
-    slexicalanalyzer.h
+    slexicalanalyzer.h \
+    ssyntacticanalyzer.h
 
 FORMS += mainwindow.ui
 

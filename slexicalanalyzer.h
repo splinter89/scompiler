@@ -1,5 +1,5 @@
-#ifndef S_LEXICAL_ANALYZER_H
-#define S_LEXICAL_ANALYZER_H
+#ifndef SLEXICALANALYZER_H
+#define SLEXICALANALYZER_H
 
 #include <QtCore>
 #include <QObject>
@@ -21,15 +21,15 @@ public:
 
     bool processSource(const QString);
 
-    QList<TokenPointer> getAllTokens() const { return tokens; }
+    QList<TokenPointer> getAllTokens() const { return tokens_; }
     QList<TableItem_id> getTableIds() const { return Table_ids; }
     QList<TableItem_const> getTableConsts() const { return Table_consts; }
     QList<TableItem_keyword> getTableKeywords() const { return Table_keywords; }
     QList<TableItem_separator> getTableSeparators() const { return Table_separators; }
 
 private:
-    QString source;
-    QList<TokenPointer> tokens;
+    QString source_;
+    QList<TokenPointer> tokens_;
 
     void addIdToken(int start, int length, QString identifier);
     void addConstToken(int start, int length, ConstType type, QVariant value);
@@ -44,7 +44,7 @@ private:
     void removeToken(int index);
 
 signals:
-    void lex_error(int pos, QString msg);
+    void lexical_error(int pos, QString msg);
 };
 
-#endif // S_LEXICAL_ANALYZER_H
+#endif // SLEXICAL_ANALYZERH
