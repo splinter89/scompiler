@@ -430,8 +430,7 @@ void MainWindow::run()
     // syntax analysis ----------------------------------------------------------------
     // --------------------------------------------------------------------------------
     SSyntacticAnalyzer *syntactic_analyzer = new SSyntacticAnalyzer();
-    Q_UNUSED(syntactic_analyzer)
-//    qDebug() << syntactic_analyzer->process(tokens);
+    qDebug() << syntactic_analyzer->process(tokens);
 }
 
 
