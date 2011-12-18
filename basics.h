@@ -5,7 +5,7 @@
 
 enum Token {
     UNKNOWN,        // MUST BE FIRST(!)
-    TERMINAL, NON_TERMINAL,
+    /*TERMINAL, NON_TERMINAL,*/
     LAMBDA,         // empty token
     DOT_TOKEN,      // separator in LR-situation
 
@@ -30,8 +30,80 @@ enum Token {
     N_S, N_E, N_T, N_F,
     EOF_TOKEN      // end of input string (MUST BE LAST(!))
 };
-
 enum ConstType {CONST_BOOL, CONST_INT, CONST_DOUBLE, CONST_CHAR, CONST_STRING};
+enum ActionType {A_SHIFT, A_REDUCE, A_ACCEPT};
+
+
+// items of token tables
+struct TokenId {
+    QString identifier;
+};
+struct TokenConst {
+    ConstType const_type;
+    QVariant value;
+};
+struct TokenKeyword {
+    Token type;
+};
+struct TokenSeparator {
+    Token type;
+};
+/*struct TokenNonTerminal {
+    Token type;
+};*/
+
+// lexical convolution item
+struct TokenPointer {
+    Token type;
+    int index;
+    int start, length;
+};
+
+// [A -> B]
+struct GrammarRule {
+    Token left_token;
+    QList<Token> right_side;
+    GrammarRule() {}
+    GrammarRule(Token left, QList<Token> right) { left_token = left; right_side = right; }
+};
+// [A -> .B, a]
+struct Situation {
+    Token left_token;
+    QList<Token> right_side;
+    Token look_ahead_token;
+};
+
+// crazy stuff...
+inline bool operator==(const Situation &e1, const Situation &e2) {
+    return ((e1.left_token == e2.left_token)
+        && (e1.right_side == e2.right_side)
+        && (e1.look_ahead_token == e2.look_ahead_token));
+}
+inline uint qHash(const QList<Token> &key)
+{
+    uint result = 0;
+    foreach (const Token &token, key) {
+        result ^= qHash(token);
+    }
+    return result;
+}
+inline uint qHash(const Situation &key)
+{
+    return key.left_token ^ qHash(key.right_side) ^ key.look_ahead_token;
+}
+inline uint qHash(const QSet<Situation> &key)
+{
+    uint result = 0;
+    foreach (const Situation &situation, key) {
+        result ^= qHash(situation);
+    }
+    return result;
+}
+
+struct Action {
+    ActionType type;
+    int index;
+};
 
 
 static QHash<QString, Token> initKeywordCodes() {
@@ -107,86 +179,33 @@ static QList<Token> EmptyTokenList() {
     QList<Token> list;
     return list;
 }
-static QMultiHash<Token, QList<Token> > initGrammarRules() {
-    QMultiHash<Token, QList<Token> > hash;
+static QList<GrammarRule> initGrammarRules() {
+    QList<GrammarRule> list;
 
     // grammar rules here
-    hash.insert(N_S, EmptyTokenList() << N_E);
-    hash.insert(N_E, EmptyTokenList() << N_E << S_PLUS << N_T);
-    hash.insert(N_E, EmptyTokenList() << N_T);
-    hash.insert(N_T, EmptyTokenList() << N_T << S_MULT << N_F);
-    hash.insert(N_T, EmptyTokenList() << N_F);
-    hash.insert(N_F, EmptyTokenList() << T_ID);
+    list << GrammarRule(N_S, EmptyTokenList() << N_E)
+         << GrammarRule(N_E, EmptyTokenList() << N_E << S_PLUS << N_T)
+         << GrammarRule(N_E, EmptyTokenList() << N_T)
+         << GrammarRule(N_T, EmptyTokenList() << N_T << S_MULT << N_F)
+         << GrammarRule(N_T, EmptyTokenList() << N_F)
+         << GrammarRule(N_F, EmptyTokenList() << T_ID);
 
-    return hash;
+    return list;
 }
-static const QMultiHash<Token, QList<Token> > Grammar = initGrammarRules();
+static const QList<GrammarRule> Grammar = initGrammarRules();
 
 
-// items of token tables
-struct TokenId {
-    QString identifier;
-};
-struct TokenConst {
-    ConstType const_type;
-    QVariant value;
-};
-struct TokenKeyword {
-    Token type;
-};
-struct TokenSeparator {
-    Token type;
-};
-/*struct TokenNonTerminal {
-    Token type;
-};*/
-
-// lexical convolution item
-struct TokenPointer {
-    Token type;
-    int index;
-    int start, length;
-};
-
-// [A -> .B, a]
-struct Situation {
-    Token left_token;
-    QList<Token> right_side;
-    Token look_ahead_token;
-};
-
-// crazy stuff...
-inline bool operator==(const Situation &e1, const Situation &e2) {
-    return ((e1.left_token == e2.left_token)
-        && (e1.right_side == e2.right_side)
-        && (e1.look_ahead_token == e2.look_ahead_token));
-}
-inline uint qHash(const QList<Token> &key)
-{
-    uint result = 0;
-    foreach (const Token &token, key) {
-        result ^= qHash(token);
-    }
-    return result;
-}
-inline uint qHash(const Situation &key)
-{
-    return key.left_token ^ qHash(key.right_side) ^ key.look_ahead_token;
-}
-inline uint qHash(const QSet<Situation> &key)
-{
-    uint result = 0;
-    foreach (const Situation &situation, key) {
-        result ^= qHash(situation);
-    }
-    return result;
-}
+QList<GrammarRule> getGrammarRulesByLeftToken(Token token);
+int indexOfGrammarRule(Token left, QList<Token> right);
+GrammarRule getGrammarRule(Token left, QList<Token> right);
 
 bool isTokenTerminal(Token token);
 bool isTokenKeyword(Token token);
 bool isTokenSeparator(Token token);
 bool isTokenNonTerminal(Token token);
 
+QSet<Token> getAllTerminalTokens();
+QSet<Token> getAllNonTerminalTokens();
 QSet<Token> getAllGrammarTokens();
 
 #endif // BASICS_H

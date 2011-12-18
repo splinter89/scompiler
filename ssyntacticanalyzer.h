@@ -15,14 +15,22 @@ public:
     ~SSyntacticAnalyzer();
 
 private:
-    QSet<QSet<Situation> > ultimate_set_c_;
+    QList<QSet<Situation> > ultimate_situations_set_;
+    QList<QHash<Token, Action> > action_table_;
+    QList<QHash<Token, int> > goto_table_;
+
+    QList<int> states_stack_;
+    QList<Token> tokens_stack_;
+
+    QList<int> process(QList<TokenPointer> tokens);
 
     QSet<Token> first(const Token token);
     QSet<Token> first(const QList<Token> tokens);
 
     QSet<Situation> closure(QSet<Situation> i);
     QSet<Situation> makeStep(const QSet<Situation> i, const Token x);
-    QSet<QSet<Situation> > generateSetOfSituations();
+    void generateSetOfSituations();
+    void generateActionGotoTables();
 
 signals:
     void syntax_error(int pos, QString msg);

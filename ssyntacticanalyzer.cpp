@@ -4,8 +4,8 @@
 SSyntacticAnalyzer::SSyntacticAnalyzer(QObject * parent)
 {
     this->setParent(parent);
-
-    ultimate_set_c_ = generateSetOfSituations();
+    generateSetOfSituations();
+    generateActionGotoTables();
 }
 
 SSyntacticAnalyzer::~SSyntacticAnalyzer()
@@ -21,7 +21,7 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token) {
         result << token;
     } else if (isTokenNonTerminal(token)) {
         // step 2
-        if (Grammar.values(token).contains(EmptyTokenList() << LAMBDA)) {
+        if (indexOfGrammarRule(token, EmptyTokenList() << LAMBDA) > -1) {
             result << LAMBDA;
         }
 
@@ -29,10 +29,10 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token) {
         int old_count = result.count();
         do {
             // для каждого правила X -> Y0Y1...Yk-1
-            foreach (const QList<Token> &rule, Grammar.values(token)) {
+            foreach (const GrammarRule &rule, getGrammarRulesByLeftToken(token)) {
                 bool all_y_got_lambda = true;
-                for (int i = 0; i < rule.length(); i++) {
-                    QSet<Token> first_y = first(rule.at(i));
+                for (int i = 0; i < rule.right_side.length(); i++) {
+                    QSet<Token> first_y = first(rule.right_side.at(i));
                     int old_first_y_count = first_y.count();
                     first_y.remove(LAMBDA);
 
@@ -90,10 +90,10 @@ QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i) {
             int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
             if ((dot_pos > -1) && (dot_pos < situation.right_side.length() - 1)) {
                 Token b = situation.right_side.at(dot_pos + 1);
-                QList<QList<Token> > rules = Grammar.values(b);
+                QList<GrammarRule> rules = getGrammarRulesByLeftToken(b);
                 if (!rules.isEmpty()) {
                     // для каждого правила вывода B -> gamma из G
-                    foreach (const QList<Token> &rule, rules) {
+                    foreach (const GrammarRule &rule, rules) {
                         QList<Token> test_right_side;
                         if (dot_pos < situation.right_side.length() - 2) {
                             test_right_side = situation.right_side.mid(dot_pos + 2);    // skip .B
@@ -103,7 +103,7 @@ QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i) {
                         // для каждого терминала c из FIRST(beta a), такого, что [B ->.gamma, c] нет в I
                         foreach (const Token &c, first_test) {
                             QList<Token> new_right_rule = EmptyTokenList() << DOT_TOKEN;
-                            new_right_rule += rule;     // .gamma
+                            new_right_rule += rule.right_side;     // .gamma
                             Situation new_situation = {b, new_right_rule, c};
                             // добавляем [B ->.gamma, c] к I;
                             i << new_situation;
@@ -123,7 +123,7 @@ QSet<Situation> SSyntacticAnalyzer::makeStep(const QSet<Situation> i, const Toke
         int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
         if ((dot_pos > -1)
             && (dot_pos < situation.right_side.length() - 1)
-            && (situation.right_side.at(situation.right_side.indexOf(DOT_TOKEN) + 1) == x)
+            && (situation.right_side.at(dot_pos + 1) == x)
         ) {
             situation.right_side.swap(dot_pos, dot_pos + 1);
             j << situation;
@@ -132,14 +132,17 @@ QSet<Situation> SSyntacticAnalyzer::makeStep(const QSet<Situation> i, const Toke
     return closure(j);
 }
 
-QSet<QSet<Situation> > SSyntacticAnalyzer::generateSetOfSituations() {
+void SSyntacticAnalyzer::generateSetOfSituations() {
+    if (Grammar.isEmpty()) return;
+
+    // initial situation (in I0)
     Situation s = {
         N_S,
         EmptyTokenList() << DOT_TOKEN << N_E,
         EOF_TOKEN
     };
     QSet<Situation> i;
-    QSet<QSet<Situation> > c;
+    QList<QSet<Situation> > c;
     QSet<Token> all_tokens = getAllGrammarTokens();
 
     i << s;
@@ -157,5 +160,145 @@ QSet<QSet<Situation> > SSyntacticAnalyzer::generateSetOfSituations() {
             }
         }
     } while (c.count() != old_count);
-    return c;
+    ultimate_situations_set_ = c;
+}
+
+void SSyntacticAnalyzer::generateActionGotoTables() {
+    if (ultimate_situations_set_.isEmpty()) return;
+
+    QSet<Token> terminals = getAllTerminalTokens();
+    QSet<Token> non_terminals = getAllNonTerminalTokens();
+
+    foreach (const QSet<Situation> &i, ultimate_situations_set_) {
+        QHash<Token, Action> action_row;
+        QHash<Token, int> goto_row;
+
+        foreach (const Situation &situation, i) {
+            // action
+            foreach (const Token &terminal, terminals) {
+                int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
+                // step 1
+                if ((dot_pos > -1)
+                    && (dot_pos < situation.right_side.length() - 1)
+                    && (situation.right_side.at(dot_pos + 1) == terminal)
+                ) {
+                    QSet<Situation> test_i = makeStep(i, terminal);
+                    int j = ultimate_situations_set_.indexOf(test_i);
+                    if (j > -1) {
+                        Action new_action = {A_SHIFT, j};
+                        if (action_row.contains(terminal)) {
+                            // error - not LR(1)
+                        } else {
+                            action_row.insert(terminal, new_action);
+                        }
+                    }
+                }
+                // step 2
+                if ((dot_pos == situation.right_side.length() - 1)
+                    && (situation.left_token != N_S)
+                    && (situation.look_ahead_token == terminal)
+                ) {
+                    int j = indexOfGrammarRule(
+                                situation.left_token,
+                                situation.right_side.mid(0, situation.right_side.length() - 1)
+                            );
+                    if (j > -1) {
+                        Action new_action = {A_REDUCE, j};
+                        if (action_row.contains(terminal)) {
+                            // error - not LR(1)
+                        } else {
+                            action_row.insert(terminal, new_action);
+                        }
+                    } else {
+                        // error - grammar rule not found
+                    }
+                }
+            }
+            // step 3
+            if ((situation.left_token == N_S)
+                && (situation.right_side == (EmptyTokenList() << N_E << DOT_TOKEN))
+                && (situation.look_ahead_token == EOF_TOKEN)
+            ) {
+                Action new_action = {A_ACCEPT, 0};
+                if (action_row.contains(EOF_TOKEN)) {
+                    // error
+                } else {
+                    action_row.insert(EOF_TOKEN, new_action);
+                }
+            }
+
+            // goto
+            foreach (const Token &non_terminal, non_terminals) {
+                QSet<Situation> test_i = makeStep(i, non_terminal);
+                int j = ultimate_situations_set_.indexOf(test_i);
+                if (j > -1) {
+                    int new_goto = j;
+                    if (goto_row.contains(non_terminal)) {
+                        // error
+                    } else {
+                        goto_row.insert(non_terminal, new_goto);
+                    }
+                }
+            }
+        }
+        action_table_ << action_row;
+        goto_table_ << goto_row;
+    }
+}
+
+QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens) {
+    QList<int> result;
+    if (Grammar.isEmpty() || action_table_.isEmpty() || goto_table_.isEmpty()) return result;
+
+    int i = 0;
+    bool tokens_accepted = false;
+    while (!tokens_accepted && (i < tokens.length())) {
+        int state = states_stack_.last();
+        Token token = tokens.at(i).type;
+
+        if (action_table_.at(state).contains(token)) {
+            Action action = action_table_.at(state).value(token);
+            GrammarRule rule;
+
+            switch (action.type) {
+            case A_SHIFT:
+                states_stack_ << action.index;
+                tokens_stack_ << token;
+                i++;
+                break;
+
+            case A_REDUCE:
+                rule = Grammar.at(action.index);
+                if ((states_stack_.length() > rule.right_side.length())
+                     && (tokens_stack_.length() >= rule.right_side.length())
+                ) {
+                    for (int num = 0; num < rule.right_side.length(); num++) {
+                        states_stack_.removeLast();
+                        tokens_stack_.removeLast();
+                    }
+                    if (goto_table_.at(states_stack_.last()).contains(rule.left_token)) {
+                        int goto_index = goto_table_.at(states_stack_.last()).value(rule.left_token);
+                        states_stack_ << goto_index;
+                        tokens_stack_ << rule.left_token;
+                    } else {
+                        // error - goto not defined
+                    }
+                } else {
+                    // error - stacks have too few items
+                }
+                break;
+
+            case A_ACCEPT:
+                tokens_accepted = true;
+                break;
+            }
+        } else {
+            // error - action not defined
+        }
+    }
+    if (i >= tokens.length()) {
+        // error - tokens not accepted
+    }
+
+    return result;
 }

@@ -14,7 +14,7 @@ public:
     SLexicalAnalyzer(QObject * parent = 0);
     ~SLexicalAnalyzer();
 
-    bool processSource(const QString);
+    bool process(const QString);
 
     QList<TokenPointer> getAllTokens() const { return tokens_; }
     QList<TokenId> getTableIds() const { return table_ids_; }

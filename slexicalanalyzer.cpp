@@ -11,7 +11,7 @@ SLexicalAnalyzer::~SLexicalAnalyzer()
     // bye
 }
 
-bool SLexicalAnalyzer::processSource(const QString code)
+bool SLexicalAnalyzer::process(const QString code)
 {
 //    QList<QString> space_chars;
 //    space_chars << " " << "\n" << "\t" << "\r";

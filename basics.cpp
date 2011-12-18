@@ -1,9 +1,41 @@
 #include "basics.h"
 #include <QDebug>
 
+QList<GrammarRule> getGrammarRulesByLeftToken(Token token) {
+    QList<GrammarRule> result;
+    for (int i = 0; i < Grammar.length(); i++) {
+        if (Grammar.at(i).left_token == token) {
+            result << Grammar.at(i);
+        }
+    }
+    return result;
+}
+
+int indexOfGrammarRule(Token left, QList<Token> right) {
+    int result = -1;
+    QList<GrammarRule> rules = getGrammarRulesByLeftToken(left);
+    for (int i = 0; i < rules.length(); i++) {
+        if (rules.at(i).right_side == right) {
+            result = i;
+            break;
+        }
+    }
+    return result;
+}
+
+GrammarRule getGrammarRule(Token left, QList<Token> right) {
+    GrammarRule result;
+    int index = indexOfGrammarRule(left, right);
+    if (index > -1) {
+        result = Grammar.at(index);
+    }
+    return result;
+}
+
+
 bool isTokenTerminal(Token token) {
     QSet<Token> list;
-    list << TERMINAL
+    list /*<< TERMINAL*/
          << T_ID << T_CONST << T_KEYWORD << T_SEPARATOR;
     return (list.contains(token) || isTokenKeyword(token) || isTokenSeparator(token));
 }
@@ -32,22 +64,35 @@ bool isTokenSeparator(Token token) {
 
 bool isTokenNonTerminal(Token token) {
     QSet<Token> list;
-    list << NON_TERMINAL
+    list /*<< NON_TERMINAL*/
          << N_S << N_E << N_T << N_F;
     return list.contains(token);
 }
 
-QSet<Token> getAllGrammarTokens() {
+QSet<Token> getAllTerminalTokens() {
     QSet<Token> result;
     for (int token = UNKNOWN; token != EOF_TOKEN; token++) {
         if ((token == T_ID) || (token == T_CONST) || (token == EOF_TOKEN)
             || isTokenKeyword((Token)token)
             || isTokenSeparator((Token)token)
-            || isTokenNonTerminal((Token)token)
         ) {
             result << (Token)token;
         }
     }
 
     return result;
+}
+QSet<Token> getAllNonTerminalTokens() {
+    QSet<Token> result;
+    for (int token = UNKNOWN; token != EOF_TOKEN; token++) {
+        if (isTokenNonTerminal((Token)token)) {
+            result << (Token)token;
+        }
+    }
+
+    return result;
+}
+
+QSet<Token> getAllGrammarTokens() {
+    return getAllTerminalTokens() + getAllNonTerminalTokens();
 }

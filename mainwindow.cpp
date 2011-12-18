@@ -235,7 +235,7 @@ void MainWindow::run()
     SLexicalAnalyzer *lexical_analyzer = new SLexicalAnalyzer();
     connect(lexical_analyzer, SIGNAL(lexical_error(int,QString)),
             this, SLOT(displayError(int,QString)));
-    if (lexical_analyzer->processSource(editor_->toPlainText())) {
+    if (lexical_analyzer->process(editor_->toPlainText())) {
         setStatusMsg("ok");
     }
 
