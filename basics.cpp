@@ -1,6 +1,22 @@
 #include "basics.h"
 #include <QDebug>
 
+QDebug operator<<(QDebug d, const QList<Token> tokens) {
+    QString s;
+    foreach (const Token token, tokens) {
+        s += (!s.isEmpty()?", ":"") + QString::number(token);
+    }
+    d << s;
+    return d;
+}
+QDebug operator<<(QDebug d, const QList<GrammarRule> grammar) {
+    qDebug() << "Grammar:";
+    foreach (const GrammarRule &rule, grammar) {
+        qDebug() << rule.left_token << "->" << rule.right_side;
+    }
+    return d;
+}
+
 QList<GrammarRule> getGrammarRulesByLeftToken(Token token) {
     QList<GrammarRule> result;
     for (int i = 0; i < Grammar.length(); i++) {
@@ -28,6 +44,28 @@ GrammarRule getGrammarRule(Token left, QList<Token> right) {
     int index = indexOfGrammarRule(left, right);
     if (index > -1) {
         result = Grammar.at(index);
+    }
+    return result;
+}
+
+int indexOfSituation(Situation situation, QList<Situation> i) {
+    int result = -1;
+    for (int num = 0; num < i.length(); num++) {
+        if (i.at(num) == situation) {
+            result = num;
+            break;
+        }
+    }
+    return result;
+}
+
+int indexOfSetOfSituations(QList<Situation> i, QList<QList<Situation> > c) {
+    int result = -1;
+    for (int num = 0; num < c.length(); num++) {
+        if (c.at(num) == i) {
+            result = num;
+            break;
+        }
     }
     return result;
 }
@@ -65,7 +103,8 @@ bool isTokenSeparator(Token token) {
 bool isTokenNonTerminal(Token token) {
     QSet<Token> list;
     list /*<< NON_TERMINAL*/
-         << N_S << N_E << N_T << N_F;
+//         << N_S << N_E << N_T << N_F;
+         << N_S << N_E << N_E1 << N_T << N_T1 << N_F;
     return list.contains(token);
 }
 

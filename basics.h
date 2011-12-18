@@ -2,6 +2,7 @@
 #define BASICS_H
 
 #include <QtCore>
+#include <QDebug>
 
 enum Token {
     UNKNOWN,        // MUST BE FIRST(!)
@@ -27,7 +28,9 @@ enum Token {
     S_ARROW, S_SCOPE,
 
     // non-terminals
-    N_S, N_E, N_T, N_F,
+//    N_S, N_E, N_T, N_F,
+    N_S,
+    N_E, N_E1, N_T, N_T1, N_F,
     EOF_TOKEN      // end of input string (MUST BE LAST(!))
 };
 enum ConstType {CONST_BOOL, CONST_INT, CONST_DOUBLE, CONST_CHAR, CONST_STRING};
@@ -79,7 +82,7 @@ inline bool operator==(const Situation &e1, const Situation &e2) {
         && (e1.right_side == e2.right_side)
         && (e1.look_ahead_token == e2.look_ahead_token));
 }
-inline uint qHash(const QList<Token> &key)
+/*inline uint qHash(const QList<Token> &key)
 {
     uint result = 0;
     foreach (const Token &token, key) {
@@ -98,7 +101,7 @@ inline uint qHash(const QSet<Situation> &key)
         result ^= qHash(situation);
     }
     return result;
-}
+}*/
 
 struct Action {
     ActionType type;
@@ -183,21 +186,34 @@ static QList<GrammarRule> initGrammarRules() {
     QList<GrammarRule> list;
 
     // grammar rules here
-    list << GrammarRule(N_S, EmptyTokenList() << N_E)
-         << GrammarRule(N_E, EmptyTokenList() << N_E << S_PLUS << N_T)
-         << GrammarRule(N_E, EmptyTokenList() << N_T)
-         << GrammarRule(N_T, EmptyTokenList() << N_T << S_MULT << N_F)
-         << GrammarRule(N_T, EmptyTokenList() << N_F)
-         << GrammarRule(N_F, EmptyTokenList() << T_ID);
+//    list << GrammarRule(N_S, EmptyTokenList() << N_E)
+//         << GrammarRule(N_E, EmptyTokenList() << N_E << S_PLUS << N_T)
+//         << GrammarRule(N_E, EmptyTokenList() << N_T)
+//         << GrammarRule(N_T, EmptyTokenList() << N_T << S_MULT << N_F)
+//         << GrammarRule(N_T, EmptyTokenList() << N_F)
+//         << GrammarRule(N_F, EmptyTokenList() << T_ID);
+    list << GrammarRule(N_E,  EmptyTokenList() << N_T << N_E1)
+         << GrammarRule(N_E1, EmptyTokenList() << S_PLUS << N_T << N_E1)
+         << GrammarRule(N_E1, EmptyTokenList() << LAMBDA)
+         << GrammarRule(N_T,  EmptyTokenList() << N_F << N_T1)
+         << GrammarRule(N_T1, EmptyTokenList() << S_MULT << N_F << N_T1)
+         << GrammarRule(N_T1, EmptyTokenList() << LAMBDA)
+         << GrammarRule(N_F,  EmptyTokenList() << S_ROUND_OPEN << N_E << S_ROUND_CLOSE)
+         << GrammarRule(N_F,  EmptyTokenList() << T_ID);
 
     return list;
 }
 static const QList<GrammarRule> Grammar = initGrammarRules();
 
 
+QDebug operator<<(QDebug d, const QList<Token> tokens);
+QDebug operator<<(QDebug d, const QList<GrammarRule> grammar);
+
 QList<GrammarRule> getGrammarRulesByLeftToken(Token token);
 int indexOfGrammarRule(Token left, QList<Token> right);
 GrammarRule getGrammarRule(Token left, QList<Token> right);
+int indexOfSituation(Situation situation, QList<Situation> i);
+int indexOfSetOfSituations(QList<Situation> i, QList<QList<Situation> > c);
 
 bool isTokenTerminal(Token token);
 bool isTokenKeyword(Token token);

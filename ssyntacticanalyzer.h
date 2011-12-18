@@ -15,7 +15,7 @@ public:
     ~SSyntacticAnalyzer();
 
 private:
-    QList<QSet<Situation> > ultimate_situations_set_;
+    QList<QList<Situation> > ultimate_situations_set_;
     QList<QHash<Token, Action> > action_table_;
     QList<QHash<Token, int> > goto_table_;
 
@@ -27,8 +27,8 @@ private:
     QSet<Token> first(const Token token);
     QSet<Token> first(const QList<Token> tokens);
 
-    QSet<Situation> closure(QSet<Situation> i);
-    QSet<Situation> makeStep(const QSet<Situation> i, const Token x);
+    QList<Situation> closure(QList<Situation> i);
+    QList<Situation> makeStep(const QList<Situation> i, const Token x);
     void generateSetOfSituations();
     void generateActionGotoTables();
 
