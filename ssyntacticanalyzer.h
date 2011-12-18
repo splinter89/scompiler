@@ -14,7 +14,11 @@ public:
     SSyntacticAnalyzer(QObject * parent = 0);
     ~SSyntacticAnalyzer();
 
-    QList<int> process(QList<TokenPointer> tokens);
+    QList<int> process(QList<TokenPointer> tokens,
+                       QList<TokenId> table_ids,
+                       QList<TokenConst> table_consts,
+                       QList<TokenKeyword> table_keywords,
+                       QList<TokenSeparator> table_separators);
 
 private:
     QList<QSet<Situation> > ultimate_situations_set_;

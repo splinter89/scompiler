@@ -7,14 +7,6 @@ SSyntacticAnalyzer::SSyntacticAnalyzer(QObject * parent)
 
     generateSetOfSituations();
     generateActionGotoTables();
-
-//    qDebug() << Grammar;
-//    qDebug() << "===============";
-//    qDebug() << ultimate_situations_set_;
-//    qDebug() << "===============";
-//    qDebug() << action_table_;
-//    qDebug() << "===============";
-//    qDebug() << goto_table_;
 }
 
 SSyntacticAnalyzer::~SSyntacticAnalyzer()
@@ -261,15 +253,32 @@ void SSyntacticAnalyzer::generateActionGotoTables() {
     }
 }
 
-QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens) {
+QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
+                                       QList<TokenId> table_ids,
+                                       QList<TokenConst> table_consts,
+                                       QList<TokenKeyword> table_keywords,
+                                       QList<TokenSeparator> table_separators) {
+    Q_UNUSED(table_ids)
+    Q_UNUSED(table_consts)
+
     QList<int> result;
     if (Grammar.isEmpty() || action_table_.isEmpty() || goto_table_.isEmpty()) return result;
 
     int i = 0;
     bool tokens_accepted = false;
+
+    states_stack_.clear();
+    tokens_stack_.clear();
+    states_stack_ << 0; // initial state
+
     while (!tokens_accepted && (i < tokens.length())) {
         int state = states_stack_.last();
         Token token = tokens.at(i).type;
+        if (token == T_KEYWORD) {
+            token = table_keywords.at(tokens.at(i).index).type;
+        } else if (token == T_SEPARATOR) {
+            token = table_separators.at(tokens.at(i).index).type;
+        }
 
         if (action_table_.at(state).contains(token)) {
             Action action = action_table_.at(state).value(token);
@@ -295,6 +304,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens) {
                         int goto_index = goto_table_.at(states_stack_.last()).value(rule.left_token);
                         states_stack_ << goto_index;
                         tokens_stack_ << rule.left_token;
+
+                        result << action.index;
                     } else {
                         // error - goto not defined
                     }

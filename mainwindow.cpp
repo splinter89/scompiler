@@ -430,7 +430,7 @@ void MainWindow::run()
     // syntax analysis ----------------------------------------------------------------
     // --------------------------------------------------------------------------------
     SSyntacticAnalyzer *syntactic_analyzer = new SSyntacticAnalyzer();
-    qDebug() << syntactic_analyzer->process(tokens);
+    qDebug() << syntactic_analyzer->process(tokens, table_ids, table_consts, table_keywords, table_separators);
 }
 
 
