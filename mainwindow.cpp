@@ -125,12 +125,14 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::displayError(int pos, QString msg)
 {
     // :TODO: calc (line, col)
-    setStatusError("[pos " + QString::number(pos) + "] " + msg);
+    setStatusError(((pos > -1) ? "[pos " + QString::number(pos) + "] " : "") + msg);
 
-    // move cursor to position
-    QTextCursor cursor(editor_->textCursor());
-    cursor.setPosition(pos);
-    editor_->setTextCursor(cursor);
+    if (pos > -1) {
+        // move cursor to position
+        QTextCursor cursor(editor_->textCursor());
+        cursor.setPosition(pos);
+        editor_->setTextCursor(cursor);
+    }
 }
 
 
@@ -432,13 +434,18 @@ void MainWindow::run()
     SSyntacticAnalyzer *syntactic_analyzer = new SSyntacticAnalyzer();
     connect(syntactic_analyzer, SIGNAL(syntax_error(int,QString)),
             this, SLOT(displayError(int,QString)));
-    if (syntactic_analyzer->generateSetOfSituations()
-        && syntactic_analyzer->generateActionGotoTables()
-    ) {
-        QList<int> parse_rules = syntactic_analyzer->process(tokens,table_ids, table_consts,
-                                                             table_keywords, table_separators);
-        qDebug() << parse_rules;
+    if (!syntactic_analyzer->generateSetOfSituations()) {
+        displayError(-1, error_msg(E_INTERNAL_GENERATING_SITUATIONS));
+        return;
     }
+    if (!syntactic_analyzer->generateActionGotoTables()) {
+        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
+        return;
+    }
+
+    QList<int> parse_rules = syntactic_analyzer->process(tokens,table_ids, table_consts,
+                                                         table_keywords, table_separators);
+    qDebug() << parse_rules;
 }
 
 
