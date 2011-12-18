@@ -14,6 +14,8 @@ public:
     SSyntacticAnalyzer(QObject * parent = 0);
     ~SSyntacticAnalyzer();
 
+    bool generateSetOfSituations();
+    bool generateActionGotoTables();
     QList<int> process(QList<TokenPointer> tokens,
                        QList<TokenId> table_ids,
                        QList<TokenConst> table_consts,
@@ -33,8 +35,6 @@ private:
 
     QSet<Situation> closure(QSet<Situation> i);
     QSet<Situation> makeStep(const QSet<Situation> i, const Token x);
-    void generateSetOfSituations();
-    void generateActionGotoTables();
 
 signals:
     void syntax_error(int pos, QString msg);

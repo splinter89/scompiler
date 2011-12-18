@@ -430,7 +430,15 @@ void MainWindow::run()
     // syntax analysis ----------------------------------------------------------------
     // --------------------------------------------------------------------------------
     SSyntacticAnalyzer *syntactic_analyzer = new SSyntacticAnalyzer();
-    qDebug() << syntactic_analyzer->process(tokens, table_ids, table_consts, table_keywords, table_separators);
+    connect(syntactic_analyzer, SIGNAL(syntax_error(int,QString)),
+            this, SLOT(displayError(int,QString)));
+    if (syntactic_analyzer->generateSetOfSituations()
+        && syntactic_analyzer->generateActionGotoTables()
+    ) {
+        QList<int> parse_rules = syntactic_analyzer->process(tokens,table_ids, table_consts,
+                                                             table_keywords, table_separators);
+        qDebug() << parse_rules;
+    }
 }
 
 

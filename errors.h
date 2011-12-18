@@ -7,21 +7,32 @@ enum ErrorType {E_UNKNOWN_ERROR,
                 // lexical errors
                 E_UNKNOWN_TERMINAL_ERROR, E_COMMENT_NOT_CLOSED,
                 E_INVALID_DOUBLE, E_INVALID_INT, E_INVALID_CHAR,
-                E_CHAR_NOT_CLOSED, E_STRING_NOT_CLOSED
-                // syntactic errors
+                E_CHAR_NOT_CLOSED, E_STRING_NOT_CLOSED,
+                // syntax errors
+                E_NOT_LR1_GRAMMAR, E_INTERNAL_GENERATING_TABLES,
+                E_INTERNAL_GOTO_UNDEFINED, E_INTERNAL_ACTION_UNDEFINED,
+                E_INTERNAL_STATES_STACK_EMPTY, E_CHAIN_REJECTED
                };
 
 static QHash<ErrorType, QString> initErrorCodes() {
         QHash<ErrorType, QString> hash;
-        hash.insert(E_UNKNOWN_ERROR,        "Unknown error occured...");
+        hash.insert(E_UNKNOWN_ERROR,                "Unknown error occured...");
 
-        hash.insert(E_UNKNOWN_TERMINAL_ERROR,  "Unknown terminal found");
-        hash.insert(E_COMMENT_NOT_CLOSED,   "Multi-line comment is not closed");
-        hash.insert(E_INVALID_DOUBLE,       "Double constant is out of range");
-        hash.insert(E_INVALID_INT,          "Integer constant is out of range");
-        hash.insert(E_INVALID_CHAR,         "Char constant must contain a single character");
-        hash.insert(E_CHAR_NOT_CLOSED,      "Char constant is not closed");
-        hash.insert(E_STRING_NOT_CLOSED,    "String constant is not closed");
+        hash.insert(E_UNKNOWN_TERMINAL_ERROR,       "Unknown terminal found");
+        hash.insert(E_COMMENT_NOT_CLOSED,           "Multi-line comment is not closed");
+        hash.insert(E_INVALID_DOUBLE,               "Double constant is out of range");
+        hash.insert(E_INVALID_INT,                  "Integer constant is out of range");
+        hash.insert(E_INVALID_CHAR,                 "Char constant must contain a single character");
+        hash.insert(E_CHAR_NOT_CLOSED,              "Char constant is not closed");
+        hash.insert(E_STRING_NOT_CLOSED,            "String constant is not closed");
+
+//        hash.insert(E_NOT_LR1_GRAMMAR,              "The predefined grammar is not LR(1)");
+        hash.insert(E_NOT_LR1_GRAMMAR,              "The chain got rejected by parser");
+        hash.insert(E_INTERNAL_GENERATING_TABLES,   "Could not generate action/goto tables (internal)");
+        hash.insert(E_INTERNAL_GOTO_UNDEFINED,      "Goto-rule undefined (internal)");
+        hash.insert(E_INTERNAL_ACTION_UNDEFINED,    "Action-rule undefined (internal)");
+        hash.insert(E_INTERNAL_STATES_STACK_EMPTY,  "Stack of states got broken (internal)");
+        hash.insert(E_CHAIN_REJECTED,               "The chain got rejected by parser");
 
         return hash;
 }
