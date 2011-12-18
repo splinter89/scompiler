@@ -1,19 +1,86 @@
 #include "basics.h"
 #include <QDebug>
 
-QDebug operator<<(QDebug d, const QList<Token> tokens) {
+QString tokenToString(const Token token) {
     QString s;
-    foreach (const Token token, tokens) {
-        s += (!s.isEmpty()?", ":"") + QString::number(token);
+
+    if (KeywordCodes.key(token).length() > 0) {
+        s = KeywordCodes.key(token);
+    } else if (SeparatorCodes.key(token).length() > 0) {
+        s = SeparatorCodes.key(token);
+    } else {
+        switch (token) {
+        case LAMBDA:
+            s = "[e]"; break;
+        case DOT_TOKEN:
+            s = "[.]"; break;
+        case EOF_TOKEN:
+            s = "[$]"; break;
+
+        case T_ID:
+            s = "[id]"; break;
+        case T_CONST:
+            s = "[const]"; break;
+
+        case N_S:
+            s = "S"; break;
+        case N_E:
+            s = "E"; break;
+        case N_T:
+            s = "T"; break;
+        case N_F:
+            s = "F"; break;
+
+        default:
+            s = QString::number(token);
+            break;
+        }
     }
-    d << s;
+    return s;
+}
+
+QDebug operator<<(QDebug d, const Token token) {
+    d << tokenToString(token);
+    return d;
+}
+QDebug operator<<(QDebug d, const Action action) {
+    QString res;
+    switch (action.type) {
+    case A_SHIFT:
+        res = "S"; break;
+    case A_REDUCE:
+        res = "R"; break;
+    case A_ACCEPT:
+        res = "acc"; break;
+    }
+    if (res != "acc") {
+        res += QString::number(action.index);
+    }
+    d << res;
+    return d;
+}
+QDebug operator<<(QDebug d, const QList<Token> tokens) {
+    QStringList s;
+    foreach (const Token token, tokens) {
+        s << tokenToString(token);
+    }
+    d << s.join(" ");
     return d;
 }
 QDebug operator<<(QDebug d, const QList<GrammarRule> grammar) {
-    qDebug() << "Grammar:";
+    d << "Grammar:\n";
     foreach (const GrammarRule &rule, grammar) {
-        qDebug() << rule.left_token << "->" << rule.right_side;
+        d << rule.left_token << "->" << rule.right_side << "\n";
     }
+    return d;
+}
+bool operator==(const Situation &e1, const Situation &e2) {
+    return ((e1.left_token == e2.left_token)
+        && (e1.right_side == e2.right_side)
+        && (e1.look_ahead_token == e2.look_ahead_token));
+}
+QDebug operator<<(QDebug d, const Situation situation) {
+    d << "[" << situation.left_token << "->" << situation.right_side << ", " << situation.look_ahead_token << "]";
     return d;
 }
 
@@ -29,9 +96,8 @@ QList<GrammarRule> getGrammarRulesByLeftToken(Token token) {
 
 int indexOfGrammarRule(Token left, QList<Token> right) {
     int result = -1;
-    QList<GrammarRule> rules = getGrammarRulesByLeftToken(left);
-    for (int i = 0; i < rules.length(); i++) {
-        if (rules.at(i).right_side == right) {
+    for (int i = 0; i < Grammar.length(); i++) {
+        if ((Grammar.at(i).left_token == left) && (Grammar.at(i).right_side == right)) {
             result = i;
             break;
         }
@@ -48,33 +114,11 @@ GrammarRule getGrammarRule(Token left, QList<Token> right) {
     return result;
 }
 
-int indexOfSituation(Situation situation, QList<Situation> i) {
-    int result = -1;
-    for (int num = 0; num < i.length(); num++) {
-        if (i.at(num) == situation) {
-            result = num;
-            break;
-        }
-    }
-    return result;
-}
-
-int indexOfSetOfSituations(QList<Situation> i, QList<QList<Situation> > c) {
-    int result = -1;
-    for (int num = 0; num < c.length(); num++) {
-        if (c.at(num) == i) {
-            result = num;
-            break;
-        }
-    }
-    return result;
-}
-
 
 bool isTokenTerminal(Token token) {
     QSet<Token> list;
     list /*<< TERMINAL*/
-         << T_ID << T_CONST << T_KEYWORD << T_SEPARATOR;
+         << T_ID << T_CONST << T_KEYWORD << T_SEPARATOR << EOF_TOKEN;
     return (list.contains(token) || isTokenKeyword(token) || isTokenSeparator(token));
 }
 
@@ -103,14 +147,13 @@ bool isTokenSeparator(Token token) {
 bool isTokenNonTerminal(Token token) {
     QSet<Token> list;
     list /*<< NON_TERMINAL*/
-//         << N_S << N_E << N_T << N_F;
-         << N_S << N_E << N_E1 << N_T << N_T1 << N_F;
+         << N_S << N_E << N_T << N_F;
     return list.contains(token);
 }
 
 QSet<Token> getAllTerminalTokens() {
     QSet<Token> result;
-    for (int token = UNKNOWN; token != EOF_TOKEN; token++) {
+    for (int token = UNKNOWN; token <= EOF_TOKEN; token++) {
         if ((token == T_ID) || (token == T_CONST) || (token == EOF_TOKEN)
             || isTokenKeyword((Token)token)
             || isTokenSeparator((Token)token)
@@ -123,7 +166,7 @@ QSet<Token> getAllTerminalTokens() {
 }
 QSet<Token> getAllNonTerminalTokens() {
     QSet<Token> result;
-    for (int token = UNKNOWN; token != EOF_TOKEN; token++) {
+    for (int token = UNKNOWN; token <= EOF_TOKEN; token++) {
         if (isTokenNonTerminal((Token)token)) {
             result << (Token)token;
         }

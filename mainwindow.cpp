@@ -298,6 +298,11 @@ void MainWindow::run()
                     : SeparatorCodes.key(table_separators.at(tokens.at(i).index).type);
             break;
 
+        case EOF_TOKEN:
+            token_type_temp = "eof";
+            code_temp = "$";
+            break;
+
         default:
             break;
         }
@@ -424,7 +429,9 @@ void MainWindow::run()
     // --------------------------------------------------------------------------------
     // syntax analysis ----------------------------------------------------------------
     // --------------------------------------------------------------------------------
-
+    SSyntacticAnalyzer *syntactic_analyzer = new SSyntacticAnalyzer();
+    Q_UNUSED(syntactic_analyzer)
+//    qDebug() << syntactic_analyzer->process(tokens);
 }
 
 

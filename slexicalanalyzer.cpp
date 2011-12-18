@@ -240,7 +240,7 @@ bool SLexicalAnalyzer::process(const QString code)
         removeToken(tokens_.length() - 1);
     }
 
-    TokenPointer new_token = {EOF_TOKEN, -1, -1, -1};
+    TokenPointer new_token = {EOF_TOKEN, -1, code.length(), 1};
     tokens_ << new_token;
 
     return true;
