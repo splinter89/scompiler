@@ -67,11 +67,16 @@ QDebug operator<<(QDebug d, const QList<Token> tokens) {
     d << s.join(" ");
     return d;
 }
-QDebug operator<<(QDebug d, const QList<GrammarRule> grammar) {
-    d << "Grammar:\n";
-    foreach (const GrammarRule &rule, grammar) {
-        d << rule.left_token << "->" << rule.right_side << "\n";
+QString ruleToString(const GrammarRule rule) {
+    QString result, right_side;
+    foreach (Token token, rule.right_side) {
+        right_side += tokenToString(token);
     }
+    result = tokenToString(rule.left_token) + " ::= " + right_side;
+    return result;
+}
+QDebug operator<<(QDebug d, const GrammarRule rule) {
+    d << rule.left_token << "->" << rule.right_side << "\n";
     return d;
 }
 bool operator==(const Situation &e1, const Situation &e2) {

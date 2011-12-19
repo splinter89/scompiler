@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // first width is for '#' column; second - 'index', 'start', 'length'
     int header_num_width = 40, header_index_width = 60;
     int main_width = 1050, main_height = 650;
+    int tab_stop_width = 20;
 
     ui_->setupUi(this);
     resize(main_width, main_height);
@@ -33,12 +34,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // now draw interface
     editor_ = new CodeEditor();
-    editor_->setTabStopWidth(20);
+    editor_->setTabStopWidth(tab_stop_width);
     editor_->setCursor(Qt::IBeamCursor);
 
-    QWidget *tab_lex = new QWidget();
-    QWidget *tab_sint = new QWidget();
     tab_main_ = new QTabWidget();
+    QWidget *tab_lex = new QWidget();
     tab_main_->addTab(tab_lex, trUtf8("Лексический анализ"));
         QWidget *tab_lex_0 = new QWidget();
         QWidget *tab_lex_1 = new QWidget();
@@ -89,15 +89,58 @@ MainWindow::MainWindow(QWidget *parent) :
         QGridLayout *grid_lex = new QGridLayout();
         grid_lex->addWidget(tab_lex_main_);
         tab_lex->setLayout(grid_lex);
-    tab_main_->addTab(tab_sint, trUtf8("..."));
 
-//    QGridLayout *grid_main = new QGridLayout();
-//    grid_main->addWidget(editor, 0, 0);
-//    grid_main->addWidget(tab_main, 0, 1);
+    QWidget *tab_synt = new QWidget();
+    tab_main_->addTab(tab_synt, trUtf8("Синтаксический анализ"));
+        QWidget *tab_synt_0 = new QWidget();
+        QWidget *tab_synt_1 = new QWidget();
+        QWidget *tab_synt_2 = new QWidget();
+        QWidget *tab_synt_3 = new QWidget();
+        QWidget *tab_synt_4 = new QWidget();
+        tab_synt_main_ = new QTabWidget();
+        tab_synt_main_->addTab(tab_synt_0, trUtf8("правый вывод"));
+            QGridLayout *grid_synt_0 = new QGridLayout();
+            edit_synt_0_ = new QPlainTextEdit();
+            edit_synt_0_->setReadOnly(true);
+            edit_synt_0_->setTabStopWidth(tab_stop_width);
+            grid_synt_0->addWidget(edit_synt_0_);
+            tab_synt_0->setLayout(grid_synt_0);
+        tab_synt_main_->addTab(tab_synt_1, trUtf8("grammar"));
+            QGridLayout *grid_synt_1 = new QGridLayout();
+            table_synt_1_ = new QTableWidget(0, 2);
+            table_synt_1_->setColumnWidth(0, header_num_width);
+            table_synt_1_->verticalHeader()->setVisible(false);
+            grid_synt_1->addWidget(table_synt_1_);
+            tab_synt_1->setLayout(grid_synt_1);
+        tab_synt_main_->addTab(tab_synt_2, trUtf8("sets of situations"));
+            QGridLayout *grid_synt_2 = new QGridLayout();
+            edit_synt_2_ = new QPlainTextEdit();
+            edit_synt_2_->setReadOnly(true);
+            edit_synt_2_->setTabStopWidth(tab_stop_width);
+            grid_synt_2->addWidget(edit_synt_2_);
+            tab_synt_2->setLayout(grid_synt_2);
+        tab_synt_main_->addTab(tab_synt_3, trUtf8("action table"));
+            QGridLayout *grid_synt_3 = new QGridLayout();
+            edit_synt_3_ = new QPlainTextEdit();
+            edit_synt_3_->setReadOnly(true);
+            edit_synt_3_->setTabStopWidth(tab_stop_width);
+            grid_synt_3->addWidget(edit_synt_3_);
+            tab_synt_3->setLayout(grid_synt_3);
+        tab_synt_main_->addTab(tab_synt_4, trUtf8("goto table"));
+            QGridLayout *grid_synt_4 = new QGridLayout();
+            edit_synt_4_ = new QPlainTextEdit();
+            edit_synt_4_->setReadOnly(true);
+            edit_synt_4_->setTabStopWidth(tab_stop_width);
+            grid_synt_4->addWidget(edit_synt_4_);
+            tab_synt_4->setLayout(grid_synt_4);
 
-//    QWidget *central_widget = new QWidget();
-//    central_widget->setLayout(grid_main);
-//    setCentralWidget(central_widget);
+        QStringList table_synt_1_headers;
+        table_synt_1_headers << trUtf8("#") << trUtf8("правило");
+        table_synt_1_->setHorizontalHeaderLabels(table_synt_1_headers);
+
+        QGridLayout *grid_synt = new QGridLayout();
+        grid_synt->addWidget(tab_synt_main_);
+        tab_synt->setLayout(grid_synt);
 
     QSplitter *splitter = new QSplitter(Qt::Horizontal);
     splitter->addWidget(editor_);
@@ -190,6 +233,13 @@ void MainWindow::clearLexTables()
     }
 }
 
+void MainWindow::clearSyntTables()
+{
+    while (table_synt_1_->rowCount() > 0) {
+        table_synt_1_->removeRow(0);
+    }
+}
+
 
 void MainWindow::openFile(const QString filename)
 {
@@ -229,11 +279,11 @@ void MainWindow::run()
         return;
     }
 
+    int i, row;
+
     // --------------------------------------------------------------------------------
     // lexical analysis ---------------------------------------------------------------
     // --------------------------------------------------------------------------------
-    int i, row;
-
     SLexicalAnalyzer *lexical_analyzer = new SLexicalAnalyzer();
     connect(lexical_analyzer, SIGNAL(lexical_error(int,QString)),
             this, SLOT(displayError(int,QString)));
@@ -445,7 +495,46 @@ void MainWindow::run()
 
     QList<int> parse_rules = syntactic_analyzer->process(tokens,table_ids, table_consts,
                                                          table_keywords, table_separators);
-    qDebug() << parse_rules;
+    QList<QSet<Situation> > ultimate_set = syntactic_analyzer->getUltimateSetOfSituations();
+    QList<QHash<Token, Action> > table_action = syntactic_analyzer->getTableAction();
+    QList<QHash<Token, int> > table_goto = syntactic_analyzer->getTableGoto();
+
+    // reverse the list
+    for(int k = 0; k < (parse_rules.size()/2); k++) parse_rules.swap(k, parse_rules.size()-(1+k));
+
+
+    clearSyntTables();
+    QString text_0, text_2, text_3, text_4;
+    QStringList text_0_first, text_0_second;
+    text_0_second << trUtf8("Подробно:");
+    foreach (int rule_num, parse_rules) {
+        text_0_first << QString::number(rule_num);
+        text_0_second << (QString("#%1\n\t").arg(rule_num) + ruleToString(Grammar.at(rule_num)));
+    }
+    text_0 = text_0_first.join(" ") + "\n\n" + text_0_second.join("\n\n===============================\n");
+    for (i = 0; i < Grammar.length(); i++) {
+        row = table_synt_1_->rowCount();
+        table_synt_1_->insertRow(row);
+
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        item_0->setTextAlignment(Qt::AlignCenter);
+
+        item_0->setText(QString::number(i));
+        item_1->setText(ruleToString(Grammar.at(i)));
+        table_synt_1_->setItem(row, 0, item_0);
+        table_synt_1_->setItem(row, 1, item_1);
+    }
+    /*text_2 << ultimate_set;
+    text_3 << table_action;
+    text_4 << table_goto;*/
+    Q_UNUSED(ultimate_set)
+    Q_UNUSED(table_action)
+    Q_UNUSED(table_goto)
+    edit_synt_0_->setPlainText(text_0);
+    edit_synt_2_->setPlainText(text_2);
+    edit_synt_3_->setPlainText(text_3);
+    edit_synt_4_->setPlainText(text_4);
 }
 
 

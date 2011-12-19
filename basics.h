@@ -187,7 +187,8 @@ QString tokenToString(const Token token);
 QDebug operator<<(QDebug d, const Token token);
 QDebug operator<<(QDebug d, const Action action);
 QDebug operator<<(QDebug d, const QList<Token> tokens);
-QDebug operator<<(QDebug d, const QList<GrammarRule> grammar);
+QString ruleToString(const GrammarRule rule);
+QDebug operator<<(QDebug d, const GrammarRule rule);
 bool operator==(const Situation &e1, const Situation &e2);
 QDebug operator<<(QDebug d, const Situation situation);
 

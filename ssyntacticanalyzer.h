@@ -22,6 +22,10 @@ public:
                        QList<TokenKeyword> table_keywords,
                        QList<TokenSeparator> table_separators);
 
+    QList<QSet<Situation> > getUltimateSetOfSituations() { return ultimate_situations_set_; }
+    QList<QHash<Token, Action> > getTableAction() { return action_table_; }
+    QList<QHash<Token, int> > getTableGoto() { return goto_table_; }
+
 private:
     QList<QSet<Situation> > ultimate_situations_set_;
     QList<QHash<Token, Action> > action_table_;

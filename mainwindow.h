@@ -32,6 +32,7 @@ private:
 
     CodeEditor *editor_;
     QTabWidget *tab_main_;
+
     QTabWidget *tab_lex_main_;
     QTableWidget *table_lex_0_;  // convolution
     QTableWidget *table_lex_1_;  // id's
@@ -39,10 +40,18 @@ private:
     QTableWidget *table_lex_3_;  // keywords
     QTableWidget *table_lex_4_;  // separators
 
+    QTabWidget *tab_synt_main_;
+    QPlainTextEdit *edit_synt_0_; // parse rules
+    QTableWidget *table_synt_1_;  // grammar
+    QPlainTextEdit *edit_synt_2_; // situations
+    QPlainTextEdit *edit_synt_3_; // action rules
+    QPlainTextEdit *edit_synt_4_; // goto rules
+
     QString base_window_title_;
 
     void clearLexTables();
     void setLexTableHeaders();
+    void clearSyntTables();
 
 public slots:
     void closeEvent(QCloseEvent *event);
