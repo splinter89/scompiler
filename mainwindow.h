@@ -44,8 +44,8 @@ private:
     QPlainTextEdit *edit_synt_0_; // parse rules
     QTableWidget *table_synt_1_;  // grammar
     QPlainTextEdit *edit_synt_2_; // situations
-    QPlainTextEdit *edit_synt_3_; // action rules
-    QPlainTextEdit *edit_synt_4_; // goto rules
+    QTableWidget *table_synt_3_;  // action rules
+    QTableWidget *table_synt_4_;  // goto rules
 
     QString base_window_title_;
 

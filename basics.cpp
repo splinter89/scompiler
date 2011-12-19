@@ -38,14 +38,17 @@ QString tokenToString(const Token token) {
     }
     return s;
 }
-
-QDebug operator<<(QDebug d, const Token token) {
-    d << tokenToString(token);
-    return d;
+QString GrammarRule::toString() const {
+    QString res, right;
+    foreach (Token token, right_side) {
+        right += tokenToString(token);
+    }
+    res = tokenToString(left_token) + " ::= " + right;
+    return res;
 }
-QDebug operator<<(QDebug d, const Action action) {
+QString Action::toString() const {
     QString res;
-    switch (action.type) {
+    switch (type) {
     case A_SHIFT:
         res = "S"; break;
     case A_REDUCE:
@@ -53,41 +56,52 @@ QDebug operator<<(QDebug d, const Action action) {
     case A_ACCEPT:
         res = "acc"; break;
     }
-    if (res != "acc") {
-        res += QString::number(action.index);
+    if (type != A_ACCEPT) {
+        res += QString::number(index);
     }
-    d << res;
+    return res;
+}
+QString Situation::toString() const {
+    QString right;
+    foreach (Token token, right_side) {
+        right += tokenToString(token);
+    }
+    return "[" + tokenToString(left_token) + " -> " + right + ", " + tokenToString(look_ahead_token) + "]";
+}
+
+
+QDebug operator<<(QDebug d, const Token token) {
+    d << tokenToString(token);
     return d;
 }
-QDebug operator<<(QDebug d, const QList<Token> tokens) {
+QDebug operator<<(QDebug d, const GrammarRule rule) {
+    d << rule.toString();
+    return d;
+}
+QDebug operator<<(QDebug d, const Action action) {
+    d << action.toString();
+    return d;
+}
+QDebug operator<<(QDebug d, const Situation situation) {
+    d << situation.toString();
+    return d;
+}
+/*QDebug operator<<(QDebug d, const QList<Token> tokens) {
     QStringList s;
     foreach (const Token token, tokens) {
         s << tokenToString(token);
     }
     d << s.join(" ");
     return d;
-}
-QString ruleToString(const GrammarRule rule) {
-    QString result, right_side;
-    foreach (Token token, rule.right_side) {
-        right_side += tokenToString(token);
-    }
-    result = tokenToString(rule.left_token) + " ::= " + right_side;
-    return result;
-}
-QDebug operator<<(QDebug d, const GrammarRule rule) {
-    d << rule.left_token << "->" << rule.right_side << "\n";
-    return d;
-}
+}*/
+
+
 bool operator==(const Situation &e1, const Situation &e2) {
     return ((e1.left_token == e2.left_token)
         && (e1.right_side == e2.right_side)
         && (e1.look_ahead_token == e2.look_ahead_token));
 }
-QDebug operator<<(QDebug d, const Situation situation) {
-    d << "[" << situation.left_token << "->" << situation.right_side << ", " << situation.look_ahead_token << "]";
-    return d;
-}
+
 
 QList<GrammarRule> getGrammarRulesByLeftToken(Token token) {
     QList<GrammarRule> result;
@@ -106,15 +120,6 @@ int indexOfGrammarRule(Token left, QList<Token> right) {
             result = i;
             break;
         }
-    }
-    return result;
-}
-
-GrammarRule getGrammarRule(Token left, QList<Token> right) {
-    GrammarRule result;
-    int index = indexOfGrammarRule(left, right);
-    if (index > -1) {
-        result = Grammar.at(index);
     }
     return result;
 }

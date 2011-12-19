@@ -64,8 +64,10 @@ struct TokenPointer {
 struct GrammarRule {
     Token left_token;
     QList<Token> right_side;
+
     GrammarRule() {}
     GrammarRule(Token left, QList<Token> right) { left_token = left; right_side = right; }
+    QString toString() const;
 };
 
 // [A -> .B, a]
@@ -73,11 +75,15 @@ struct Situation {
     Token left_token;
     QList<Token> right_side;
     Token look_ahead_token;
+
+    QString toString() const;
 };
 
 struct Action {
     ActionType type;
     int index;
+
+    QString toString() const;
 };
 
 
@@ -187,7 +193,6 @@ QString tokenToString(const Token token);
 QDebug operator<<(QDebug d, const Token token);
 QDebug operator<<(QDebug d, const Action action);
 QDebug operator<<(QDebug d, const QList<Token> tokens);
-QString ruleToString(const GrammarRule rule);
 QDebug operator<<(QDebug d, const GrammarRule rule);
 bool operator==(const Situation &e1, const Situation &e2);
 QDebug operator<<(QDebug d, const Situation situation);
