@@ -503,7 +503,7 @@ void MainWindow::run()
         return;
     }
     if (!syntactic_analyzer->generateActionGotoTables()) {
-        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
+//        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
         return;
     }
 
@@ -527,8 +527,8 @@ void MainWindow::run()
             text_0_second << (QString("#%1\n\t").arg(rule_num) + Grammar.at(rule_num).toString());
         }
         text_0 = text_0_first.join(" ") + "\n\n"
-                + trUtf8("Подробно:\n===============================\n")
-                + text_0_second.join("\n\n===============================\n");
+                + trUtf8("Подробно:\n=========================================\n")
+                + text_0_second.join("\n\n=========================================\n");
     } else {
         text_0 = trUtf8("Не удалось получить правый вывод в заданной грамматике");
     }
