@@ -280,10 +280,10 @@ static QList<GrammarRule> initGrammarRules() {
 
 //         << GrammarRule(N_RETURN, EmptyTokenList() << K_RETURN << S_SPACE << N_EXPRESSION)
 
-//         << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_OP_1)
+         << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_OP_1)
 //         << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_EXPRESSION << S_COMMA << N_OP_1)
 
-//         << GrammarRule(N_OP_1, EmptyTokenList() << N_OP_2)
+         << GrammarRule(N_OP_1, EmptyTokenList() << N_OP_2)
 //         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_ASSIGN << N_OP_2)
 //         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_ADD_ASSIGN << N_OP_2)
 //         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_SUB_ASSIGN << N_OP_2)
@@ -291,32 +291,32 @@ static QList<GrammarRule> initGrammarRules() {
 //         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_DIV_ASSIGN << N_OP_2)
 //         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_MOD_ASSIGN << N_OP_2)
 
-//         << GrammarRule(N_OP_2, EmptyTokenList() << N_OP_3)
+         << GrammarRule(N_OP_2, EmptyTokenList() << N_OP_3)
 //         << GrammarRule(N_OP_2, EmptyTokenList() << N_OP_2 << S_OR << N_OP_3)
 
-//         << GrammarRule(N_OP_3, EmptyTokenList() << N_OP_4)
+         << GrammarRule(N_OP_3, EmptyTokenList() << N_OP_4)
 //         << GrammarRule(N_OP_3, EmptyTokenList() << N_OP_3 << S_AND << N_OP_4)
 
-//         << GrammarRule(N_OP_4, EmptyTokenList() << N_OP_5)
+         << GrammarRule(N_OP_4, EmptyTokenList() << N_OP_5)
 //         << GrammarRule(N_OP_4, EmptyTokenList() << N_OP_4 << S_EQ << N_OP_5)
 //         << GrammarRule(N_OP_4, EmptyTokenList() << N_OP_4 << S_NOT_EQ << N_OP_5)
 
-//         << GrammarRule(N_OP_5, EmptyTokenList() << N_OP_6)
+         << GrammarRule(N_OP_5, EmptyTokenList() << N_OP_6)
 //         << GrammarRule(N_OP_5, EmptyTokenList() << N_OP_5 << S_LESS << N_OP_6)
 //         << GrammarRule(N_OP_5, EmptyTokenList() << N_OP_5 << S_LE << N_OP_6)
 //         << GrammarRule(N_OP_5, EmptyTokenList() << N_OP_5 << S_GREATER << N_OP_6)
 //         << GrammarRule(N_OP_5, EmptyTokenList() << N_OP_5 << S_GE << N_OP_6)
 
-//         << GrammarRule(N_OP_6, EmptyTokenList() << N_OP_7)
+         << GrammarRule(N_OP_6, EmptyTokenList() << N_OP_7)
 //         << GrammarRule(N_OP_6, EmptyTokenList() << N_OP_6 << S_PLUS << N_OP_7)
 //         << GrammarRule(N_OP_6, EmptyTokenList() << N_OP_6 << S_MINUS << N_OP_7)
 
-//         << GrammarRule(N_OP_7, EmptyTokenList() << N_OP_8)
+         << GrammarRule(N_OP_7, EmptyTokenList() << N_OP_8)
 //         << GrammarRule(N_OP_7, EmptyTokenList() << N_OP_7 << S_MULT << N_OP_8)
 //         << GrammarRule(N_OP_7, EmptyTokenList() << N_OP_7 << S_DIV << N_OP_8)
 //         << GrammarRule(N_OP_7, EmptyTokenList() << N_OP_7 << S_MOD << N_OP_8)
 
-//         << GrammarRule(N_OP_8, EmptyTokenList() << N_OP_9)
+         << GrammarRule(N_OP_8, EmptyTokenList() << N_OP_9)
 //         << GrammarRule(N_OP_8, EmptyTokenList() << S_PLUS << N_OP_9)
 //         << GrammarRule(N_OP_8, EmptyTokenList() << S_MINUS << N_OP_9)
 //         << GrammarRule(N_OP_8, EmptyTokenList() << S_NOT << N_OP_9)
@@ -326,7 +326,7 @@ static QList<GrammarRule> initGrammarRules() {
 //         << GrammarRule(N_OP_8, EmptyTokenList() << S_AMP << N_OBJECT)
 
 //         << GrammarRule(N_OP_9, EmptyTokenList() << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE)
-//         << GrammarRule(N_OP_9, EmptyTokenList() << T_CONST)
+         << GrammarRule(N_OP_9, EmptyTokenList() << T_CONST)
 //         << GrammarRule(N_OP_9, EmptyTokenList() << N_OBJECT)
 //         << GrammarRule(N_OP_9, EmptyTokenList() << N_OBJECT << S_INCREMENT)
 //         << GrammarRule(N_OP_9, EmptyTokenList() << N_OBJECT << S_DECREMENT)
@@ -358,7 +358,7 @@ static QList<GrammarRule> initGrammarRules() {
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << S_MULT << T_ID)
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << N_VARS_LIST << S_COMMA << T_ID)
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << N_VARS_LIST << S_COMMA << S_MULT << T_ID)
-//         << GrammarRule(N_VARS_LIST, EmptyTokenList() << T_ID << S_ASSIGN << N_EXPRESSION)
+         << GrammarRule(N_VARS_LIST, EmptyTokenList() << T_ID << S_ASSIGN << N_EXPRESSION)
 //         << GrammarRule(N_VARS_LIST, EmptyTokenList() << S_MULT << T_ID << S_ASSIGN << N_EXPRESSION)
 //         << GrammarRule(N_VARS_LIST, EmptyTokenList() << N_VARS_LIST << S_COMMA << T_ID << S_ASSIGN << N_EXPRESSION)
 //         << GrammarRule(N_VARS_LIST, EmptyTokenList() << N_VARS_LIST << S_COMMA << S_MULT << T_ID << S_ASSIGN << N_EXPRESSION)
