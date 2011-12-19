@@ -135,8 +135,8 @@ bool isTokenTerminal(Token token) {
 bool isTokenKeyword(Token token) {
     QSet<Token> list;
     list << T_KEYWORD
-         << K_IF << K_ELSE << K_FOR << K_WHILE << K_DO << K_RETURN << K_BREAK
-         << K_CONTINUE << K_CHAR << K_INT << K_DOUBLE << K_BOOL << K_VOID
+         << K_IF << K_ELSE << K_FOR << K_WHILE << K_DO << K_RETURN
+         << K_CHAR << K_INT << K_DOUBLE << K_BOOL << K_VOID
          << K_CONST << K_TRUE << K_FALSE << K_CLASS << K_PUBLIC << K_PRIVATE;
     return list.contains(token);
 }
