@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     // first width is for '#' column; second - 'index', 'start', 'length'
     int header_num_width = 40, header_index_width = 60;
+    int header_grammar_width = 450;
     int main_width = 1050, main_height = 650;
     int tab_stop_width = 20;
 
@@ -109,6 +110,7 @@ MainWindow::MainWindow(QWidget *parent) :
             QGridLayout *grid_synt_1 = new QGridLayout();
             table_synt_1_ = new QTableWidget(0, 2);
             table_synt_1_->setColumnWidth(0, header_num_width);
+            table_synt_1_->setColumnWidth(1, header_grammar_width);
             table_synt_1_->verticalHeader()->setVisible(false);
             grid_synt_1->addWidget(table_synt_1_);
             tab_synt_1->setLayout(grid_synt_1);

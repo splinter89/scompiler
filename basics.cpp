@@ -4,33 +4,96 @@
 QString tokenToString(const Token token) {
     QString s;
 
-    if (KeywordCodes.key(token).length() > 0) {
+    if (token == S_SPACE) {
+        s = QString::fromUtf8("[space]");
+    } else if (KeywordCodes.key(token).length() > 0) {
         s = KeywordCodes.key(token);
     } else if (SeparatorCodes.key(token).length() > 0) {
         s = SeparatorCodes.key(token);
     } else {
         switch (token) {
         case LAMBDA:
-            s = "[e]"; break;
+            s = QString::fromUtf8("[e]"); break;
         case DOT_TOKEN:
-            s = "[.]"; break;
+            s = QString::fromUtf8("[.]"); break;
         case EOF_TOKEN:
-            s = "[$]"; break;
+            s = QString::fromUtf8("[$]"); break;
 
         case T_ID:
-            s = "[id]"; break;
+            s = QString::fromUtf8("[id]"); break;
         case T_CONST:
-            s = "[const]"; break;
+            s = QString::fromUtf8("[const]"); break;
 
         case N_S:
-            s = "S"; break;
-        case N_E:
-            s = "E"; break;
-        case N_T:
-            s = "T"; break;
-        case N_F:
-            s = "F"; break;
-
+            s = QString::fromUtf8("S"); break;
+        case N_PROGRAM:
+            s = QString::fromUtf8("<программа>"); break;
+        case N_PROG_ELEMENT:
+            s = QString::fromUtf8("<элемент_программы>"); break;
+        case N_CLASS:
+            s = QString::fromUtf8("<класс>"); break;
+        case N_ACCESS_SPEC:
+            s = QString::fromUtf8("<спецификатор_доступа>"); break;
+        case N_CLASS_METHOD:
+            s = QString::fromUtf8("<метод_класса>"); break;
+        case N_CLASS_METHOD_IMPLEMENTATION:
+            s = QString::fromUtf8("<реализация_метода_класса>"); break;
+        case N_FUNCTION:
+            s = QString::fromUtf8("<функция>"); break;
+        case N_ARGUMENTS_LIST:
+            s = QString::fromUtf8("<список_аргументов>"); break;
+        case N_ARGUMENT:
+            s = QString::fromUtf8("<аргумент>"); break;
+        case N_BLOCK:
+            s = QString::fromUtf8("<блок>"); break;
+        case N_BLOCK_ELEMENT:
+            s = QString::fromUtf8("<элемент_блока>"); break;
+        case N_RETURN:
+            s = QString::fromUtf8("<возврат>"); break;
+        case N_EXPRESSION:
+            s = QString::fromUtf8("<выражение>"); break;
+        case N_OP_1:
+            s = QString::fromUtf8("<оператор_1>"); break;
+        case N_OP_2:
+            s = QString::fromUtf8("<оператор_2>"); break;
+        case N_OP_3:
+            s = QString::fromUtf8("<оператор_3>"); break;
+        case N_OP_4:
+            s = QString::fromUtf8("<оператор_4>"); break;
+        case N_OP_5:
+            s = QString::fromUtf8("<оператор_5>"); break;
+        case N_OP_6:
+            s = QString::fromUtf8("<оператор_6>"); break;
+        case N_OP_7:
+            s = QString::fromUtf8("<оператор_7>"); break;
+        case N_OP_8:
+            s = QString::fromUtf8("<оператор_8>"); break;
+        case N_OP_9:
+            s = QString::fromUtf8("<оператор_9>"); break;
+        case N_FUNC_CALL:
+            s = QString::fromUtf8("<вызов_функции>"); break;
+        case N_OBJECT:
+            s = QString::fromUtf8("<объект>"); break;
+        case N_CLASS_PROPS_DECLARATION:
+            s = QString::fromUtf8("<декларация_свойств_класса>"); break;
+        case N_VAR_DECLARATION:
+            s = QString::fromUtf8("<декларация_переменных>"); break;
+        case N_VAR_TYPE:
+            s = QString::fromUtf8("<тип_переменной>"); break;
+        case N_CLASS_PROPS_LIST:
+            s = QString::fromUtf8("<список_свойств_класса>"); break;
+        case N_VARS_LIST:
+            s = QString::fromUtf8("<список_переменных>"); break;
+        case N_LOOP:
+            s = QString::fromUtf8("<цикл>"); break;
+        case N_WHILE_LOOP:
+            s = QString::fromUtf8("<while-цикл>"); break;
+        case N_DO_WHILE_LOOP:
+            s = QString::fromUtf8("<do-while-цикл>"); break;
+        case N_FOR_LOOP:
+            s = QString::fromUtf8("<for-цикл>"); break;
+        case N_BRANCHING:
+            s = QString::fromUtf8("<ветвление>"); break;
         default:
             s = QString::number(token);
             break;
@@ -86,14 +149,6 @@ QDebug operator<<(QDebug d, const Situation situation) {
     d << situation.toString();
     return d;
 }
-/*QDebug operator<<(QDebug d, const QList<Token> tokens) {
-    QStringList s;
-    foreach (const Token token, tokens) {
-        s << tokenToString(token);
-    }
-    d << s.join(" ");
-    return d;
-}*/
 
 
 bool operator==(const Situation &e1, const Situation &e2) {
@@ -127,38 +182,20 @@ int indexOfGrammarRule(Token left, QList<Token> right) {
 
 bool isTokenTerminal(Token token) {
     QSet<Token> list;
-    list /*<< TERMINAL*/
-         << T_ID << T_CONST << T_KEYWORD << T_SEPARATOR << EOF_TOKEN;
+    list << T_ID << T_CONST << T_KEYWORD << T_SEPARATOR << EOF_TOKEN;
     return (list.contains(token) || isTokenKeyword(token) || isTokenSeparator(token));
 }
 
 bool isTokenKeyword(Token token) {
-    QSet<Token> list;
-    list << T_KEYWORD
-         << K_IF << K_ELSE << K_FOR << K_WHILE << K_DO << K_RETURN
-         << K_CHAR << K_INT << K_DOUBLE << K_BOOL << K_VOID
-         << K_CONST << K_TRUE << K_FALSE << K_CLASS << K_PUBLIC << K_PRIVATE;
-    return list.contains(token);
+    return ((KeywordCodes.key(token).length() > 0)/* || (token == T_KEYWORD)*/);
 }
 
 bool isTokenSeparator(Token token) {
-    QSet<Token> list;
-    list << T_SEPARATOR
-         << S_SPACE << S_PLUS << S_MINUS << S_MULT << S_DIV << S_NOT
-         << S_MOD << S_AMP << S_LESS << S_GREATER << S_ASSIGN
-         << S_ROUND_OPEN << S_ROUND_CLOSE << S_CURLY_OPEN << S_CURLY_CLOSE
-         << S_SEMICOLON << S_COMMA << S_PERIOD << S_COLON << S_TILDE
-         << S_DECREMENT << S_INCREMENT << S_AND << S_OR << S_LE << S_GE
-         << S_EQ << S_NOT_EQ << S_MULT_ASSIGN << S_DIV_ASSIGN << S_MOD_ASSIGN
-         << S_ADD_ASSIGN << S_SUB_ASSIGN << S_ARROW << S_SCOPE;
-    return list.contains(token);
+    return ((SeparatorCodes.key(token).length() > 0)/* || (token == T_SEPARATOR)*/);
 }
 
 bool isTokenNonTerminal(Token token) {
-    QSet<Token> list;
-    list /*<< NON_TERMINAL*/
-         << N_S << N_E << N_T << N_F;
-    return list.contains(token);
+    return (getGrammarRulesByLeftToken(token).length() > 0);
 }
 
 QSet<Token> getAllTerminalTokens() {

@@ -141,7 +141,7 @@ bool SSyntacticAnalyzer::generateSetOfSituations() {
     // initial situation
     Situation s = {
         N_S,
-        EmptyTokenList() << DOT_TOKEN << N_E,
+        EmptyTokenList() << DOT_TOKEN << N_PROGRAM,
         EOF_TOKEN
     };
     QSet<Situation> i;
@@ -229,7 +229,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
             }
             // step 3
             if ((situation.left_token == N_S)
-                && (situation.right_side == (EmptyTokenList() << N_E << DOT_TOKEN))
+                && (situation.right_side == (EmptyTokenList() << N_PROGRAM << DOT_TOKEN))
                 && (situation.look_ahead_token == EOF_TOKEN)
             ) {
                 Action new_action = {A_ACCEPT, 0};
