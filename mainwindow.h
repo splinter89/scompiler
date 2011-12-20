@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QTabWidget>
 #include <QTableWidget>
+#include <QPushButton>
 
 #include "slexicalanalyzer.h"
 #include "ssyntacticanalyzer.h"
@@ -57,6 +58,8 @@ private:
     QTableWidget *table_synt_4_;  // goto rules
     QTableWidget *table_synt_5_;  // set grammar
 
+    QPushButton *b_update_grammar;
+
     QString base_window_title_;
 
     void clearLexTables();
@@ -71,6 +74,7 @@ private slots:
     void on_open_triggered();
     void on_save_triggered();
     void on_run_triggered();
+    void uncheckAllRules();
     void updateGrammar();
 };
 

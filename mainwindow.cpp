@@ -8,7 +8,6 @@
 #include <QGridLayout>
 #include <QDesktopWidget>
 #include <QCheckBox>
-#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -170,7 +169,13 @@ MainWindow::MainWindow(QWidget *parent) :
             table_synt_5_->verticalHeader()->setVisible(false);
             grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 2);
 
-            QPushButton *b_update_grammar = new QPushButton(trUtf8("применить"));
+            // buttons
+            QPushButton *b_uncheck_all_rules = new QPushButton(trUtf8("очистить"));
+            grid_synt_5->addWidget(b_uncheck_all_rules, 1, 0);
+            connect(b_uncheck_all_rules, SIGNAL(clicked()),
+                    this, SLOT(uncheckAllRules()));
+
+            b_update_grammar = new QPushButton(trUtf8("применить"));
             grid_synt_5->addWidget(b_update_grammar, 1, 1);
             connect(b_update_grammar, SIGNAL(clicked()),
                     this, SLOT(updateGrammar()));
@@ -205,12 +210,11 @@ MainWindow::MainWindow(QWidget *parent) :
 //    QList<QHash<Token, int> > table_goto = syntactic_analyzer_->getTableGoto();
 
     clearSyntTables();
-    QTableWidgetItem *item_0, *item_1;
     for (i = 0; i < grammar_.length(); i++) {
         table_synt_1_->insertRow(i);
 
-        item_0 = new QTableWidgetItem;
-        item_1 = new QTableWidgetItem;
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
 
         item_0->setTextAlignment(Qt::AlignCenter);
         item_0->setText(QString::number(i));
@@ -221,24 +225,29 @@ MainWindow::MainWindow(QWidget *parent) :
     for (i = 0; i < Grammar_full.length(); i++) {
         table_synt_5_->insertRow(i);
 
-        item_0 = new QTableWidgetItem;
-        item_1 = new QTableWidgetItem;
+//        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QCheckBox *chb = new QCheckBox(QString::number(i));
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
 
-        item_0->setTextAlignment(Qt::AlignCenter);
-        item_0->setText(QString::number(i));
+//        item_0->setTextAlignment(Qt::AlignCenter);
+//        item_0->setText(QString::number(i));
         if (i == 0) {
-            // rule #0 must be always active
-            item_0->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
-        } else {
-            item_0->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+//            // rule #0 must be always active
+//            item_0->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
+            chb->setEnabled(false);
+//        } else {
+//            item_0->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         }
         if (grammar_active_rules_.contains(i)) {
-            item_0->setCheckState(Qt::Checked);
+//            item_0->setCheckState(Qt::Checked);
+            chb->setChecked(true);
         } else {
-            item_0->setCheckState(Qt::Unchecked);
+//            item_0->setCheckState(Qt::Unchecked);
+            chb->setChecked(false);
         }
         item_1->setText(Grammar_full.at(i).toString());
-        table_synt_5_->setItem(i, 0, item_0);
+//        table_synt_5_->setItem(i, 0, item_0);
+        table_synt_5_->setCellWidget(i, 0, chb);
         table_synt_5_->setItem(i, 1, item_1);
     }
 
@@ -662,8 +671,14 @@ void MainWindow::run()
     if (!parse_rules.isEmpty()) {
         QStringList text_0_first, text_0_second;
         foreach (int rule_num, parse_rules) {
+            int rule_num_full = indexOfGrammarRule(
+                grammar_.at(rule_num).left_token,
+                grammar_.at(rule_num).right_side,
+                Grammar_full
+            );
             text_0_first << QString::number(rule_num);
-            text_0_second << (QString("#%1\n\t").arg(rule_num) + grammar_.at(rule_num).toString());
+            text_0_second << (QString("#%1 (%2)\n\t").arg(rule_num).arg(rule_num_full)
+                              + grammar_.at(rule_num).toString());
         }
         text_0 = text_0_first.join(" ") + "\n\n"
                 + trUtf8("Подробно:\n=========================================\n")
@@ -675,9 +690,12 @@ void MainWindow::run()
 }
 
 void MainWindow::updateGrammar() {
+    b_update_grammar->setEnabled(false);
+
+    int i;
     grammar_active_rules_.clear();
     grammar_active_rules_ << 0;
-    for (int i = 1; i < table_synt_5_->rowCount(); i++) {
+    for (i = 1; i < table_synt_5_->rowCount(); i++) {
         QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
         if (chb->isChecked()) {
             grammar_active_rules_ << i;
@@ -693,6 +711,31 @@ void MainWindow::updateGrammar() {
     if (!syntactic_analyzer_->generateActionGotoTables()) {
 //        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
         return;
+    }
+
+    while (table_synt_1_->rowCount() > 0) {
+        table_synt_1_->removeRow(0);
+    }
+    for (i = 0; i < grammar_.length(); i++) {
+        table_synt_1_->insertRow(i);
+
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
+
+        item_0->setTextAlignment(Qt::AlignCenter);
+        item_0->setText(QString::number(i));
+        item_1->setText(grammar_.at(i).toString());
+        table_synt_1_->setItem(i, 0, item_0);
+        table_synt_1_->setItem(i, 1, item_1);
+    }
+
+    b_update_grammar->setEnabled(true);
+}
+
+void MainWindow::uncheckAllRules() {
+    for (int i = 1; i < table_synt_5_->rowCount(); i++) {
+        QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
+        chb->setChecked(false);
     }
 }
 

@@ -178,6 +178,9 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
     QSet<Token> terminals = getAllTerminalTokens();
     QSet<Token> non_terminals = getAllNonTerminalTokens(grammar_);
 
+    action_table_.clear();
+    goto_table_.clear();
+
     foreach (const QSet<Situation> &i, ultimate_situations_set_) {
         QHash<Token, Action> action_row;
         QHash<Token, int> goto_row;
