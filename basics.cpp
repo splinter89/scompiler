@@ -166,20 +166,20 @@ bool operator==(const Situation &e1, const Situation &e2) {
 }
 
 
-QList<GrammarRule> getGrammarRulesByLeftToken(Token token) {
+QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule> &grammar) {
     QList<GrammarRule> result;
-    for (int i = 0; i < Grammar.length(); i++) {
-        if (Grammar.at(i).left_token == token) {
-            result << Grammar.at(i);
+    for (int i = 0; i < grammar.length(); i++) {
+        if (grammar.at(i).left_token == token) {
+            result << grammar.at(i);
         }
     }
     return result;
 }
 
-int indexOfGrammarRule(Token left, QList<Token> right) {
+int indexOfGrammarRule(Token left, QList<Token> right, const QList<GrammarRule> &grammar) {
     int result = -1;
-    for (int i = 0; i < Grammar.length(); i++) {
-        if ((Grammar.at(i).left_token == left) && (Grammar.at(i).right_side == right)) {
+    for (int i = 0; i < grammar.length(); i++) {
+        if ((grammar.at(i).left_token == left) && (grammar.at(i).right_side == right)) {
             result = i;
             break;
         }
@@ -202,8 +202,8 @@ bool isTokenSeparator(Token token) {
     return ((SeparatorCodes.key(token).length() > 0)/* || (token == T_SEPARATOR)*/);
 }
 
-bool isTokenNonTerminal(Token token) {
-    return (getGrammarRulesByLeftToken(token).length() > 0);
+bool isTokenNonTerminal(Token token, const QList<GrammarRule> &grammar) {
+    return (getGrammarRulesByLeftToken(token, grammar).length() > 0);
 }
 
 QSet<Token> getAllTerminalTokens() {
@@ -219,10 +219,10 @@ QSet<Token> getAllTerminalTokens() {
 
     return result;
 }
-QSet<Token> getAllNonTerminalTokens() {
+QSet<Token> getAllNonTerminalTokens(const QList<GrammarRule> &grammar) {
     QSet<Token> result;
     for (int token = UNKNOWN; token <= EOF_TOKEN; token++) {
-        if (isTokenNonTerminal((Token)token)) {
+        if (isTokenNonTerminal((Token)token, grammar)) {
             result << (Token)token;
         }
     }
@@ -230,6 +230,17 @@ QSet<Token> getAllNonTerminalTokens() {
     return result;
 }
 
-QSet<Token> getAllGrammarTokens() {
-    return getAllTerminalTokens() + getAllNonTerminalTokens();
+QSet<Token> getAllGrammarTokens(const QList<GrammarRule> &grammar) {
+    return getAllTerminalTokens() + getAllNonTerminalTokens(grammar);
 }
+
+QList<GrammarRule> setGrammarRules(QList<int> grammar_active_rules) {
+    QList<GrammarRule> list;
+    for (int i = 0; i < Grammar_full.length(); i++) {
+        if (grammar_active_rules.contains(i)) {
+            list << Grammar_full.at(i);
+        }
+    }
+    return list;
+}
+

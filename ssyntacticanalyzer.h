@@ -14,8 +14,11 @@ public:
     SSyntacticAnalyzer(QObject * parent = 0);
     ~SSyntacticAnalyzer();
 
+    void setGrammar(QList<GrammarRule> grammar);
+
     bool generateSetOfSituations();
     bool generateActionGotoTables();
+
     QList<int> process(QList<TokenPointer> tokens,
                        QList<TokenId> table_ids,
                        QList<TokenConst> table_consts,
@@ -27,6 +30,8 @@ public:
     QList<QHash<Token, int> > getTableGoto() { return goto_table_; }
 
 private:
+    QList<GrammarRule> grammar_;
+
     QList<QSet<Situation> > ultimate_situations_set_;
     QList<QHash<Token, Action> > action_table_;
     QList<QHash<Token, int> > goto_table_;

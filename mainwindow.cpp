@@ -7,11 +7,20 @@
 #include <QSplitter>
 #include <QGridLayout>
 #include <QDesktopWidget>
+#include <QCheckBox>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow)
 {
+    // init0 ==================================================================
+    grammar_active_rules_.clear();
+    grammar_active_rules_ << 0 << 1 << 6 << 40 << 50 << 51 << 52 << 53 << 55
+                          << 56 << 57 << 60 << 61 << 62 << 100 << 101 << 104
+                          << 105 << 106 << 107 << 108 << 109;
+    grammar_ = setGrammarRules(grammar_active_rules_);
+
     // init1 ==================================================================
     lexical_analyzer_ = new SLexicalAnalyzer();
     connect(lexical_analyzer_, SIGNAL(lexical_error(int,QString)),
@@ -20,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     syntactic_analyzer_ = new SSyntacticAnalyzer();
     connect(syntactic_analyzer_, SIGNAL(syntax_error(int,QString)),
             this, SLOT(displayError(int,QString)));
+
+    syntactic_analyzer_->setGrammar(grammar_);
     if (!syntactic_analyzer_->generateSetOfSituations()) {
         displayError(-1, error_msg(E_INTERNAL_GENERATING_SITUATIONS));
         return;
@@ -29,9 +40,10 @@ MainWindow::MainWindow(QWidget *parent) :
         return;
     }
     // ========================================================================
+    //
     // first width is for '#' column; second - 'index', 'start', 'length'
-    int header_num_width = 40, header_index_width = 60;
-    int header_grammar_width = 450;
+    int header_num_width = 50, header_index_width = 60;
+    int header_grammar_width = 440;
     int main_width = 1050, main_height = 650;
     int tab_stop_width = 20;
 
@@ -112,6 +124,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QWidget *tab_synt_2 = new QWidget();
         QWidget *tab_synt_3 = new QWidget();
         QWidget *tab_synt_4 = new QWidget();
+        QWidget *tab_synt_5 = new QWidget();
         tab_synt_main_ = new QTabWidget();
         tab_synt_main_->addTab(tab_synt_0, trUtf8("правый вывод"));
             QGridLayout *grid_synt_0 = new QGridLayout();
@@ -149,10 +162,28 @@ MainWindow::MainWindow(QWidget *parent) :
             table_synt_4_->verticalHeader()->setVisible(false);
             grid_synt_4->addWidget(table_synt_4_);
             tab_synt_4->setLayout(grid_synt_4);
+        tab_synt_main_->addTab(tab_synt_5, trUtf8("set grammar"));
+            QGridLayout *grid_synt_5 = new QGridLayout();
+            table_synt_5_ = new QTableWidget(0, 2);
+            table_synt_5_->setColumnWidth(0, header_num_width);
+            table_synt_5_->setColumnWidth(1, header_grammar_width);
+            table_synt_5_->verticalHeader()->setVisible(false);
+            grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 2);
+
+            QPushButton *b_update_grammar = new QPushButton(trUtf8("применить"));
+            grid_synt_5->addWidget(b_update_grammar, 1, 1);
+            connect(b_update_grammar, SIGNAL(clicked()),
+                    this, SLOT(updateGrammar()));
+
+            tab_synt_5->setLayout(grid_synt_5);
 
         QStringList table_synt_1_headers;
         table_synt_1_headers << trUtf8("#") << trUtf8("правило");
         table_synt_1_->setHorizontalHeaderLabels(table_synt_1_headers);
+
+        QStringList table_synt_5_headers;
+        table_synt_5_headers << trUtf8("#") << trUtf8("правило");
+        table_synt_5_->setHorizontalHeaderLabels(table_synt_5_headers);
 
         QGridLayout *grid_synt = new QGridLayout();
         grid_synt->addWidget(tab_synt_main_);
@@ -174,17 +205,41 @@ MainWindow::MainWindow(QWidget *parent) :
 //    QList<QHash<Token, int> > table_goto = syntactic_analyzer_->getTableGoto();
 
     clearSyntTables();
-    for (i = 0; i < Grammar.length(); i++) {
+    QTableWidgetItem *item_0, *item_1;
+    for (i = 0; i < grammar_.length(); i++) {
         table_synt_1_->insertRow(i);
 
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
-        item_0->setTextAlignment(Qt::AlignCenter);
+        item_0 = new QTableWidgetItem;
+        item_1 = new QTableWidgetItem;
 
+        item_0->setTextAlignment(Qt::AlignCenter);
         item_0->setText(QString::number(i));
-        item_1->setText(Grammar.at(i).toString());
+        item_1->setText(grammar_.at(i).toString());
         table_synt_1_->setItem(i, 0, item_0);
         table_synt_1_->setItem(i, 1, item_1);
+    }
+    for (i = 0; i < Grammar_full.length(); i++) {
+        table_synt_5_->insertRow(i);
+
+        item_0 = new QTableWidgetItem;
+        item_1 = new QTableWidgetItem;
+
+        item_0->setTextAlignment(Qt::AlignCenter);
+        item_0->setText(QString::number(i));
+        if (i == 0) {
+            // rule #0 must be always active
+            item_0->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
+        } else {
+            item_0->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        }
+        if (grammar_active_rules_.contains(i)) {
+            item_0->setCheckState(Qt::Checked);
+        } else {
+            item_0->setCheckState(Qt::Unchecked);
+        }
+        item_1->setText(Grammar_full.at(i).toString());
+        table_synt_5_->setItem(i, 0, item_0);
+        table_synt_5_->setItem(i, 1, item_1);
     }
 
 //    QStringList sets;
@@ -231,7 +286,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //        }
 //    }
 
-//    QSet<Token> nonterminals = getAllNonTerminalTokens();
+//    QSet<Token> nonterminals = getAllNonTerminalTokens(grammar_);
 //    QStringList table_synt_4_headers;
 //    table_synt_4_headers << trUtf8("#");
 //    foreach (Token nonterminal, nonterminals) {
@@ -360,6 +415,9 @@ void MainWindow::clearSyntTables()
     }
     while (table_synt_4_->rowCount() > 0) {
         table_synt_4_->removeRow(0);
+    }
+    while (table_synt_5_->rowCount() > 0) {
+        table_synt_5_->removeRow(0);
     }
 }
 
@@ -605,7 +663,7 @@ void MainWindow::run()
         QStringList text_0_first, text_0_second;
         foreach (int rule_num, parse_rules) {
             text_0_first << QString::number(rule_num);
-            text_0_second << (QString("#%1\n\t").arg(rule_num) + Grammar.at(rule_num).toString());
+            text_0_second << (QString("#%1\n\t").arg(rule_num) + grammar_.at(rule_num).toString());
         }
         text_0 = text_0_first.join(" ") + "\n\n"
                 + trUtf8("Подробно:\n=========================================\n")
@@ -614,6 +672,28 @@ void MainWindow::run()
         text_0 = trUtf8("Не удалось получить правый вывод в заданной грамматике");
     }
     edit_synt_0_->setPlainText(text_0);
+}
+
+void MainWindow::updateGrammar() {
+    grammar_active_rules_.clear();
+    grammar_active_rules_ << 0;
+    for (int i = 1; i < table_synt_5_->rowCount(); i++) {
+        QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
+        if (chb->isChecked()) {
+            grammar_active_rules_ << i;
+        }
+    }
+    grammar_ = setGrammarRules(grammar_active_rules_);
+
+    syntactic_analyzer_->setGrammar(grammar_);
+    if (!syntactic_analyzer_->generateSetOfSituations()) {
+        displayError(-1, error_msg(E_INTERNAL_GENERATING_SITUATIONS));
+        return;
+    }
+    if (!syntactic_analyzer_->generateActionGotoTables()) {
+//        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
+        return;
+    }
 }
 
 

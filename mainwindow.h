@@ -32,6 +32,10 @@ public:
 
 private:
     Ui::MainWindow *ui_;
+
+    QList<GrammarRule> grammar_;
+    QList<int> grammar_active_rules_;
+
     SLexicalAnalyzer *lexical_analyzer_;
     SSyntacticAnalyzer *syntactic_analyzer_;
 
@@ -51,6 +55,7 @@ private:
     QPlainTextEdit *edit_synt_2_; // situations
     QTableWidget *table_synt_3_;  // action rules
     QTableWidget *table_synt_4_;  // goto rules
+    QTableWidget *table_synt_5_;  // set grammar
 
     QString base_window_title_;
 
@@ -66,6 +71,7 @@ private slots:
     void on_open_triggered();
     void on_save_triggered();
     void on_run_triggered();
+    void updateGrammar();
 };
 
 #endif // MAINWINDOW_H
