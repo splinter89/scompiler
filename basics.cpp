@@ -50,8 +50,6 @@ QString tokenToString(const Token token) {
             s = QString::fromUtf8("<аргумент>"); break;
         case N_BLOCK:
             s = QString::fromUtf8("<блок>"); break;
-        case N_BLOCK_W_BRACES:
-            s = QString::fromUtf8("<блок_со_скобками>"); break;
         case N_BLOCK_BODY:
             s = QString::fromUtf8("<тело_блока>"); break;
         case N_BLOCK_ELEMENT:
