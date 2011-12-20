@@ -168,7 +168,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // ========================================================================
     // draw syntax data (grammar, set fo situations, action/goto tables) ======
-//    int i, j;
+    int i;
 //    QList<QSet<Situation> > ultimate_set = syntactic_analyzer_->getUltimateSetOfSituations();
 //    QList<QHash<Token, Action> > table_action = syntactic_analyzer_->getTableAction();
 //    QList<QHash<Token, int> > table_goto = syntactic_analyzer_->getTableGoto();
@@ -213,7 +213,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //        item_0->setText(QString::number(i));
 //        table_synt_3_->setItem(i, 0, item_0);
 //    }
-//    j = 1;
+//    int j = 1;
 //    foreach (Token terminal, terminals) {
 //        bool empty_col = true;
 //        for (i = 0; i < table_action.length(); i++) {

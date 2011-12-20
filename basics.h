@@ -210,7 +210,7 @@ static QList<GrammarRule> initGrammarRules() {
 //         << GrammarRule(N_PROG_ELEMENT, EmptyTokenList() << N_CLASS)
 //         << GrammarRule(N_PROG_ELEMENT, EmptyTokenList() << N_CLASS_METHOD_IMPLEMENTATION)
          << GrammarRule(N_PROG_ELEMENT, EmptyTokenList() << N_VAR_DECLARATION)
-//         << GrammarRule(N_PROG_ELEMENT, EmptyTokenList() << N_FUNCTION)
+         << GrammarRule(N_PROG_ELEMENT, EmptyTokenList() << N_FUNCTION)
 
 //         << GrammarRule(N_CLASS, EmptyTokenList() << K_CLASS << S_SPACE << T_ID << S_CURLY_OPEN << S_CURLY_CLOSE << S_SEMICOLON)
 //         << GrammarRule(N_CLASS, EmptyTokenList() << K_CLASS << S_SPACE << T_ID << S_CURLY_OPEN << N_CLASS_BODY << S_CURLY_CLOSE << S_SEMICOLON)
@@ -249,39 +249,40 @@ static QList<GrammarRule> initGrammarRules() {
 //         << GrammarRule(N_CLASS_METHOD_IMPLEMENTATION, EmptyTokenList() << T_ID << S_SCOPE << S_TILDE << T_ID << S_ROUND_OPEN << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
 //         << GrammarRule(N_CLASS_METHOD_IMPLEMENTATION, EmptyTokenList() << T_ID << S_SCOPE << S_TILDE << T_ID << S_ROUND_OPEN << N_ARGUMENTS_LIST << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
 
-//         << GrammarRule(N_FUNCTION, EmptyTokenList() << N_VAR_TYPE << S_SPACE << T_ID << S_ROUND_OPEN << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
-//         << GrammarRule(N_FUNCTION, EmptyTokenList() << N_VAR_TYPE << S_SPACE << T_ID << S_ROUND_OPEN << N_ARGUMENTS_LIST << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
-//         << GrammarRule(N_FUNCTION, EmptyTokenList() << K_VOID << S_SPACE << T_ID << S_ROUND_OPEN << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
-//         << GrammarRule(N_FUNCTION, EmptyTokenList() << K_VOID << S_SPACE << T_ID << S_ROUND_OPEN << N_ARGUMENTS_LIST << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
+         << GrammarRule(N_FUNCTION, EmptyTokenList() << N_VAR_TYPE << S_SPACE << T_ID << S_ROUND_OPEN << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
+         << GrammarRule(N_FUNCTION, EmptyTokenList() << N_VAR_TYPE << S_SPACE << T_ID << S_ROUND_OPEN << N_ARGUMENTS_LIST << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
+         << GrammarRule(N_FUNCTION, EmptyTokenList() << K_VOID << S_SPACE << T_ID << S_ROUND_OPEN << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
+         << GrammarRule(N_FUNCTION, EmptyTokenList() << K_VOID << S_SPACE << T_ID << S_ROUND_OPEN << N_ARGUMENTS_LIST << S_ROUND_CLOSE << N_BLOCK_W_BRACES)
 
-//         << GrammarRule(N_ARGUMENTS_LIST, EmptyTokenList() << N_ARGUMENT)
-//         << GrammarRule(N_ARGUMENTS_LIST, EmptyTokenList() << N_ARGUMENTS_LIST << S_COMMA << N_ARGUMENT)
+         << GrammarRule(N_ARGUMENTS_LIST, EmptyTokenList() << N_ARGUMENT)
+         << GrammarRule(N_ARGUMENTS_LIST, EmptyTokenList() << N_ARGUMENTS_LIST << S_COMMA << N_ARGUMENT)
 
-//         << GrammarRule(N_ARGUMENT, EmptyTokenList() << N_VAR_TYPE << S_SPACE << T_ID)
-//         << GrammarRule(N_ARGUMENT, EmptyTokenList() << K_CONST << S_SPACE << N_VAR_TYPE << S_SPACE << T_ID)
-//         << GrammarRule(N_ARGUMENT, EmptyTokenList() << N_VAR_TYPE << S_SPACE << S_AMP << T_ID)
-//         << GrammarRule(N_ARGUMENT, EmptyTokenList() << K_CONST << S_SPACE << N_VAR_TYPE << S_SPACE << S_AMP << T_ID)
+         << GrammarRule(N_ARGUMENT, EmptyTokenList() << N_VAR_TYPE << S_SPACE << T_ID)
+         << GrammarRule(N_ARGUMENT, EmptyTokenList() << K_CONST << S_SPACE << N_VAR_TYPE << S_SPACE << T_ID)
+         << GrammarRule(N_ARGUMENT, EmptyTokenList() << N_VAR_TYPE << S_SPACE << S_AMP << T_ID)
+         << GrammarRule(N_ARGUMENT, EmptyTokenList() << K_CONST << S_SPACE << N_VAR_TYPE << S_SPACE << S_AMP << T_ID)
 
-//         << GrammarRule(N_BLOCK, EmptyTokenList() << N_BLOCK_ELEMENT)
-//         << GrammarRule(N_BLOCK, EmptyTokenList() << N_BLOCK_W_BRACES)
+         << GrammarRule(N_BLOCK, EmptyTokenList() << N_BLOCK_ELEMENT)
+         << GrammarRule(N_BLOCK, EmptyTokenList() << N_BLOCK_W_BRACES)
 
-//         << GrammarRule(N_BLOCK_W_BRACES, EmptyTokenList() << S_CURLY_OPEN << S_CURLY_CLOSE)
-//         << GrammarRule(N_BLOCK_W_BRACES, EmptyTokenList() << S_CURLY_OPEN << N_BLOCK_BODY << S_CURLY_CLOSE)
+         << GrammarRule(N_BLOCK_W_BRACES, EmptyTokenList() << S_CURLY_OPEN << S_CURLY_CLOSE)
+         << GrammarRule(N_BLOCK_W_BRACES, EmptyTokenList() << S_CURLY_OPEN << N_BLOCK_BODY << S_CURLY_CLOSE)
 
-//         << GrammarRule(N_BLOCK_BODY, EmptyTokenList() << N_BLOCK_ELEMENT)
-//         << GrammarRule(N_BLOCK_BODY, EmptyTokenList() << N_BLOCK_BODY << N_BLOCK_ELEMENT)
+         << GrammarRule(N_BLOCK_BODY, EmptyTokenList() << N_BLOCK_ELEMENT)
+         << GrammarRule(N_BLOCK_BODY, EmptyTokenList() << N_BLOCK_BODY << N_BLOCK_ELEMENT)
 
-//         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << N_VAR_DECLARATION)
-//         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << S_SEMICOLON)
+         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << N_VAR_DECLARATION)
+         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << S_SEMICOLON)
 //         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << N_EXPRESSION << S_SEMICOLON)
-//         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << N_RETURN << S_SEMICOLON)
+         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << N_RETURN << S_SEMICOLON)
 //         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << N_LOOP)
 //         << GrammarRule(N_BLOCK_ELEMENT, EmptyTokenList() << N_BRANCHING)
 
+         << GrammarRule(N_RETURN, EmptyTokenList() << K_RETURN)
 //         << GrammarRule(N_RETURN, EmptyTokenList() << K_RETURN << S_SPACE << N_EXPRESSION)
 
          << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_OP_1)
-         << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_EXPRESSION << S_COMMA << N_OP_1)
+//         << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_EXPRESSION << S_COMMA << N_OP_1)
 
          << GrammarRule(N_OP_1, EmptyTokenList() << N_OP_2)
          << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_ASSIGN << N_OP_2)
@@ -325,7 +326,7 @@ static QList<GrammarRule> initGrammarRules() {
          << GrammarRule(N_OP_8, EmptyTokenList() << S_DECREMENT << N_OBJECT)
          << GrammarRule(N_OP_8, EmptyTokenList() << S_AMP << N_OBJECT)
 
-         << GrammarRule(N_OP_9, EmptyTokenList() << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE)
+//         << GrammarRule(N_OP_9, EmptyTokenList() << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE)
          << GrammarRule(N_OP_9, EmptyTokenList() << T_CONST)
          << GrammarRule(N_OP_9, EmptyTokenList() << N_OBJECT)
          << GrammarRule(N_OP_9, EmptyTokenList() << N_OBJECT << S_INCREMENT)
@@ -333,7 +334,7 @@ static QList<GrammarRule> initGrammarRules() {
          << GrammarRule(N_OP_9, EmptyTokenList() << N_FUNC_CALL)
 
          << GrammarRule(N_FUNC_CALL, EmptyTokenList() << N_OBJECT << S_ROUND_OPEN << S_ROUND_CLOSE)
-         << GrammarRule(N_FUNC_CALL, EmptyTokenList() << N_OBJECT << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE)
+//         << GrammarRule(N_FUNC_CALL, EmptyTokenList() << N_OBJECT << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE)
 
          << GrammarRule(N_OBJECT, EmptyTokenList() << T_ID)
          << GrammarRule(N_OBJECT, EmptyTokenList() << T_ID << S_PERIOD << T_ID)
@@ -357,11 +358,9 @@ static QList<GrammarRule> initGrammarRules() {
 //         << GrammarRule(N_CLASS_PROPS_LIST, EmptyTokenList() << N_CLASS_PROPS_LIST << S_COMMA << T_ID)
 
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << T_ID)
-//         << GrammarRule(N_VARS_LIST, EmptyTokenList() << S_MULT << T_ID)
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << N_VARS_LIST << S_COMMA << T_ID)
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << N_VARS_LIST << S_COMMA << S_MULT << T_ID)
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << T_ID << S_ASSIGN << N_OP_1)
-//         << GrammarRule(N_VARS_LIST, EmptyTokenList() << S_MULT << T_ID << S_ASSIGN << N_OP_1)
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << N_VARS_LIST << S_COMMA << T_ID << S_ASSIGN << N_OP_1)
          << GrammarRule(N_VARS_LIST, EmptyTokenList() << N_VARS_LIST << S_COMMA << S_MULT << T_ID << S_ASSIGN << N_OP_1)
 

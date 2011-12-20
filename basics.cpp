@@ -32,6 +32,10 @@ QString tokenToString(const Token token) {
             s = QString::fromUtf8("<элемент_программы>"); break;
         case N_CLASS:
             s = QString::fromUtf8("<класс>"); break;
+        case N_CLASS_BODY:
+            s = QString::fromUtf8("<тело_класса>"); break;
+        case N_CLASS_ELEMENT:
+            s = QString::fromUtf8("<элемент_класса>"); break;
         case N_ACCESS_SPEC:
             s = QString::fromUtf8("<спецификатор_доступа>"); break;
         case N_CLASS_METHOD:
@@ -46,6 +50,10 @@ QString tokenToString(const Token token) {
             s = QString::fromUtf8("<аргумент>"); break;
         case N_BLOCK:
             s = QString::fromUtf8("<блок>"); break;
+        case N_BLOCK_W_BRACES:
+            s = QString::fromUtf8("<блок_со_скобками>"); break;
+        case N_BLOCK_BODY:
+            s = QString::fromUtf8("<тело_блока>"); break;
         case N_BLOCK_ELEMENT:
             s = QString::fromUtf8("<элемент_блока>"); break;
         case N_RETURN:
