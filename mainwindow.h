@@ -8,6 +8,9 @@
 #include <QTabWidget>
 #include <QTableWidget>
 
+#include "slexicalanalyzer.h"
+#include "ssyntacticanalyzer.h"
+
 namespace Ui {
     class MainWindow;
 }
@@ -29,6 +32,8 @@ public:
 
 private:
     Ui::MainWindow *ui_;
+    SLexicalAnalyzer *lexical_analyzer_;
+    SSyntacticAnalyzer *syntactic_analyzer_;
 
     CodeEditor *editor_;
     QTabWidget *tab_main_;

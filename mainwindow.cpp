@@ -1,9 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "slexicalanalyzer.h"
-#include "ssyntacticanalyzer.h"
-
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QFileDialog>
@@ -15,6 +12,23 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow)
 {
+    // init1 ==================================================================
+    lexical_analyzer_ = new SLexicalAnalyzer();
+    connect(lexical_analyzer_, SIGNAL(lexical_error(int,QString)),
+            this, SLOT(displayError(int,QString)));
+    // init2 ==================================================================
+    syntactic_analyzer_ = new SSyntacticAnalyzer();
+    connect(syntactic_analyzer_, SIGNAL(syntax_error(int,QString)),
+            this, SLOT(displayError(int,QString)));
+    if (!syntactic_analyzer_->generateSetOfSituations()) {
+        displayError(-1, error_msg(E_INTERNAL_GENERATING_SITUATIONS));
+        return;
+    }
+    if (!syntactic_analyzer_->generateActionGotoTables()) {
+//        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
+        return;
+    }
+    // ========================================================================
     // first width is for '#' column; second - 'index', 'start', 'length'
     int header_num_width = 40, header_index_width = 60;
     int header_grammar_width = 450;
@@ -140,14 +154,6 @@ MainWindow::MainWindow(QWidget *parent) :
         table_synt_1_headers << trUtf8("#") << trUtf8("правило");
         table_synt_1_->setHorizontalHeaderLabels(table_synt_1_headers);
 
-        QStringList table_synt_3_headers;
-        table_synt_3_headers << trUtf8("#") << trUtf8("");
-        table_synt_3_->setHorizontalHeaderLabels(table_synt_3_headers);
-
-        QStringList table_synt_4_headers;
-        table_synt_4_headers << trUtf8("#") << trUtf8("");
-        table_synt_4_->setHorizontalHeaderLabels(table_synt_4_headers);
-
         QGridLayout *grid_synt = new QGridLayout();
         grid_synt->addWidget(tab_synt_main_);
         tab_synt->setLayout(grid_synt);
@@ -159,6 +165,104 @@ MainWindow::MainWindow(QWidget *parent) :
     splitter->addWidget(editor_);
     splitter->addWidget(tab_main_);
     setCentralWidget(splitter);
+
+    // ========================================================================
+    // draw syntax data (grammar, set fo situations, action/goto tables) ======
+//    int i, j;
+//    QList<QSet<Situation> > ultimate_set = syntactic_analyzer_->getUltimateSetOfSituations();
+//    QList<QHash<Token, Action> > table_action = syntactic_analyzer_->getTableAction();
+//    QList<QHash<Token, int> > table_goto = syntactic_analyzer_->getTableGoto();
+
+    clearSyntTables();
+    for (i = 0; i < Grammar.length(); i++) {
+        table_synt_1_->insertRow(i);
+
+        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        item_0->setTextAlignment(Qt::AlignCenter);
+
+        item_0->setText(QString::number(i));
+        item_1->setText(Grammar.at(i).toString());
+        table_synt_1_->setItem(i, 0, item_0);
+        table_synt_1_->setItem(i, 1, item_1);
+    }
+
+//    QStringList sets;
+//    for (i = 0; i < ultimate_set.length(); i++) {
+//        QSet<Situation> one_set = ultimate_set.at(i);
+//        QStringList set;
+//        foreach (Situation situation, one_set) {
+//            set << ("\t" + situation.toString());
+//        }
+//        sets << ("// #" + QString::number(i) + "\n" + set.join(",\n"));
+//    }
+//    edit_synt_2_->setPlainText("(\n" + sets.join("\n), (\n") + "\n)");
+
+//    QSet<Token> terminals = getAllTerminalTokens();
+//    QStringList table_synt_3_headers;
+//    table_synt_3_headers << trUtf8("#");
+//    foreach (Token terminal, terminals) {
+//        table_synt_3_headers << tokenToString(terminal);
+//    }
+//    table_synt_3_->setColumnCount(terminals.count() + 1);
+//    table_synt_3_->setRowCount(table_action.length());
+//    table_synt_3_->setHorizontalHeaderLabels(table_synt_3_headers);
+//    for (i = 0; i < table_action.length(); i++) {
+//        QTableWidgetItem *item_0 = new QTableWidgetItem;
+//        item_0->setTextAlignment(Qt::AlignCenter);
+//        item_0->setText(QString::number(i));
+//        table_synt_3_->setItem(i, 0, item_0);
+//    }
+//    j = 1;
+//    foreach (Token terminal, terminals) {
+//        bool empty_col = true;
+//        for (i = 0; i < table_action.length(); i++) {
+//            if (table_action.at(i).contains(terminal)) {
+//                QTableWidgetItem *item = new QTableWidgetItem;
+//                item->setText(table_action.at(i).value(terminal).toString());
+//                table_synt_3_->setItem(i, j, item);
+//                empty_col = false;
+//            }
+//        }
+//        if (empty_col) {
+//            table_synt_3_->removeColumn(j);
+//        } else {
+//            j++;
+//        }
+//    }
+
+//    QSet<Token> nonterminals = getAllNonTerminalTokens();
+//    QStringList table_synt_4_headers;
+//    table_synt_4_headers << trUtf8("#");
+//    foreach (Token nonterminal, nonterminals) {
+//        table_synt_4_headers << tokenToString(nonterminal);
+//    }
+//    table_synt_4_->setColumnCount(nonterminals.count() + 1);
+//    table_synt_4_->setRowCount(table_goto.length());
+//    table_synt_4_->setHorizontalHeaderLabels(table_synt_4_headers);
+//    for (i = 0; i < table_goto.length(); i++) {
+//        QTableWidgetItem *item_0 = new QTableWidgetItem;
+//        item_0->setTextAlignment(Qt::AlignCenter);
+//        item_0->setText(QString::number(i));
+//        table_synt_4_->setItem(i, 0, item_0);
+//    }
+//    j = 1;
+//    foreach (Token nonterminal, nonterminals) {
+//        bool empty_col = true;
+//        for (i = 0; i < table_goto.length(); i++) {
+//            if (table_goto.at(i).contains(nonterminal)) {
+//                QTableWidgetItem *item = new QTableWidgetItem;
+//                item->setText(QString::number(table_goto.at(i).value(nonterminal)));
+//                table_synt_4_->setItem(i, j, item);
+//                empty_col = false;
+//            }
+//        }
+//        if (empty_col) {
+//            table_synt_4_->removeColumn(j);
+//        } else {
+//            j++;
+//        }
+//    }
 }
 
 MainWindow::~MainWindow()
@@ -298,23 +402,19 @@ void MainWindow::run()
         return;
     }
 
-    int i, j;
-
+    int i;
     // --------------------------------------------------------------------------------
     // lexical analysis ---------------------------------------------------------------
     // --------------------------------------------------------------------------------
-    SLexicalAnalyzer *lexical_analyzer = new SLexicalAnalyzer();
-    connect(lexical_analyzer, SIGNAL(lexical_error(int,QString)),
-            this, SLOT(displayError(int,QString)));
-    if (lexical_analyzer->process(editor_->toPlainText())) {
+    if (lexical_analyzer_->process(editor_->toPlainText())) {
         setStatusMsg("ok");
     }
 
-    QList<TokenPointer>   tokens           = lexical_analyzer->getAllTokens();
-    QList<TokenId>        table_ids        = lexical_analyzer->getTableIds();
-    QList<TokenConst>     table_consts     = lexical_analyzer->getTableConsts();
-    QList<TokenKeyword>   table_keywords   = lexical_analyzer->getTableKeywords();
-    QList<TokenSeparator> table_separators = lexical_analyzer->getTableSeparators();
+    QList<TokenPointer>   tokens           = lexical_analyzer_->getAllTokens();
+    QList<TokenId>        table_ids        = lexical_analyzer_->getTableIds();
+    QList<TokenConst>     table_consts     = lexical_analyzer_->getTableConsts();
+    QList<TokenKeyword>   table_keywords   = lexical_analyzer_->getTableKeywords();
+    QList<TokenSeparator> table_separators = lexical_analyzer_->getTableSeparators();
 
 
     clearLexTables();
@@ -495,29 +595,10 @@ void MainWindow::run()
     // --------------------------------------------------------------------------------
     // syntax analysis ----------------------------------------------------------------
     // --------------------------------------------------------------------------------
-    SSyntacticAnalyzer *syntactic_analyzer = new SSyntacticAnalyzer();
-    connect(syntactic_analyzer, SIGNAL(syntax_error(int,QString)),
-            this, SLOT(displayError(int,QString)));
-    if (!syntactic_analyzer->generateSetOfSituations()) {
-        displayError(-1, error_msg(E_INTERNAL_GENERATING_SITUATIONS));
-        return;
-    }
-    if (!syntactic_analyzer->generateActionGotoTables()) {
-//        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
-        return;
-    }
-
-    QList<int> parse_rules = syntactic_analyzer->process(tokens,table_ids, table_consts,
+    QList<int> parse_rules = syntactic_analyzer_->process(tokens,table_ids, table_consts,
                                                          table_keywords, table_separators);
-    QList<QSet<Situation> > ultimate_set = syntactic_analyzer->getUltimateSetOfSituations();
-    QList<QHash<Token, Action> > table_action = syntactic_analyzer->getTableAction();
-    QList<QHash<Token, int> > table_goto = syntactic_analyzer->getTableGoto();
-
     // reverse the list
     for(int k = 0; k < (parse_rules.size()/2); k++) parse_rules.swap(k, parse_rules.size()-(1+k));
-
-
-    clearSyntTables();
 
     QString text_0;
     if (!parse_rules.isEmpty()) {
@@ -533,96 +614,6 @@ void MainWindow::run()
         text_0 = trUtf8("Не удалось получить правый вывод в заданной грамматике");
     }
     edit_synt_0_->setPlainText(text_0);
-
-    for (i = 0; i < Grammar.length(); i++) {
-        table_synt_1_->insertRow(i);
-
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
-        item_0->setTextAlignment(Qt::AlignCenter);
-
-        item_0->setText(QString::number(i));
-        item_1->setText(Grammar.at(i).toString());
-        table_synt_1_->setItem(i, 0, item_0);
-        table_synt_1_->setItem(i, 1, item_1);
-    }
-
-    QStringList sets;
-    for (i = 0; i < ultimate_set.length(); i++) {
-        QSet<Situation> one_set = ultimate_set.at(i);
-        QStringList set;
-        foreach (Situation situation, one_set) {
-            set << ("\t" + situation.toString());
-        }
-        sets << ("// #" + QString::number(i) + "\n" + set.join(",\n"));
-    }
-    edit_synt_2_->setPlainText("(\n" + sets.join("\n), (\n") + "\n)");
-
-    QSet<Token> terminals = getAllTerminalTokens();
-    QStringList table_synt_3_headers;
-    table_synt_3_headers << trUtf8("#");
-    foreach (Token terminal, terminals) {
-        table_synt_3_headers << tokenToString(terminal);
-    }
-    table_synt_3_->setColumnCount(terminals.count() + 1);
-    table_synt_3_->setRowCount(table_action.length());
-    table_synt_3_->setHorizontalHeaderLabels(table_synt_3_headers);
-    for (i = 0; i < table_action.length(); i++) {
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        item_0->setTextAlignment(Qt::AlignCenter);
-        item_0->setText(QString::number(i));
-        table_synt_3_->setItem(i, 0, item_0);
-    }
-    j = 1;
-    foreach (Token terminal, terminals) {
-        bool empty_col = true;
-        for (i = 0; i < table_action.length(); i++) {
-            if (table_action.at(i).contains(terminal)) {
-                QTableWidgetItem *item = new QTableWidgetItem;
-                item->setText(table_action.at(i).value(terminal).toString());
-                table_synt_3_->setItem(i, j, item);
-                empty_col = false;
-            }
-        }
-        if (empty_col) {
-            table_synt_3_->removeColumn(j);
-        } else {
-            j++;
-        }
-    }
-
-    QSet<Token> nonterminals = getAllNonTerminalTokens();
-    QStringList table_synt_4_headers;
-    table_synt_4_headers << trUtf8("#");
-    foreach (Token nonterminal, nonterminals) {
-        table_synt_4_headers << tokenToString(nonterminal);
-    }
-    table_synt_4_->setColumnCount(nonterminals.count() + 1);
-    table_synt_4_->setRowCount(table_goto.length());
-    table_synt_4_->setHorizontalHeaderLabels(table_synt_4_headers);
-    for (i = 0; i < table_goto.length(); i++) {
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        item_0->setTextAlignment(Qt::AlignCenter);
-        item_0->setText(QString::number(i));
-        table_synt_4_->setItem(i, 0, item_0);
-    }
-    j = 1;
-    foreach (Token nonterminal, nonterminals) {
-        bool empty_col = true;
-        for (i = 0; i < table_goto.length(); i++) {
-            if (table_goto.at(i).contains(nonterminal)) {
-                QTableWidgetItem *item = new QTableWidgetItem;
-                item->setText(QString::number(table_goto.at(i).value(nonterminal)));
-                table_synt_4_->setItem(i, j, item);
-                empty_col = false;
-            }
-        }
-        if (empty_col) {
-            table_synt_4_->removeColumn(j);
-        } else {
-            j++;
-        }
-    }
 }
 
 

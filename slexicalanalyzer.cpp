@@ -13,8 +13,7 @@ SLexicalAnalyzer::~SLexicalAnalyzer()
 
 bool SLexicalAnalyzer::process(const QString code)
 {
-//    QList<QString> space_chars;
-//    space_chars << " " << "\n" << "\t" << "\r";
+    tokens_.clear();
 
     Token token_type;
     ConstType const_type;
