@@ -1,4 +1,4 @@
-#include "SSyntacticAnalyzer.h"
+#include "ssyntacticanalyzer.h"
 #include <QDebug>
 
 SSyntacticAnalyzer::SSyntacticAnalyzer(QObject * parent)
