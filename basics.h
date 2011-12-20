@@ -282,12 +282,12 @@ static QList<GrammarRule> initGrammarFullRules() {
          << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_EXPRESSION << S_COMMA << N_OP_1)
 
          << GrammarRule(N_OP_1, EmptyTokenList() << N_OP_2)
-         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_ASSIGN << N_OP_2)
-         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_ADD_ASSIGN << N_OP_2)
-         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_SUB_ASSIGN << N_OP_2)
-         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_MULT_ASSIGN << N_OP_2)
-         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_DIV_ASSIGN << N_OP_2)
-         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_MOD_ASSIGN << N_OP_2)
+         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_ASSIGN << N_OP_1)
+         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_ADD_ASSIGN << N_OP_1)
+         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_SUB_ASSIGN << N_OP_1)
+         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_MULT_ASSIGN << N_OP_1)
+         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_DIV_ASSIGN << N_OP_1)
+         << GrammarRule(N_OP_1, EmptyTokenList() << N_OBJECT << S_MOD_ASSIGN << N_OP_1)
 
          << GrammarRule(N_OP_2, EmptyTokenList() << N_OP_3)
          << GrammarRule(N_OP_2, EmptyTokenList() << N_OP_2 << S_OR << N_OP_3)
