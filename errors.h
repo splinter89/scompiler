@@ -29,7 +29,7 @@ static QHash<ErrorType, QString> initErrorCodes() {
 
 //        hash.insert(E_NOT_LR1_GRAMMAR,              "The predefined grammar is not LR(1)");
         hash.insert(E_NOT_LR1_GRAMMAR,              "The chain rejected [it may be not LR(1)-grammar]");
-        hash.insert(E_INTERNAL_GENERATING_SITUATIONS, "Grammar not loaded [failed to generate situations]");
+        hash.insert(E_INTERNAL_GENERATING_SITUATIONS, "Grammar not loaded [failed to generate situations (internal)]");
         hash.insert(E_INTERNAL_GENERATING_TABLES,   "The chain rejected [failed to generate action/goto tables (internal)]");
         hash.insert(E_INTERNAL_GOTO_UNDEFINED,      "The chain rejected [goto-rule undefined (internal)]");
         hash.insert(E_INTERNAL_ACTION_UNDEFINED,    "The chain rejected [action-rule undefined (internal)]");

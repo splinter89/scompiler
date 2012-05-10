@@ -5,7 +5,7 @@
 #include <QDebug>
 
 enum Token {
-    UNKNOWN,        // MUST BE FIRST(!)
+    UNKNOWN,        // MUST BE FIRST(!) - left tokens border
     LAMBDA,         // empty token
     DOT_TOKEN,      // separator in LR-situation
 
@@ -66,7 +66,7 @@ enum Token {
     N_FOR_LOOP,
     N_BRANCHING,
 
-    EOF_TOKEN      // end of input string (MUST BE LAST(!))
+    EOF_TOKEN      // end of input string (MUST BE LAST(!)) - right tokens border
 };
 enum ConstType {CONST_BOOL, CONST_INT, CONST_DOUBLE, CONST_CHAR, CONST_STRING};
 enum ActionType {A_SHIFT, A_REDUCE, A_ACCEPT};
@@ -86,9 +86,6 @@ struct TokenKeyword {
 struct TokenSeparator {
     Token type;
 };
-/*struct TokenNonTerminal {
-    Token type;
-};*/
 
 // lexical convolution item
 struct TokenPointer {
@@ -382,7 +379,7 @@ static const QList<GrammarRule> Grammar_full = initGrammarFullRules();
 QList<GrammarRule> setGrammarRules(QList<int> grammar_active_rules);
 
 
-// cool xD
+// cool xD - in order to use QSet<Situation>
 inline uint qHash(const Situation &e)
 {
     QStringList res;

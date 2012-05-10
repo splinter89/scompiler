@@ -131,11 +131,12 @@ QString Action::toString() const {
     return res;
 }
 QString Situation::toString() const {
-    QString right;
+    QString res, right;
     foreach (Token token, right_side) {
         right += tokenToString(token);
     }
-    return "[" + tokenToString(left_token) + " -> " + right + ", " + tokenToString(look_ahead_token) + "]";
+    res = "[" + tokenToString(left_token) + " -> " + right + ", " + tokenToString(look_ahead_token) + "]";
+    return res;
 }
 
 

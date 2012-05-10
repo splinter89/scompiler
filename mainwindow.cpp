@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->showMessage(trUtf8("Статус: ok"));
     base_window_title_ = windowTitle();
 
-    // now draw interface
+    // now draw interface >:[]
     editor_ = new CodeEditor();
     editor_->setTabStopWidth(tab_stop_width);
     editor_->setCursor(Qt::IBeamCursor);

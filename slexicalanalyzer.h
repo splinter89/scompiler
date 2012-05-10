@@ -48,4 +48,4 @@ signals:
     void lexical_error(int pos, QString msg);
 };
 
-#endif // SLEXICAL_ANALYZERH
+#endif // SLEXICAL_ANALYZER_H
