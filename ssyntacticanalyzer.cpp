@@ -93,14 +93,14 @@ QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i) {
     do {
         old_count = i.count();
         // для каждой ситуации [A -> alpha.Bbeta, a] из I
-        foreach (const Situation &situation, i) {
+        foreach (const Situation& situation, i) {
             int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
             if ((dot_pos > -1) && (dot_pos < situation.right_side.length() - 1)) {
                 Token b = situation.right_side.at(dot_pos + 1);
                 QList<GrammarRule> rules = getGrammarRulesByLeftToken(b, grammar_);
                 if (!rules.isEmpty()) {
                     // для каждого правила вывода B -> gamma из G
-                    foreach (const GrammarRule &rule, rules) {
+                    foreach (const GrammarRule& rule, rules) {
                         QList<Token> test_right_side;
                         if (dot_pos < situation.right_side.length() - 2) {
                             test_right_side = situation.right_side.mid(dot_pos + 2);    // skip .B
@@ -108,7 +108,7 @@ QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i) {
                         test_right_side << situation.look_ahead_token;  // beta a
                         QSet<Token> first_test = first(test_right_side);
                         // для каждого терминала c из FIRST(beta a), такого, что [B ->.gamma, c] нет в I
-                        foreach (const Token &c, first_test) {
+                        foreach (const Token& c, first_test) {
                             QList<Token> new_right_rule = EmptyTokenList() << DOT_TOKEN;
                             new_right_rule += rule.right_side;     // .gamma
                             Situation new_situation = {b, new_right_rule, c};
@@ -159,8 +159,8 @@ bool SSyntacticAnalyzer::generateSetOfSituations() {
     int old_count;
     do {
         old_count = c.count();
-        foreach (const QSet<Situation> &j, c) {
-            foreach (const Token &x, all_tokens) {
+        foreach (const QSet<Situation>& j, c) {
+            foreach (const Token& x, all_tokens) {
                 QSet<Situation> new_i = makeStep(j, x);
                 if (!new_i.isEmpty() && !c.contains(new_i)) {
                     c << new_i;
@@ -181,13 +181,13 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
     action_table_.clear();
     goto_table_.clear();
 
-    foreach (const QSet<Situation> &i, ultimate_situations_set_) {
+    foreach (const QSet<Situation>& i, ultimate_situations_set_) {
         QHash<Token, Action> action_row;
         QHash<Token, int> goto_row;
 
-        foreach (const Situation &situation, i) {
+        foreach (const Situation& situation, i) {
             // action
-            foreach (const Token &terminal, terminals) {
+            foreach (const Token& terminal, terminals) {
                 int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
                 // step 1
                 if ((dot_pos > -1)
@@ -251,7 +251,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
             }
 
             // goto
-            foreach (const Token &non_terminal, non_terminals) {
+            foreach (const Token& non_terminal, non_terminals) {
                 QSet<Situation> test_i = makeStep(i, non_terminal);
                 int j = ultimate_situations_set_.indexOf(test_i);
                 if (j > -1) {

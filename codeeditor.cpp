@@ -87,7 +87,7 @@ void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 
 //![slotUpdateRequest]
 
-void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
+void CodeEditor::updateLineNumberArea(const QRect& rect, int dy)
 {
     if (dy)
         lineNumberArea->scroll(0, dy);

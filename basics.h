@@ -380,7 +380,7 @@ QList<GrammarRule> setGrammarRules(QList<int> grammar_active_rules);
 
 
 // cool xD - in order to use QSet<Situation>
-inline uint qHash(const Situation &e)
+inline uint qHash(const Situation& e)
 {
     QStringList res;
     res << QString::number(e.left_token) << "+";
@@ -397,20 +397,20 @@ QDebug operator<<(QDebug d, const Token token);
 QDebug operator<<(QDebug d, const Action action);
 QDebug operator<<(QDebug d, const QList<Token> tokens);
 QDebug operator<<(QDebug d, const GrammarRule rule);
-bool operator==(const Situation &e1, const Situation &e2);
+bool operator==(const Situation& e1, const Situation& e2);
 QDebug operator<<(QDebug d, const Situation situation);
 
-QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule> &grammar);
-int indexOfGrammarRule(Token left, QList<Token> right, const QList<GrammarRule> &grammar);
+QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule>& grammar);
+int indexOfGrammarRule(Token left, QList<Token> right, const QList<GrammarRule>& grammar);
 //GrammarRule getGrammarRule(Token left, QList<Token> right);
 
 bool isTokenTerminal(Token token);
 bool isTokenKeyword(Token token);
 bool isTokenSeparator(Token token);
-bool isTokenNonTerminal(Token token, const QList<GrammarRule> &grammar);
+bool isTokenNonTerminal(Token token, const QList<GrammarRule>& grammar);
 
 QSet<Token> getAllTerminalTokens();
-QSet<Token> getAllNonTerminalTokens(const QList<GrammarRule> &grammar);
-QSet<Token> getAllGrammarTokens(const QList<GrammarRule> &grammar);
+QSet<Token> getAllNonTerminalTokens(const QList<GrammarRule>& grammar);
+QSet<Token> getAllGrammarTokens(const QList<GrammarRule>& grammar);
 
 #endif // BASICS_H
