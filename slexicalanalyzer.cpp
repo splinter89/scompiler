@@ -72,16 +72,16 @@ bool SLexicalAnalyzer::process(const QString code)
                 i++;
             }
             identifier = code.mid(start, i - start + 1);
-            if (KeywordCodes.contains(identifier)) {
-                // keyword
-                token_type = T_KEYWORD;
-                token = KeywordCodes.value(identifier);
-            } else if ((identifier == "true") || (identifier == "false")) {
+            if ((identifier == "true") || (identifier == "false")) {
                 // boolean const
                 token_type = T_CONST;
                 const_type = CONST_BOOL;
                 const_value = (identifier == "true") ? true : false;
-            } else {
+            } else if (KeywordCodes.contains(identifier)) {
+                // keyword
+                token_type = T_KEYWORD;
+                token = KeywordCodes.value(identifier);
+            } else  {
                 // identifier
                 token_type = T_ID;
             }

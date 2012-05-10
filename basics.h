@@ -14,7 +14,7 @@ enum Token {
 
     // keywords
     K_IF, K_ELSE, K_FOR, K_WHILE, K_DO, K_RETURN,
-    K_CHAR, K_INT, K_DOUBLE, K_BOOL, K_VOID, K_CONST, K_TRUE, K_FALSE,
+    K_CHAR, K_INT, K_DOUBLE, K_BOOL, K_VOID, K_CONST, /*K_TRUE, K_FALSE,*/
     K_CLASS, K_PUBLIC, K_PRIVATE,
 
     // separators (1x)
@@ -139,8 +139,8 @@ static QHash<QString, Token> initKeywordCodes() {
     hash.insert("bool", K_BOOL);
     hash.insert("void", K_VOID);
     hash.insert("const", K_CONST);
-    hash.insert("true", K_TRUE);
-    hash.insert("false", K_FALSE);
+//    hash.insert("true", K_TRUE);
+//    hash.insert("false", K_FALSE);
     hash.insert("class", K_CLASS);
     hash.insert("public", K_PUBLIC);
     hash.insert("private", K_PRIVATE);
