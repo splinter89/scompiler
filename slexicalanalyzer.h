@@ -33,7 +33,7 @@ private:
 
     // add id, const, keyword/separator
     void addToken(const int start, const int length, const Token type, const QString identifier);
-    void addToken(const int start, const int length, const Token type, const ConstType const_type,
+    void addToken(const int start, const int length, const Token type, const DataType const_type,
                   QVariant value);
     void addToken(const int start, const int length, const Token type, const Token token);
 

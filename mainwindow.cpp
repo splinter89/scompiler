@@ -493,31 +493,33 @@ void MainWindow::run()
         case T_ID:
             token_type_temp = "id";
             table_temp = "i";
-            code_temp = table_ids.at(tokens.at(i).index).identifier;
+            code_temp = table_ids.at(tokens.at(i).index).name;
             break;
 
         case T_CONST:
-            switch (table_consts.at(tokens.at(i).index).const_type) {
-            case CONST_BOOL:
+            switch (table_consts.at(tokens.at(i).index).type) {
+            case TYPE_BOOL:
                 const_type_temp = "bool";
                 break;
 
-            case CONST_INT:
+            case TYPE_INT:
                 const_type_temp = "int";
                 break;
 
-            case CONST_DOUBLE:
+            case TYPE_DOUBLE:
                 const_type_temp = "double";
                 break;
 
-            case CONST_CHAR:
+            case TYPE_CHAR:
                 const_type_temp = "char";
                 break;
 
-            case CONST_STRING:
+            case TYPE_STRING:
                 const_type_temp = "string";
                 break;
 
+            default:
+                const_type_temp = "???";
             }
 
             token_type_temp = "const (" + const_type_temp + ")";
@@ -586,7 +588,7 @@ void MainWindow::run()
         item_0->setTextAlignment(Qt::AlignCenter);
 
         item_0->setText(QString::number(i));
-        item_1->setText(table_ids.at(i).identifier);
+        item_1->setText(table_ids.at(i).name);
         table_lex_1_->setItem(i, 0, item_0);
         table_lex_1_->setItem(i, 1, item_1);
     }
@@ -594,25 +596,29 @@ void MainWindow::run()
         table_lex_2_->insertRow(i);
 
         QString const_type_temp;
-        switch (table_consts.at(i).const_type) {
-        case CONST_BOOL:
+        switch (table_consts.at(i).type) {
+        case TYPE_BOOL:
             const_type_temp = "bool";
             break;
 
-        case CONST_INT:
+        case TYPE_INT:
             const_type_temp = "int";
             break;
 
-        case CONST_DOUBLE:
+        case TYPE_DOUBLE:
             const_type_temp = "double";
             break;
 
-        case CONST_CHAR:
+        case TYPE_CHAR:
             const_type_temp = "char";
             break;
 
-        case CONST_STRING:
+        case TYPE_STRING:
             const_type_temp = "string";
+            break;
+
+        default:
+            const_type_temp = "";
             break;
         }
 

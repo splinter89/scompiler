@@ -16,7 +16,7 @@ bool SLexicalAnalyzer::process(const QString code)
     tokens_.clear();
 
     Token token_type;
-    ConstType const_type;
+    DataType const_type;
 
     QString identifier;
     QVariant const_value;
@@ -75,7 +75,7 @@ bool SLexicalAnalyzer::process(const QString code)
             if ((identifier == "true") || (identifier == "false")) {
                 // boolean const
                 token_type = T_CONST;
-                const_type = CONST_BOOL;
+                const_type = TYPE_BOOL;
                 const_value = (identifier == "true") ? true : false;
             } else if (KeywordCodes.contains(identifier)) {
                 // keyword
@@ -110,21 +110,21 @@ bool SLexicalAnalyzer::process(const QString code)
                     }
                     i += const_value.toString().length() - 1;
                     const_value = const_value.toDouble(&ok);
-                    const_type = CONST_DOUBLE;
+                    const_type = TYPE_DOUBLE;
                 }
             } else if (rx_int.indexIn(str) > -1) {
                 // int (hex/oct/dec) const
                 i += rx_int.cap(1).length() - 1;
                 const_value = rx_int.cap(1).toInt(&ok, 0);
-                const_type = CONST_INT;
+                const_type = TYPE_INT;
             }
 
             // check value for min/max range
-            if (!ok && (const_type == CONST_DOUBLE)) {
+            if (!ok && (const_type == TYPE_DOUBLE)) {
                 tokens_.clear();
                 emit lexical_error(i + 1, error_msg(E_INVALID_DOUBLE));
                 return false;
-            } else if (!ok && (const_type == CONST_INT)) {
+            } else if (!ok && (const_type == TYPE_INT)) {
                 tokens_.clear();
                 emit lexical_error(i + 1, error_msg(E_INVALID_INT));
                 return false;
@@ -173,7 +173,7 @@ bool SLexicalAnalyzer::process(const QString code)
             }
             i++;    // closing apostrophe
             token_type = T_CONST;
-            const_type = CONST_CHAR;
+            const_type = TYPE_CHAR;
         } else if (code.at(i) == '"') {
             // string const
             while ((i < code.length() - 1)
@@ -199,7 +199,7 @@ bool SLexicalAnalyzer::process(const QString code)
                     .replace("\\t", "\t");
             i++;    // closing double quotes
             token_type = T_CONST;
-            const_type = CONST_STRING;
+            const_type = TYPE_STRING;
         } else {
             // error (unknown token, e.g. after "3_" (or "123?") "_" (or "?") is unknown)
         }
@@ -263,11 +263,11 @@ void SLexicalAnalyzer::addToken(const int start, const int length, const Token t
 }
 
 // add const
-void SLexicalAnalyzer::addToken(const int start, const int length, const Token type, const ConstType const_type,
+void SLexicalAnalyzer::addToken(const int start, const int length, const Token type, const DataType const_type,
                                 QVariant value)
 {
     if (type == T_CONST) {
-        if (((const_type == CONST_INT) || (const_type == CONST_DOUBLE))
+        if (((const_type == TYPE_INT) || (const_type == TYPE_DOUBLE))
             && (tokens_.length() >= 1)
             && (tokens_.last().type == T_SEPARATOR)
             && ((table_separators_.at(tokens_.last().index).type == S_PLUS)
@@ -281,7 +281,7 @@ void SLexicalAnalyzer::addToken(const int start, const int length, const Token t
         ) {
             // (some separator (excluding ")") -> unary plus/minus -> number) => (separator -> signed number)
             if (table_separators_.at(tokens_.last().index).type == S_MINUS) {
-                if (const_type == CONST_INT) {
+                if (const_type == TYPE_INT) {
                     value = -value.toInt();
                 } else {
                     value = -value.toDouble();
@@ -349,7 +349,7 @@ int SLexicalAnalyzer::indexOfTokenItem(const TokenId item)
 {
     int i, res = -1;
     for (i = 0; i < table_ids_.length(); i++) {
-        if (item.identifier == table_ids_.at(i).identifier) {
+        if (item.name == table_ids_.at(i).name) {
             res = i;
             break;
         }
@@ -361,7 +361,7 @@ int SLexicalAnalyzer::indexOfTokenItem(const TokenConst item)
 {
     int i, res = -1;
     for (i = 0; i < table_consts_.length(); i++) {
-        if ((item.const_type == table_consts_.at(i).const_type)
+        if ((item.type == table_consts_.at(i).type)
                 && (item.value.toString() == table_consts_.at(i).value.toString())) {
             res = i;
             break;

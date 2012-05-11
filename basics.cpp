@@ -144,6 +144,30 @@ QDebug operator<<(QDebug d, const Token token) {
     d << tokenToString(token);
     return d;
 }
+QDebug operator<<(QDebug d, const TokenPointer token) {
+    QString table_temp;
+    switch (token.type) {
+    case T_ID:
+        table_temp = "i";
+        break;
+    case T_CONST:
+        table_temp = "c";
+        break;
+    case T_KEYWORD:
+        table_temp = "k";
+        break;
+    case T_SEPARATOR:
+        table_temp = "s";
+        break;
+    default:
+        break;
+    }
+
+    d << ((token.type != EOF_TOKEN)
+          ? QString("%1[%2]").arg(table_temp).arg(token.index)
+          : QString::number(token.index));
+    return d;
+}
 QDebug operator<<(QDebug d, const GrammarRule rule) {
     d << rule.toString();
     return d;

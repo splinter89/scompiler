@@ -68,16 +68,19 @@ enum Token {
 
     EOF_TOKEN      // end of input string (MUST BE LAST(!)) - right tokens border
 };
-enum ConstType {CONST_BOOL, CONST_INT, CONST_DOUBLE, CONST_CHAR, CONST_STRING};
+enum DataType {TYPE_BOOL, TYPE_INT, TYPE_DOUBLE, TYPE_CHAR, TYPE_STRING, TYPE_VOID};
+enum AccessSpecifier {ACCESS_PUBLIC, ACCESS_PRIVATE};
 enum ActionType {A_SHIFT, A_REDUCE, A_ACCEPT};
+enum SymbolType {SYM_CLASS, SYM_FUNCTION, SYM_VARIABLE};
+enum ParamType {PARAM_BY_VALUE, PARAM_BY_REFERENCE};
 
 
 // items of token tables
 struct TokenId {
-    QString identifier;
+    QString name;
 };
 struct TokenConst {
-    ConstType const_type;
+    DataType type;
     QVariant value;
 };
 struct TokenKeyword {
@@ -394,6 +397,7 @@ inline uint qHash(const Situation& e)
 
 QString tokenToString(const Token token);
 QDebug operator<<(QDebug d, const Token token);
+QDebug operator<<(QDebug d, const TokenPointer token);
 QDebug operator<<(QDebug d, const Action action);
 QDebug operator<<(QDebug d, const QList<Token> tokens);
 QDebug operator<<(QDebug d, const GrammarRule rule);
