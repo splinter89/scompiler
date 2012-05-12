@@ -71,8 +71,8 @@ enum Token {
 enum DataType {TYPE_BOOL, TYPE_INT, TYPE_DOUBLE, TYPE_CHAR, TYPE_STRING, TYPE_VOID};
 enum AccessSpecifier {ACCESS_PUBLIC, ACCESS_PRIVATE};
 enum ActionType {A_SHIFT, A_REDUCE, A_ACCEPT};
-enum SymbolType {SYM_CLASS, SYM_FUNCTION, SYM_VARIABLE};
-enum ParamType {PARAM_BY_VALUE, PARAM_BY_REFERENCE};
+enum SymbolType {SYM_CLASS, SYM_FUNCTION, SYM_ARGUMENT, SYM_VARIABLE};
+enum ArgType {ARG_BY_VALUE, ARG_BY_REFERENCE};
 
 
 // items of token tables
@@ -95,6 +95,8 @@ struct TokenPointer {
     Token type;
     int index;
     int start, length;
+
+    QString toString() const;
 };
 
 // [A -> B]
@@ -121,6 +123,33 @@ struct Action {
     int index;
 
     QString toString() const;
+};
+
+struct Symbol {
+    QString name;
+    SymbolType type;        // class/function/...
+    DataType data_type;     // bool/int/...
+
+    // for class members
+    int class_index;
+    AccessSpecifier access_type;
+
+    // for functions
+    QList<int> args_indexes;
+
+    // for function arguments
+    ArgType arg_type;
+    bool is_const;
+
+    // for variables
+    bool is_defined;        // "a = ..." is definition
+
+    QString toString() const;
+};
+
+struct Block {
+    int parent_block_index;
+    QSet<int> symbols_indexes;
 };
 
 
@@ -258,8 +287,8 @@ static QList<GrammarRule> initGrammarFullRules() {
 
          << GrammarRule(N_ARGUMENT, EmptyTokenList() << N_VAR_TYPE << S_SPACE << T_ID)
          << GrammarRule(N_ARGUMENT, EmptyTokenList() << K_CONST << S_SPACE << N_VAR_TYPE << S_SPACE << T_ID)
-         << GrammarRule(N_ARGUMENT, EmptyTokenList() << N_VAR_TYPE << S_SPACE << S_AMP << T_ID)
-         << GrammarRule(N_ARGUMENT, EmptyTokenList() << K_CONST << S_SPACE << N_VAR_TYPE << S_SPACE << S_AMP << T_ID)
+         << GrammarRule(N_ARGUMENT, EmptyTokenList() << N_VAR_TYPE << S_AMP << T_ID)
+         << GrammarRule(N_ARGUMENT, EmptyTokenList() << K_CONST << S_SPACE << N_VAR_TYPE << S_AMP << T_ID)
 
          << GrammarRule(N_BLOCK, EmptyTokenList() << S_CURLY_OPEN << S_CURLY_CLOSE)
          << GrammarRule(N_BLOCK, EmptyTokenList() << S_CURLY_OPEN << N_BLOCK_BODY << S_CURLY_CLOSE)
@@ -277,7 +306,6 @@ static QList<GrammarRule> initGrammarFullRules() {
          << GrammarRule(N_RETURN, EmptyTokenList() << K_RETURN)
          << GrammarRule(N_RETURN, EmptyTokenList() << K_RETURN << S_SPACE << N_EXPRESSION)
 
-         << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_OP_9)
          << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_OP_1)
          << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_EXPRESSION << S_COMMA << N_OP_1)
 
@@ -374,6 +402,7 @@ static QList<GrammarRule> initGrammarFullRules() {
          << GrammarRule(N_BRANCHING, EmptyTokenList() << K_IF << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE << N_BLOCK)
          << GrammarRule(N_BRANCHING, EmptyTokenList() << K_IF << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE << N_BLOCK << K_ELSE << N_BLOCK)
 
+         << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_OP_9)
     ;
 
     return list;
@@ -383,7 +412,7 @@ QList<GrammarRule> setGrammarRules(QList<int> grammar_active_rules);
 
 
 // cool xD - in order to use QSet<Situation>
-inline uint qHash(const Situation& e)
+inline uint qHash(const Situation &e)
 {
     QStringList res;
     res << QString::number(e.left_token) << "+";
@@ -396,25 +425,27 @@ inline uint qHash(const Situation& e)
 }
 
 QString tokenToString(const Token token);
+QString dataTypeToString(const DataType data_type);
 QDebug operator<<(QDebug d, const Token token);
 QDebug operator<<(QDebug d, const TokenPointer token);
 QDebug operator<<(QDebug d, const Action action);
 QDebug operator<<(QDebug d, const QList<Token> tokens);
 QDebug operator<<(QDebug d, const GrammarRule rule);
-bool operator==(const Situation& e1, const Situation& e2);
+bool operator==(const Situation &e1, const Situation &e2);
 QDebug operator<<(QDebug d, const Situation situation);
+QDebug operator<<(QDebug d, const Symbol symbol);
 
-QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule>& grammar);
-int indexOfGrammarRule(Token left, QList<Token> right, const QList<GrammarRule>& grammar);
+QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule> &grammar);
+int indexOfGrammarRule(Token left, QList<Token> right, const QList<GrammarRule> &grammar);
 //GrammarRule getGrammarRule(Token left, QList<Token> right);
 
 bool isTokenTerminal(Token token);
 bool isTokenKeyword(Token token);
 bool isTokenSeparator(Token token);
-bool isTokenNonTerminal(Token token, const QList<GrammarRule>& grammar);
+bool isTokenNonTerminal(Token token, const QList<GrammarRule> &grammar);
 
 QSet<Token> getAllTerminalTokens();
-QSet<Token> getAllNonTerminalTokens(const QList<GrammarRule>& grammar);
-QSet<Token> getAllGrammarTokens(const QList<GrammarRule>& grammar);
+QSet<Token> getAllNonTerminalTokens(const QList<GrammarRule> &grammar);
+QSet<Token> getAllGrammarTokens(const QList<GrammarRule> &grammar);
 
 #endif // BASICS_H

@@ -36,14 +36,16 @@ private:
     QList<QHash<Token, Action> > action_table_;
     QList<QHash<Token, int> > goto_table_;
 
-    QList<int> states_stack_;
-    QList<Token> tokens_stack_;
+    QList<Symbol> symbol_table_;
 
     QSet<Token> first(const Token token);
     QSet<Token> first(const QList<Token> tokens);
 
     QSet<Situation> closure(QSet<Situation> i);
     QSet<Situation> makeStep(const QSet<Situation> i, const Token x);
+
+    int addSymbolFunction(QString name, DataType data_type, QList<int> args_indexes);
+    int addSymbolArgument(QString name, DataType data_type, ArgType arg_type, bool is_const);
 
 signals:
     void syntax_error(int pos, QString msg);

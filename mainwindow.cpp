@@ -15,9 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     // init0 ==================================================================
     grammar_active_rules_.clear();
-    grammar_active_rules_ << 0 << 1 << 6 << 40 << 48 << 49 << 50 << 51 << 53
-                          << 54 << 55 << 58 << 59 << 60 << 98 << 99 << 102
-                          << 103 << 104 << 105 << 106 << 107;
+    grammar_active_rules_ << 0;
+//    grammar_active_rules_ << 1 << 6 << 40 << 48 << 49 << 50 << 51 << 53
+//                          << 54 << 55 << 58 << 59 << 97 << 98 << 101
+//                          << 102 << 103 << 104 << 105 << 106 << 134;
+    grammar_active_rules_ << 1 << 6 << 40 << 41 << 42 << 43 << 44 << 45 << 46 << 47 << 48 << 49 << 50 << 51 << 53 << 54 << 55 << 58 << 59 << 97 << 98 << 101 << 102 << 103 << 104 << 105 << 106 << 113 << 114 << 115 << 116 << 134;
     grammar_ = setGrammarRules(grammar_active_rules_);
 
     // init1 ==================================================================
@@ -488,11 +490,10 @@ void MainWindow::run()
     for (i = 0; i < tokens.length(); i++) {
         table_lex_0_->insertRow(i);
 
-        QString token_type_temp, table_temp, const_type_temp, code_temp;
+        QString token_type_temp, const_type_temp, code_temp;
         switch (tokens.at(i).type) {
         case T_ID:
             token_type_temp = "id";
-            table_temp = "i";
             code_temp = table_ids.at(tokens.at(i).index).name;
             break;
 
@@ -523,19 +524,16 @@ void MainWindow::run()
             }
 
             token_type_temp = "const (" + const_type_temp + ")";
-            table_temp = "c";
             code_temp = table_consts.at(tokens.at(i).index).value.toString();
             break;
 
         case T_KEYWORD:
             token_type_temp = "keyword";
-            table_temp = "k";
             code_temp = KeywordCodes.key(table_keywords.at(tokens.at(i).index).type);
             break;
 
         case T_SEPARATOR:
             token_type_temp = "separator";
-            table_temp = "s";
             code_temp = (SeparatorCodes.key(table_separators.at(tokens.at(i).index).type) == " ")
                     ? "[space]"
                     : SeparatorCodes.key(table_separators.at(tokens.at(i).index).type);
@@ -568,9 +566,7 @@ void MainWindow::run()
         item_0->setText(QString::number(i));
         item_1->setText(code_temp);
         item_2->setText(token_type_temp);
-        item_3->setText((tokens.at(i).type != EOF_TOKEN)
-                        ? QString("%1[%2]").arg(table_temp).arg(tokens.at(i).index)
-                        : QString::number(tokens.at(i).index));
+        item_3->setText(tokens.at(i).toString());
         item_4->setText(QString::number(tokens.at(i).start));
         item_5->setText(QString::number(tokens.at(i).length));
         table_lex_0_->setItem(i, 0, item_0);

@@ -107,6 +107,52 @@ QString tokenToString(const Token token) {
     }
     return s;
 }
+QString dataTypeToString(const DataType data_type) {
+    QString s;
+
+    switch (data_type) {
+    case TYPE_BOOL:
+        s = "bool"; break;
+    case TYPE_INT:
+        s = "int"; break;
+    case TYPE_DOUBLE:
+        s = "double"; break;
+    case TYPE_CHAR:
+        s = "char"; break;
+    case TYPE_STRING:
+        s = "string"; break;
+    case TYPE_VOID:
+        s = "void"; break;
+    default:
+        s = "???"; break;
+    }
+
+    return s;
+}
+QString TokenPointer::toString() const {
+    QString res, table;
+    switch (type) {
+    case T_ID:
+        table = "i";
+        break;
+    case T_CONST:
+        table = "c";
+        break;
+    case T_KEYWORD:
+        table = "k";
+        break;
+    case T_SEPARATOR:
+        table = "s";
+        break;
+    default:
+        break;
+    }
+
+    res = ((type != EOF_TOKEN)
+          ? QString("%1[%2]").arg(table).arg(index)
+          : QString::number(index));
+    return res;
+}
 QString GrammarRule::toString() const {
     QString res, right;
     foreach (Token token, right_side) {
@@ -138,6 +184,40 @@ QString Situation::toString() const {
     res = "[" + tokenToString(left_token) + " -> " + right + ", " + tokenToString(look_ahead_token) + "]";
     return res;
 }
+QString Symbol::toString() const {
+    QString res;
+    QStringList args;
+    // :TODO: Symbol::toString
+    switch (type) {
+    case SYM_FUNCTION:
+        foreach (int arg_index, args_indexes) {
+            args << "#" + QString::number(arg_index);
+        }
+        res = QString("[FUNC] %1 %2(%3)").arg(dataTypeToString(data_type)).arg(name).arg(args.join(", "));
+        break;
+
+    case SYM_ARGUMENT:
+        switch (arg_type) {
+        case ARG_BY_VALUE:
+            res = QString("%1 %2").arg(dataTypeToString(data_type)).arg(name);
+            break;
+        case ARG_BY_REFERENCE:
+            res = QString("%1 &%2").arg(dataTypeToString(data_type)).arg(name);
+            break;
+        }
+        if (is_const) {
+            res = "const " + res;
+        }
+        res = "[ARG] " + res;
+        break;
+
+    default:
+        res = "(todo)";
+        break;
+    }
+
+    return res;
+}
 
 
 QDebug operator<<(QDebug d, const Token token) {
@@ -145,27 +225,7 @@ QDebug operator<<(QDebug d, const Token token) {
     return d;
 }
 QDebug operator<<(QDebug d, const TokenPointer token) {
-    QString table_temp;
-    switch (token.type) {
-    case T_ID:
-        table_temp = "i";
-        break;
-    case T_CONST:
-        table_temp = "c";
-        break;
-    case T_KEYWORD:
-        table_temp = "k";
-        break;
-    case T_SEPARATOR:
-        table_temp = "s";
-        break;
-    default:
-        break;
-    }
-
-    d << ((token.type != EOF_TOKEN)
-          ? QString("%1[%2]").arg(table_temp).arg(token.index)
-          : QString::number(token.index));
+    d << token.toString();
     return d;
 }
 QDebug operator<<(QDebug d, const GrammarRule rule) {
@@ -180,16 +240,20 @@ QDebug operator<<(QDebug d, const Situation situation) {
     d << situation.toString();
     return d;
 }
+QDebug operator<<(QDebug d, const Symbol symbol) {
+    d << symbol.toString();
+    return d;
+}
 
 
-bool operator==(const Situation& e1, const Situation& e2) {
+bool operator==(const Situation &e1, const Situation &e2) {
     return ((e1.left_token == e2.left_token)
         && (e1.right_side == e2.right_side)
         && (e1.look_ahead_token == e2.look_ahead_token));
 }
 
 
-QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule>& grammar) {
+QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule> &grammar) {
     QList<GrammarRule> result;
     for (int i = 0; i < grammar.length(); i++) {
         if (grammar.at(i).left_token == token) {
@@ -199,7 +263,7 @@ QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRu
     return result;
 }
 
-int indexOfGrammarRule(Token left, QList<Token> right, const QList<GrammarRule>& grammar) {
+int indexOfGrammarRule(Token left, QList<Token> right, const QList<GrammarRule> &grammar) {
     int result = -1;
     for (int i = 0; i < grammar.length(); i++) {
         if ((grammar.at(i).left_token == left) && (grammar.at(i).right_side == right)) {
@@ -225,7 +289,7 @@ bool isTokenSeparator(Token token) {
     return ((SeparatorCodes.key(token).length() > 0)/* || (token == T_SEPARATOR)*/);
 }
 
-bool isTokenNonTerminal(Token token, const QList<GrammarRule>& grammar) {
+bool isTokenNonTerminal(Token token, const QList<GrammarRule> &grammar) {
     return (getGrammarRulesByLeftToken(token, grammar).length() > 0);
 }
 
@@ -242,7 +306,7 @@ QSet<Token> getAllTerminalTokens() {
 
     return result;
 }
-QSet<Token> getAllNonTerminalTokens(const QList<GrammarRule>& grammar) {
+QSet<Token> getAllNonTerminalTokens(const QList<GrammarRule> &grammar) {
     QSet<Token> result;
     for (int token = UNKNOWN; token <= EOF_TOKEN; token++) {
         if (isTokenNonTerminal((Token)token, grammar)) {
@@ -253,7 +317,7 @@ QSet<Token> getAllNonTerminalTokens(const QList<GrammarRule>& grammar) {
     return result;
 }
 
-QSet<Token> getAllGrammarTokens(const QList<GrammarRule>& grammar) {
+QSet<Token> getAllGrammarTokens(const QList<GrammarRule> &grammar) {
     return getAllTerminalTokens() + getAllNonTerminalTokens(grammar);
 }
 
