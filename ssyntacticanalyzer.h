@@ -45,7 +45,8 @@ private:
     QSet<Situation> makeStep(const QSet<Situation> i, const Token x);
 
     int addSymbolFunction(QString name, DataType data_type, QList<int> args_indexes);
-    int addSymbolArgument(QString name, DataType data_type, ArgType arg_type, bool is_const);
+    int addSymbolArgument(QString name, DataType data_type, int class_index, ArgType arg_type, bool is_const);
+    int addSymbolVariable(QString name, DataType data_type, int class_index, bool is_const);
 
 signals:
     void syntax_error(int pos, QString msg);

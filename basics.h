@@ -68,7 +68,7 @@ enum Token {
 
     EOF_TOKEN      // end of input string (MUST BE LAST(!)) - right tokens border
 };
-enum DataType {TYPE_BOOL, TYPE_INT, TYPE_DOUBLE, TYPE_CHAR, TYPE_STRING, TYPE_VOID};
+enum DataType {TYPE_BOOL, TYPE_INT, TYPE_DOUBLE, TYPE_CHAR, TYPE_STRING, TYPE_VOID, TYPE_OBJECT};
 enum AccessSpecifier {ACCESS_PUBLIC, ACCESS_PRIVATE};
 enum ActionType {A_SHIFT, A_REDUCE, A_ACCEPT};
 enum SymbolType {SYM_CLASS, SYM_FUNCTION, SYM_ARGUMENT, SYM_VARIABLE};
@@ -130,8 +130,12 @@ struct Symbol {
     SymbolType type;        // class/function/...
     DataType data_type;     // bool/int/...
 
+    // for classes
+    QList<int> properties_indexes;
+    QList<int> methods_indexes;
+
     // for class members
-    int class_index;
+    int class_index;        // also for objects, i.e. args & vars ("class_name var1;")
     AccessSpecifier access_type;
 
     // for functions
@@ -141,8 +145,8 @@ struct Symbol {
     ArgType arg_type;
     bool is_const;
 
-    // for variables
-    bool is_defined;        // "a = ..." is definition
+    // for variables --- mb Value?
+//    bool is_defined;        // "a = ..." is definition
 
     QString toString() const;
 };
@@ -425,7 +429,7 @@ inline uint qHash(const Situation &e)
 }
 
 QString tokenToString(const Token token);
-QString dataTypeToString(const DataType data_type);
+QString dataTypeToString(const DataType data_type, int class_index);
 QDebug operator<<(QDebug d, const Token token);
 QDebug operator<<(QDebug d, const TokenPointer token);
 QDebug operator<<(QDebug d, const Action action);

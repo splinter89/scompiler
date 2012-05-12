@@ -107,7 +107,7 @@ QString tokenToString(const Token token) {
     }
     return s;
 }
-QString dataTypeToString(const DataType data_type) {
+QString dataTypeToString(const DataType data_type, int class_index = 0) {
     QString s;
 
     switch (data_type) {
@@ -123,6 +123,8 @@ QString dataTypeToString(const DataType data_type) {
         s = "string"; break;
     case TYPE_VOID:
         s = "void"; break;
+    case TYPE_OBJECT:
+        s = "#" + QString::number(class_index); break;
     default:
         s = "???"; break;
     }
@@ -199,16 +201,24 @@ QString Symbol::toString() const {
     case SYM_ARGUMENT:
         switch (arg_type) {
         case ARG_BY_VALUE:
-            res = QString("%1 %2").arg(dataTypeToString(data_type)).arg(name);
+            res = QString("%1 %2").arg(dataTypeToString(data_type, class_index)).arg(name);
             break;
         case ARG_BY_REFERENCE:
-            res = QString("%1 &%2").arg(dataTypeToString(data_type)).arg(name);
+            res = QString("%1 &%2").arg(dataTypeToString(data_type, class_index)).arg(name);
             break;
         }
         if (is_const) {
             res = "const " + res;
         }
         res = "[ARG] " + res;
+        break;
+
+    case SYM_VARIABLE:
+        res = QString("%1 %2").arg(dataTypeToString(data_type, class_index)).arg(name);
+        if (is_const) {
+            res = "const " + res;
+        }
+        res = "[VAR] " + res;
         break;
 
     default:
