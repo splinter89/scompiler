@@ -775,14 +775,15 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
 
                     case 97:
-                        // :TODO: need to use tokan_stack - not tokens
+                        // :TODO: need to use token_stack - not tokens (??? - check)
+                        // tokens work only for:
+                        // a = 12; but not for: a = 12 + d;
                         expr_type = table_consts.at(tokens.at(i - 1).index).type;
-                        qDebug() << "0_O" << table_consts.length() << " < " << tokens.at(i - 1).index;
-                        qDebug() << tokenToString(token);
                         break;
                     case 98:
                     case 101:
                         expr_type = symbol_table_.at(object_symbol_id).data_type;
+//                        qDebug() << dataTypeToString(expr_type, class_index) << "expr_type";
                         break;
 
 
@@ -998,7 +999,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 //                        break;
 
                     // :TODO: delme
-                    case 135:
+                    case 136:
+//                        qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
                         if (symbol_table_.at(object_symbol_id).data_type != expr_type) {
                             emit semantic_error(-1, QString("(%1 and %2) %3")
                                                 .arg(dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index))
