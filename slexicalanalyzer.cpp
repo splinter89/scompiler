@@ -42,7 +42,7 @@ bool SLexicalAnalyzer::process(const QString code)
             continue;
         } else if ((i <= code.length() - 2) && (code.mid(i, 2) == "/*")) {
             // multi-line comment
-            // TODO: it may break token into 2 parts - is it ok?
+            // TODO: it may break token into 2 parts - is it ok? --- insert Space token
             i++;
             while ((i < code.length() - 2) && (code.mid(i + 1, 2) != "*/")) {
                 i++;
