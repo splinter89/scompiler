@@ -66,6 +66,8 @@ MainWindow::MainWindow(QWidget *parent) :
     editor_->setCursor(Qt::IBeamCursor);
 
     tab_main_ = new QTabWidget();
+
+
     QWidget *tab_lex = new QWidget();
     tab_main_->addTab(tab_lex, trUtf8("Лексический анализ"));
         QWidget *tab_lex_0 = new QWidget();
@@ -117,6 +119,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QGridLayout *grid_lex = new QGridLayout();
         grid_lex->addWidget(tab_lex_main_);
         tab_lex->setLayout(grid_lex);
+
 
     QWidget *tab_synt = new QWidget();
     tab_main_->addTab(tab_synt, trUtf8("Синтаксический анализ"));
@@ -206,8 +209,31 @@ MainWindow::MainWindow(QWidget *parent) :
         grid_synt->addWidget(tab_synt_main_);
         tab_synt->setLayout(grid_synt);
 
-    QWidget *tab_sem = new QWidget();
-    tab_main_->addTab(tab_sem, trUtf8("..."));
+
+        QWidget *tab_sem = new QWidget();
+        tab_main_->addTab(tab_sem, trUtf8("Таблицы"));
+            QWidget *tab_sem_0 = new QWidget();
+            QWidget *tab_sem_1 = new QWidget();
+            tab_sem_main_ = new QTabWidget();
+            tab_sem_main_->addTab(tab_sem_0, trUtf8("таблица символов"));
+                QGridLayout *grid_sem_0 = new QGridLayout();
+                edit_sem_0_ = new QPlainTextEdit();
+                edit_sem_0_->setReadOnly(true);
+                edit_sem_0_->setTabStopWidth(tab_stop_width);
+                grid_sem_0->addWidget(edit_sem_0_);
+                tab_sem_0->setLayout(grid_sem_0);
+            tab_sem_main_->addTab(tab_sem_1, trUtf8("таблица блоков"));
+                QGridLayout *grid_sem_1 = new QGridLayout();
+                edit_sem_1_ = new QPlainTextEdit();
+                edit_sem_1_->setReadOnly(true);
+                edit_sem_1_->setTabStopWidth(tab_stop_width);
+                grid_sem_1->addWidget(edit_sem_1_);
+                tab_sem_1->setLayout(grid_sem_1);
+
+        QGridLayout *grid_sem = new QGridLayout();
+        grid_sem->addWidget(tab_sem_main_);
+        tab_sem->setLayout(grid_sem);
+
 
     QSplitter *splitter = new QSplitter(Qt::Horizontal);
     splitter->addWidget(editor_);
@@ -688,26 +714,43 @@ void MainWindow::run()
     // reverse the list
     for(int k = 0; k < (parse_rules.size()/2); k++) parse_rules.swap(k, parse_rules.size()-(1+k));
 
-    QString text_0;
+    QString text_rules, text_symbols, text_blocks;
+
+    // output parse rules
     if (!parse_rules.isEmpty()) {
-        QStringList text_0_first, text_0_second;
-        foreach (int rule_num, parse_rules) {
-            int rule_num_full = indexOfGrammarRule(
-                grammar_.at(rule_num).left_token,
-                grammar_.at(rule_num).right_side,
-                Grammar_full
-            );
-            text_0_first << QString::number(rule_num);
-            text_0_second << (QString("#%1 (%2)\n\t").arg(rule_num).arg(rule_num_full)
-                              + grammar_.at(rule_num).toString());
+        QStringList text_rule_first, text_rule_second;
+        foreach (int rule_index, parse_rules) {
+            int rule_index_full = indexOfGrammarRule(
+                        grammar_.at(rule_index).left_token,
+                        grammar_.at(rule_index).right_side,
+                        Grammar_full
+                        );
+            text_rule_first << QString::number(rule_index);
+            text_rule_second << (QString("#%1 (%2)\n\t").arg(rule_index).arg(rule_index_full)
+                                 + grammar_.at(rule_index).toString());
         }
-        text_0 = text_0_first.join(" ") + "\n\n"
+        text_rules = text_rule_first.join(" ") + "\n\n"
                 + trUtf8("Подробно:\n=========================================\n")
-                + text_0_second.join("\n\n=========================================\n");
+                + text_rule_second.join("\n\n=========================================\n");
     } else {
-        text_0 = trUtf8("Не удалось получить правый вывод в заданной грамматике");
+        text_rules = trUtf8("Не удалось получить правый вывод в заданной грамматике");
     }
-    edit_synt_0_->setPlainText(text_0);
+    edit_synt_0_->setPlainText(text_rules);
+
+    // output symbols table, blocks table
+    QList<Symbol> symbols_table = syntactic_analyzer_->getSymbolTable();
+    QList<Block> blocks_table = syntactic_analyzer_->getBlockTable();
+    QStringList text_symbols_list, text_blocks_list;
+    for (i = 0; i < symbols_table.length(); i++) {
+        text_symbols_list << QString("#%1: %2").arg(i).arg(symbols_table.at(i).toString());
+    }
+    for (i = 0; i < blocks_table.length(); i++) {
+        text_blocks_list << QString("#%1: %2").arg(i).arg(blocks_table.at(i).toString());
+    }
+    text_symbols = text_symbols_list.join("\n");
+    text_blocks = text_blocks_list.join("\n");
+    edit_sem_0_->setPlainText(text_symbols);
+    edit_sem_1_->setPlainText(text_blocks);
 }
 
 void MainWindow::updateGrammar() {

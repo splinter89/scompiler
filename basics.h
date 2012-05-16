@@ -153,7 +153,9 @@ struct Symbol {
 
 struct Block {
     int parent_block_index;
-    QSet<int> symbols_indexes;
+    QList<int> declared_symbols_indexes;
+
+    QString toString() const;
 };
 
 

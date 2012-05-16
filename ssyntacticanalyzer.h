@@ -29,6 +29,9 @@ public:
     QList<QHash<Token, Action> > getTableAction() { return action_table_; }
     QList<QHash<Token, int> > getTableGoto() { return goto_table_; }
 
+    QList<Symbol> getSymbolTable() { return symbol_table_; }
+    QList<Block> getBlockTable() { return block_table_; }
+
 private:
     QList<GrammarRule> grammar_;
 
@@ -37,6 +40,7 @@ private:
     QList<QHash<Token, int> > goto_table_;
 
     QList<Symbol> symbol_table_;
+    QList<Block> block_table_;
 
     QSet<Token> first(const Token token);
     QSet<Token> first(const QList<Token> tokens);
@@ -47,6 +51,10 @@ private:
     int addSymbolFunction(QString name, DataType data_type, QList<int> args_indexes);
     int addSymbolArgument(QString name, DataType data_type, int class_index, ArgType arg_type, bool is_const);
     int addSymbolVariable(QString name, DataType data_type, int class_index, bool is_const);
+
+    int addEmptyBlock(int parent_block_index);
+    void addBlockSymbols(int block_index, QList<int> declared_symbols_indexes);
+    int getParentBlockIndex(int block_index);
 
 signals:
     void syntax_error(int pos, QString msg);

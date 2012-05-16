@@ -44,19 +44,23 @@ private:
     QTabWidget *tab_main_;
 
     QTabWidget *tab_lex_main_;
-    QTableWidget *table_lex_0_;  // convolution
-    QTableWidget *table_lex_1_;  // id's
-    QTableWidget *table_lex_2_;  // const's
-    QTableWidget *table_lex_3_;  // keywords
-    QTableWidget *table_lex_4_;  // separators
+    QTableWidget *table_lex_0_;     // convolution
+    QTableWidget *table_lex_1_;     // id's
+    QTableWidget *table_lex_2_;     // const's
+    QTableWidget *table_lex_3_;     // keywords
+    QTableWidget *table_lex_4_;     // separators
 
     QTabWidget *tab_synt_main_;
-    QPlainTextEdit *edit_synt_0_; // parse rules
-    QTableWidget *table_synt_1_;  // grammar
-    QPlainTextEdit *edit_synt_2_; // situations
-    QTableWidget *table_synt_3_;  // action rules
-    QTableWidget *table_synt_4_;  // goto rules
-    QTableWidget *table_synt_5_;  // set grammar
+    QPlainTextEdit *edit_synt_0_;   // parse rules
+    QTableWidget *table_synt_1_;    // grammar
+    QPlainTextEdit *edit_synt_2_;   // situations
+    QTableWidget *table_synt_3_;    // action rules
+    QTableWidget *table_synt_4_;    // goto rules
+    QTableWidget *table_synt_5_;    // set grammar
+
+    QTabWidget *tab_sem_main_;
+    QPlainTextEdit *edit_sem_0_;    // symbols table
+    QPlainTextEdit *edit_sem_1_;    // blocks table
 
     QPushButton *b_update_grammar;
 

@@ -189,7 +189,7 @@ QString Situation::toString() const {
 QString Symbol::toString() const {
     QString res;
     QStringList args;
-    // :TODO: Symbol::toString
+
     switch (type) {
     case SYM_FUNCTION:
         foreach (int arg_index, args_indexes) {
@@ -224,6 +224,23 @@ QString Symbol::toString() const {
     default:
         res = "(todo)";
         break;
+    }
+
+    return res;
+}
+QString Block::toString() const {
+    QString res;
+    QStringList declared_symbols;
+
+    foreach (int declared_symbols_index, declared_symbols_indexes) {
+        declared_symbols << "#" + QString::number(declared_symbols_index);
+    }
+
+    res = QString("{parent: #%1, declared_symbols: [%2]}")
+            .arg(parent_block_index)
+            .arg(declared_symbols.join(", "));
+    if (parent_block_index == -1) {
+        res += " - global";
     }
 
     return res;

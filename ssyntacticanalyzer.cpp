@@ -188,6 +188,35 @@ int SSyntacticAnalyzer::addSymbolVariable(QString name, DataType data_type, int 
     return symbol_table_.length() - 1;
 }
 
+int SSyntacticAnalyzer::addEmptyBlock(int parent_block_index)
+{
+    Block new_block;
+    QList<int> declared_symbols_indexes;
+    if ((!block_table_.isEmpty() && (parent_block_index == -1))
+        || (block_table_.isEmpty() && (parent_block_index != -1))) {
+        // incorrect parent block index
+        return -1;
+    }
+    new_block.parent_block_index = parent_block_index;
+    new_block.declared_symbols_indexes = declared_symbols_indexes;
+
+    block_table_ << new_block;
+    return block_table_.length() - 1;
+}
+
+void SSyntacticAnalyzer::addBlockSymbols(int block_index, QList<int> declared_symbols_indexes)
+{
+    Block block = block_table_.at(block_index);
+    block.declared_symbols_indexes += declared_symbols_indexes;
+    block_table_.replace(block_index, block);
+}
+
+int SSyntacticAnalyzer::getParentBlockIndex(int block_index)
+{
+    int res = block_table_.at(block_index).parent_block_index;
+    return res;
+}
+
 bool SSyntacticAnalyzer::generateSetOfSituations() {
     if (grammar_.isEmpty()) return false;
 
@@ -338,6 +367,10 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     QList<Token> tokens_stack;
     QList<TokenPointer> ids_stack;
 
+    int parent_block_index;
+    QList<int> declared_symbols_indexes;
+    QList<int> declared_arg_symbols_indexes;
+    int symbol_index;
     // symbol params
     QList<int> args_indexes;
     DataType data_type;
@@ -350,6 +383,11 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     states_stack << 0; // initial state
 
     symbol_table_.clear();
+    block_table_.clear();
+
+    parent_block_index = addEmptyBlock(-1); // global context
+    declared_symbols_indexes.clear();
+    declared_arg_symbols_indexes.clear();
     args_indexes.clear();
     decl_vars_count = 0;
     class_index = -1;
@@ -370,8 +408,21 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
             switch (action.type) {
             case A_SHIFT:
                 states_stack << action.index;
-                if (tokens.at(i).type == T_ID) {
+                if (token == T_ID) {
                     ids_stack << tokens.at(i);
+                } else if (token == S_CURLY_OPEN) {
+                    // save declared symbols & enter new block
+                    addBlockSymbols(parent_block_index, declared_symbols_indexes);
+                    declared_symbols_indexes.clear();
+
+                    parent_block_index = addEmptyBlock(parent_block_index);
+                } else if (token == S_CURLY_CLOSE) {
+                    // save declared symbols & return to parent block
+                    addBlockSymbols(parent_block_index, declared_arg_symbols_indexes + declared_symbols_indexes);
+                    declared_symbols_indexes.clear();
+                    declared_arg_symbols_indexes.clear();
+
+                    parent_block_index = getParentBlockIndex(parent_block_index);
                 }
                 tokens_stack << token;
                 i++;
@@ -534,29 +585,29 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
                     case 38:
                         args_indexes.clear();
-                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                          data_type,
-                                          args_indexes);
+                        declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                                      data_type,
+                                                                      args_indexes);
                         ids_stack.removeLast();
                         break;
                     case 39:
-                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                          data_type,
-                                          args_indexes);
+                        declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                                      data_type,
+                                                                      args_indexes);
                         args_indexes.clear();
                         ids_stack.removeLast();
                         break;
                     case 40:
                         args_indexes.clear();
-                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                          TYPE_VOID,
-                                          args_indexes);
+                        declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                                      TYPE_VOID,
+                                                                      args_indexes);
                         ids_stack.removeLast();
                         break;
                     case 41:
-                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                          TYPE_VOID,
-                                          args_indexes);
+                        declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                                      TYPE_VOID,
+                                                                      args_indexes);
                         args_indexes.clear();
                         ids_stack.removeLast();
                         break;
@@ -564,35 +615,43 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
                     case 44:
                         // :TODO: check whether class exists
-                        args_indexes << addSymbolArgument(table_ids.at(ids_stack.last().index).name,
-                                                          data_type,
-                                                          class_index,
-                                                          ARG_BY_VALUE,
-                                                          false);
+                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
+                                                         data_type,
+                                                         class_index,
+                                                         ARG_BY_VALUE,
+                                                         false);
+                        args_indexes << symbol_index;
+                        declared_arg_symbols_indexes << symbol_index;
                         ids_stack.removeLast();
                         break;
                     case 45:
-                        args_indexes << addSymbolArgument(table_ids.at(ids_stack.last().index).name,
-                                                          data_type,
-                                                          class_index,
-                                                          ARG_BY_VALUE,
-                                                          true);
+                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
+                                                         data_type,
+                                                         class_index,
+                                                         ARG_BY_VALUE,
+                                                         true);
+                        args_indexes << symbol_index;
+                        declared_arg_symbols_indexes << symbol_index;
                         ids_stack.removeLast();
                         break;
                     case 46:
-                        args_indexes << addSymbolArgument(table_ids.at(ids_stack.last().index).name,
-                                                          data_type,
-                                                          class_index,
-                                                          ARG_BY_REFERENCE,
-                                                          false);
+                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
+                                                         data_type,
+                                                         class_index,
+                                                         ARG_BY_REFERENCE,
+                                                         false);
+                        args_indexes << symbol_index;
+                        declared_arg_symbols_indexes << symbol_index;
                         ids_stack.removeLast();
                         break;
                     case 47:
-                        args_indexes << addSymbolArgument(table_ids.at(ids_stack.last().index).name,
-                                                          data_type,
-                                                          class_index,
-                                                          ARG_BY_REFERENCE,
-                                                          true);
+                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
+                                                         data_type,
+                                                         class_index,
+                                                         ARG_BY_REFERENCE,
+                                                         true);
+                        args_indexes << symbol_index;
+                        declared_arg_symbols_indexes << symbol_index;
                         ids_stack.removeLast();
                         break;
 
@@ -612,10 +671,10 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
                     case 109:
                         while (decl_vars_count) {
-                            addSymbolVariable(table_ids.at(ids_stack.last().index).name,
-                                              data_type,
-                                              class_index,
-                                              false);
+                            declared_symbols_indexes << addSymbolVariable(table_ids.at(ids_stack.last().index).name,
+                                                                          data_type,
+                                                                          class_index,
+                                                                          false);
                             ids_stack.removeLast();
                             decl_vars_count--;
                         }
@@ -624,10 +683,10 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 //                        break;
                     case 111:
                         while (decl_vars_count) {
-                            addSymbolVariable(table_ids.at(ids_stack.last().index).name,
-                                              data_type,
-                                              class_index,
-                                              true);
+                            declared_symbols_indexes << addSymbolVariable(table_ids.at(ids_stack.last().index).name,
+                                                                          data_type,
+                                                                          class_index,
+                                                                          true);
                             ids_stack.removeLast();
                             decl_vars_count--;
                         }
@@ -717,8 +776,9 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     default:
                         break;
                     }
+                    // :TODO: delme
                     if (old_symbol_table_length != symbol_table_.length()) {
-                        qDebug() << "rule" << rule_index_full << ":" << symbol_table_;
+                        //qDebug() << "rule" << rule_index_full << ":" << symbol_table_;
                     }
 
                     // ...back to our finite-state machine
@@ -748,6 +808,13 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
             case A_ACCEPT:
                 tokens_accepted = true;
+
+                // save declared symbols & return to parent block
+                addBlockSymbols(parent_block_index, declared_symbols_indexes);
+                parent_block_index = getParentBlockIndex(parent_block_index);
+                Q_ASSERT(parent_block_index == -1);
+                declared_symbols_indexes.clear();
+
                 break;
             }
         } else {
