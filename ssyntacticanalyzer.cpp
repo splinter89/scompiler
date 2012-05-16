@@ -188,6 +188,29 @@ int SSyntacticAnalyzer::addSymbolVariable(QString name, DataType data_type, int 
     return symbol_table_.length() - 1;
 }
 
+int SSyntacticAnalyzer::addSymbolClass(QString name, QList<int> members_indexes)
+{
+    Symbol new_symbol;
+    new_symbol.name = name;
+    new_symbol.type = SYM_CLASS;
+
+    // specific
+    new_symbol.members_indexes = members_indexes;
+
+    symbol_table_ << new_symbol;
+    return symbol_table_.length() - 1;
+}
+
+void SSyntacticAnalyzer::setSymbolClassMemberAccessType(int symbol_index, AccessSpecifier access_type)
+{
+    Symbol symbol = symbol_table_.at(symbol_index);
+    if ((symbol.type == SYM_FUNCTION)
+            || (symbol.type == SYM_VARIABLE)) {
+        symbol.access_type = access_type;
+        symbol_table_.replace(symbol_index, symbol);
+    }
+}
+
 int SSyntacticAnalyzer::addEmptyBlock(int parent_block_index)
 {
     Block new_block;
@@ -417,6 +440,9 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     DataType data_type;
     int decl_vars_count;
     int class_index;
+    AccessSpecifier access_type;
+    QList<int> members_indexes;
+//    QList<int> declared_members_indexes;
 
     states_stack.clear();
     tokens_stack.clear();
@@ -432,6 +458,9 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     args_indexes.clear();
     decl_vars_count = 0;
     class_index = -1;
+    access_type = ACCESS_PRIVATE;
+    members_indexes.clear();
+//    declared_members_indexes.clear();
 
     while (!tokens_accepted && (i < tokens.length())) {
         int state = states_stack.last();
@@ -479,21 +508,47 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
                     // filling up the symbol table
                     switch (rule_index_full) {
-//                    case 7000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
+                    case 7:
+                        members_indexes.clear();
+                        declared_symbols_indexes << addSymbolClass(table_ids.at(ids_stack.last().index).name,
+                                                                   members_indexes);
+                        ids_stack.removeLast();
+                        break;
+
+                    case 8:
+                        declared_symbols_indexes << addSymbolClass(table_ids.at(ids_stack.last().index).name,
+                                                                   members_indexes);
+                        members_indexes.clear();
+                        ids_stack.removeLast();
+                        break;
+
+
+                    case 9:
+                    case 11:
+//                        members_indexes += declared_members_indexes;
+//                        declared_members_indexes.clear();
+                        break;
+                    case 10:
+                    case 12:
+//                        members_indexes += declared_members_indexes;
+//                        declared_members_indexes.clear();
+//                        access_type = ACCESS_PRIVATE;
+                        break;
+
+//                    case 13:
+//                    case 15:
+//                        break;
+//                    case 14:
+//                    case 16:
 //                        break;
 
-//                    case 8000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+
+                    case 20:
+                        access_type = ACCESS_PUBLIC;
+                        break;
+                    case 21:
+                        access_type = ACCESS_PRIVATE;
+                        break;
 
 //                    case 22000:
 //                        args_indexes.clear();
@@ -511,37 +566,46 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 //                        ids_stack.removeLast();
 //                        break;
 
-//                    case 24000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
-
-//                    case 25000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
-
-//                    case 26000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
-
-//                    case 27000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                    case 24:
+                        args_indexes.clear();
+                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                         data_type,
+                                                         args_indexes);
+                        declared_symbols_indexes << symbol_index;
+                        members_indexes << symbol_index;
+                        setSymbolClassMemberAccessType(symbol_index, access_type);
+                        ids_stack.removeLast();
+                        break;
+                    case 25:
+                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                         data_type,
+                                                         args_indexes);
+                        declared_symbols_indexes << symbol_index;
+                        members_indexes << symbol_index;
+                        setSymbolClassMemberAccessType(symbol_index, access_type);
+                        args_indexes.clear();
+                        ids_stack.removeLast();
+                        break;
+                    case 26:
+                        args_indexes.clear();
+                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                         TYPE_VOID,
+                                                         args_indexes);
+                        declared_symbols_indexes << symbol_index;
+                        members_indexes << symbol_index;
+                        setSymbolClassMemberAccessType(symbol_index, access_type);
+                        ids_stack.removeLast();
+                        break;
+                    case 27:
+                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                         TYPE_VOID,
+                                                         args_indexes);
+                        declared_symbols_indexes << symbol_index;
+                        members_indexes << symbol_index;
+                        setSymbolClassMemberAccessType(symbol_index, access_type);
+                        args_indexes.clear();
+                        ids_stack.removeLast();
+                        break;
 
 //                    case 28000:
 //                        args_indexes.clear();
@@ -709,6 +773,34 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         break;
 
 
+                    case 107:
+                        while (decl_vars_count) {
+                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name,
+                                                             data_type,
+                                                             class_index,
+                                                             false);
+                            declared_symbols_indexes << symbol_index;
+                            members_indexes << symbol_index;
+                            setSymbolClassMemberAccessType(symbol_index, access_type);
+                            ids_stack.removeLast();
+                            decl_vars_count--;
+                        }
+                        break;
+                    case 108:
+                        while (decl_vars_count) {
+                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name,
+                                                             data_type,
+                                                             class_index,
+                                                             true);
+                            declared_symbols_indexes << symbol_index;
+                            members_indexes << symbol_index;
+                            setSymbolClassMemberAccessType(symbol_index, access_type);
+                            ids_stack.removeLast();
+                            decl_vars_count--;
+                        }
+                        break;
+
+
                     case 109:
                         while (decl_vars_count) {
                             declared_symbols_indexes << addSymbolVariable(table_ids.at(ids_stack.last().index).name,
@@ -757,21 +849,12 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         break;
 
 
-//                    case 118000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
-
-//                    case 119000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                    case 118:
+                        decl_vars_count++;
+                        break;
+                    case 119:
+                        decl_vars_count++;
+                        break;
 
                     case 120:
                         decl_vars_count++;

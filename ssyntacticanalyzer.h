@@ -51,6 +51,8 @@ private:
     int addSymbolFunction(QString name, DataType data_type, QList<int> args_indexes);
     int addSymbolArgument(QString name, DataType data_type, int class_index, ArgType arg_type, bool is_const);
     int addSymbolVariable(QString name, DataType data_type, int class_index, bool is_const);
+    int addSymbolClass(QString name, QList<int> members_indexes);
+    void setSymbolClassMemberAccessType(int symbol_index, AccessSpecifier access_type);
 
     int addEmptyBlock(int parent_block_index);
     void addBlockSymbols(int block_index, QList<int> declared_symbols_indexes);

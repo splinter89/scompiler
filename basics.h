@@ -131,12 +131,11 @@ struct Symbol {
     DataType data_type;     // bool/int/...
 
     // for classes
-    QList<int> properties_indexes;
-    QList<int> methods_indexes;
+    QList<int> members_indexes;
 
     // for class members
-    int class_index;        // also for objects, i.e. args & vars ("class_name var1;")
     AccessSpecifier access_type;
+    int class_index;        // also for objects, i.e. args & vars ("class_name var1;")
 
     // for functions
     QList<int> args_indexes;
@@ -250,17 +249,18 @@ static QList<GrammarRule> initGrammarFullRules() {
          << GrammarRule(N_CLASS, EmptyTokenList() << K_CLASS << S_SPACE << T_ID << S_CURLY_OPEN << N_CLASS_BODY << S_CURLY_CLOSE << S_SEMICOLON)
 
          << GrammarRule(N_CLASS_BODY, EmptyTokenList() << N_CLASS_ELEMENT)
+         << GrammarRule(N_CLASS_BODY, EmptyTokenList() << N_ACCESS_SPEC << S_COLON << N_CLASS_ELEMENT)
          << GrammarRule(N_CLASS_BODY, EmptyTokenList() << N_CLASS_BODY << N_CLASS_ELEMENT)
+         << GrammarRule(N_CLASS_BODY, EmptyTokenList() << N_CLASS_BODY << N_ACCESS_SPEC << S_COLON << N_CLASS_ELEMENT)
 
          << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_CLASS_PROPS_DECLARATION)
          << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_CLASS_METHOD)
          << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_CLASS_ELEMENT << N_CLASS_PROPS_DECLARATION)
          << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_CLASS_ELEMENT << N_CLASS_METHOD)
-         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_ACCESS_SPEC << S_COLON)
-         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_ACCESS_SPEC << S_COLON << N_CLASS_PROPS_DECLARATION)
-         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_ACCESS_SPEC << S_COLON << N_CLASS_METHOD)
-         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_ACCESS_SPEC << S_COLON << N_CLASS_ELEMENT << N_CLASS_PROPS_DECLARATION)
-         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_ACCESS_SPEC << S_COLON << N_CLASS_ELEMENT << N_CLASS_METHOD)
+         // dummy rules
+         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << S_COLON << S_COLON)
+         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << S_COLON << S_COLON << S_COLON << S_COLON)
+         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << S_COLON << S_COLON << S_COLON << S_COLON << S_COLON)
 
          << GrammarRule(N_ACCESS_SPEC, EmptyTokenList() << K_PUBLIC)
          << GrammarRule(N_ACCESS_SPEC, EmptyTokenList() << K_PRIVATE)

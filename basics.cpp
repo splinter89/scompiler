@@ -188,14 +188,20 @@ QString Situation::toString() const {
 }
 QString Symbol::toString() const {
     QString res;
-    QStringList args;
+    QStringList list;
 
     switch (type) {
     case SYM_FUNCTION:
         foreach (int arg_index, args_indexes) {
-            args << "#" + QString::number(arg_index);
+            list << "#" + QString::number(arg_index);
         }
-        res = QString("[FUNC] %1 %2(%3)").arg(dataTypeToString(data_type)).arg(name).arg(args.join(", "));
+        res = "[FUNC]";
+        if (access_type == ACCESS_PUBLIC) {
+            res += " public";
+        } else if (access_type == ACCESS_PRIVATE) {
+            res += " private";
+        }
+        res += QString(" %1 %2(%3)").arg(dataTypeToString(data_type)).arg(name).arg(list.join(", "));
         break;
 
     case SYM_ARGUMENT:
@@ -204,7 +210,7 @@ QString Symbol::toString() const {
             res = QString("%1 %2").arg(dataTypeToString(data_type, class_index)).arg(name);
             break;
         case ARG_BY_REFERENCE:
-            res = QString("%1 &%2").arg(dataTypeToString(data_type, class_index)).arg(name);
+            res = QString("%1& %2").arg(dataTypeToString(data_type, class_index)).arg(name);
             break;
         }
         if (is_const) {
@@ -214,11 +220,23 @@ QString Symbol::toString() const {
         break;
 
     case SYM_VARIABLE:
-        res = QString("%1 %2").arg(dataTypeToString(data_type, class_index)).arg(name);
-        if (is_const) {
-            res = "const " + res;
+        res = "[VAR]";
+        if (access_type == ACCESS_PUBLIC) {
+            res += " public";
+        } else if (access_type == ACCESS_PRIVATE) {
+            res += " private";
         }
-        res = "[VAR] " + res;
+        if (is_const) {
+            res += " const";
+        }
+        res += QString(" %1 %2").arg(dataTypeToString(data_type, class_index)).arg(name);
+        break;
+
+    case SYM_CLASS:
+        foreach (int members_index, members_indexes) {
+            list << "#" + QString::number(members_index);
+        }
+        res = QString("[CLASS] %1 {%2 }").arg(name).arg(" " + list.join(", "));
         break;
 
     default:
@@ -236,7 +254,7 @@ QString Block::toString() const {
         declared_symbols << "#" + QString::number(declared_symbols_index);
     }
 
-    res = QString("{parent: #%1, declared_symbols: [%2]}")
+    res = QString("{ parent: #%1, declared_symbols: [%2] }")
             .arg(parent_block_index)
             .arg(declared_symbols.join(", "));
     if (parent_block_index == -1) {
