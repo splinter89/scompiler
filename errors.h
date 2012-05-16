@@ -14,7 +14,12 @@ enum ErrorType {E_UNKNOWN_ERROR,
                 E_INTERNAL_GOTO_UNDEFINED, E_INTERNAL_ACTION_UNDEFINED,
                 E_INTERNAL_STATES_STACK_EMPTY, E_CHAIN_REJECTED,
                 // semantic errors
-                E_ALREADY_DECLARED_IN_BLOCK
+                E_ALREADY_DECLARED_IN_BLOCK,//+
+                E_UNDECLARED_SYMBOL,//+
+                E_TYPES_MISMATCH,//+
+                E_INVALID_ARGUMENTS_LIST,
+                E_INVALID_OBJECT_TYPE,//+
+                E_OBJECT_IS_NOT_FUNCTION//+
                };
 
 static QHash<ErrorType, QString> initErrorCodes() {
@@ -39,6 +44,11 @@ static QHash<ErrorType, QString> initErrorCodes() {
         hash.insert(E_CHAIN_REJECTED,               "The chain rejected");
 
         hash.insert(E_ALREADY_DECLARED_IN_BLOCK,    "Symbol is already declared in this block");
+        hash.insert(E_UNDECLARED_SYMBOL,            "Undeclared symbol");
+        hash.insert(E_TYPES_MISMATCH,               "Types mismatch");
+        hash.insert(E_INVALID_ARGUMENTS_LIST,       "Invalid arguments list");
+        hash.insert(E_INVALID_OBJECT_TYPE,          "Invalid object type");
+        hash.insert(E_OBJECT_IS_NOT_FUNCTION,       "Object is not a function");
 
         return hash;
 }

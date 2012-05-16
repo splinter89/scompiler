@@ -58,7 +58,7 @@ private:
     void addBlockSymbols(int block_index, QList<int> declared_symbols_indexes);
     int getParentBlockIndex(int block_index);
     int indexOfSymbolDeclaredInBlock(QString name, SymbolType type, int block_index);
-    int indexOfSymbolInCurrentBlock(QString name, SymbolType type, int block_index);
+    int indexOfSymbolInCurrentBlock(QString name, SymbolType type, int block_index, QList<int> declared_but_not_in_block_indexes);
 
 signals:
     void syntax_error(int pos, QString msg);

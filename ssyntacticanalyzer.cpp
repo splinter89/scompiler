@@ -239,6 +239,7 @@ void SSyntacticAnalyzer::addBlockSymbols(int block_index, QList<int> declared_sy
                                 .arg(symbol_table_.at(declared_symbols_index).toString())
                                 .arg(block_index)
                                 .arg(error_msg(E_ALREADY_DECLARED_IN_BLOCK)));
+            return;
         } else {
             block.declared_symbols_indexes << declared_symbols_index;
             block_table_.replace(block_index, block);
@@ -267,14 +268,25 @@ int SSyntacticAnalyzer::indexOfSymbolDeclaredInBlock(QString name, SymbolType ty
 
     return res;
 }
-int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name, SymbolType type, int block_index)
+int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name, SymbolType type, int block_index, QList<int> declared_but_not_in_block_indexes)
 {
     int res = -1;
 
     while ((res == -1) && (block_index != -1)) {
-        res = indexOfSymbolDeclaredInBlock(name, type, block_index);
+        foreach (int symbol_index, declared_but_not_in_block_indexes) {
+            if ((symbol_table_.at(symbol_index).name == name)
+                && ((symbol_table_.at(symbol_index).type == type)
+                    || ((symbol_table_.at(symbol_index).type == SYM_ARGUMENT)
+                        && (type == SYM_VARIABLE)))) {
+                res = symbol_index;
+            }
+        }
+
         if (res == -1) {
-            block_index = block_table_.at(block_index).parent_block_index;
+            res = indexOfSymbolDeclaredInBlock(name, type, block_index);
+            if (res == -1) {
+                block_index = block_table_.at(block_index).parent_block_index;
+            }
         }
     }
 
@@ -419,8 +431,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                                        QList<TokenConst> table_consts,
                                        QList<TokenKeyword> table_keywords,
                                        QList<TokenSeparator> table_separators) {
-    Q_UNUSED(table_consts)
-
     QList<int> result;
     if (grammar_.isEmpty() || action_table_.isEmpty() || goto_table_.isEmpty()) return result;
 
@@ -431,10 +441,12 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     QList<Token> tokens_stack;
     QList<TokenPointer> ids_stack;
 
-    int parent_block_index;
+    int block_index;
     QList<int> declared_symbols_indexes;
     QList<int> declared_arg_symbols_indexes;
     int symbol_index;
+    int object_symbol_id;
+    DataType expr_type;
     // symbol params
     QList<int> args_indexes;
     DataType data_type;
@@ -452,9 +464,10 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     symbol_table_.clear();
     block_table_.clear();
 
-    parent_block_index = addEmptyBlock(-1); // global context
+    block_index = addEmptyBlock(-1); // global context
     declared_symbols_indexes.clear();
     declared_arg_symbols_indexes.clear();
+    object_symbol_id = -1;
     args_indexes.clear();
     decl_vars_count = 0;
     class_index = -1;
@@ -482,17 +495,17 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     ids_stack << tokens.at(i);
                 } else if (token == S_CURLY_OPEN) {
                     // save declared symbols & enter new block
-                    addBlockSymbols(parent_block_index, declared_symbols_indexes);
+                    addBlockSymbols(block_index, declared_symbols_indexes);
                     declared_symbols_indexes.clear();
 
-                    parent_block_index = addEmptyBlock(parent_block_index);
+                    block_index = addEmptyBlock(block_index);
                 } else if (token == S_CURLY_CLOSE) {
                     // save declared symbols & return to parent block
-                    addBlockSymbols(parent_block_index, declared_arg_symbols_indexes + declared_symbols_indexes);
+                    addBlockSymbols(block_index, declared_arg_symbols_indexes + declared_symbols_indexes);
                     declared_symbols_indexes.clear();
                     declared_arg_symbols_indexes.clear();
 
-                    parent_block_index = getParentBlockIndex(parent_block_index);
+                    block_index = getParentBlockIndex(block_index);
                 }
                 tokens_stack << token;
                 i++;
@@ -505,6 +518,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                 ) {
                     // full grammar because we will depend on the number of rules
                     int rule_index_full = indexOfGrammarRule(rule.left_token, rule.right_side, Grammar_full);
+
+                    int temp_class_index;   // for class search
 
                     // filling up the symbol table
                     switch (rule_index_full) {
@@ -718,7 +733,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
 
                     case 44:
-                        // :TODO: check whether class exists
                         symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
                                                          data_type,
                                                          class_index,
@@ -760,14 +774,93 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         break;
 
 
+                    case 97:
+                        // :TODO: need to use tokan_stack - not tokens
+                        expr_type = table_consts.at(tokens.at(i - 1).index).type;
+                        qDebug() << "0_O" << table_consts.length() << " < " << tokens.at(i - 1).index;
+                        qDebug() << tokenToString(token);
+                        break;
+                    case 98:
+                    case 101:
+                        expr_type = symbol_table_.at(object_symbol_id).data_type;
+                        break;
+
+
+                    case 102:
+                    case 103:
+                        if (symbol_table_.at(object_symbol_id).type != SYM_FUNCTION) {
+                            emit semantic_error(-1, QString("(Call to %1) %2")
+                                                .arg(symbol_table_.at(object_symbol_id).name)
+                                                .arg(error_msg(E_OBJECT_IS_NOT_FUNCTION)));
+                            result.clear();
+                            return result;
+                        }
+                        break;
+
+
                     case 104:
+                        object_symbol_id = indexOfSymbolInCurrentBlock(
+                                    table_ids.at(ids_stack.last().index).name,
+                                    SYM_ARGUMENT,
+                                    block_index,
+                                    declared_arg_symbols_indexes + declared_symbols_indexes);
+                        if (object_symbol_id == -1) {
+                            object_symbol_id = indexOfSymbolInCurrentBlock(
+                                        table_ids.at(ids_stack.last().index).name,
+                                        SYM_VARIABLE,
+                                        block_index,
+                                        declared_arg_symbols_indexes + declared_symbols_indexes);
+                            if (object_symbol_id == -1) {
+                                object_symbol_id = indexOfSymbolInCurrentBlock(
+                                            table_ids.at(ids_stack.last().index).name,
+                                            SYM_FUNCTION,
+                                            block_index,
+                                            declared_arg_symbols_indexes + declared_symbols_indexes);
+                                if (object_symbol_id == -1) {
+                                    emit semantic_error(-1, QString("(%1) %2")
+                                                        .arg(table_ids.at(ids_stack.last().index).name)
+                                                        .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                                    result.clear();
+                                    return result;
+                                }
+                            }
+                        }
                         ids_stack.removeLast();
                         break;
                     case 105:
+                        temp_class_index = indexOfSymbolInCurrentBlock(
+                                    table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name,
+                                    SYM_CLASS,
+                                    block_index,
+                                    declared_arg_symbols_indexes + declared_symbols_indexes);
+                        if (temp_class_index > -1) {
+                            bool ok = false;
+                            foreach (int members_index, symbol_table_.at(temp_class_index).members_indexes) {
+                                if (symbol_table_.at(members_index).name == table_ids.at(ids_stack.last().index).name) {
+                                    object_symbol_id = members_index;
+                                    ok = true;
+                                    break;
+                                }
+                            }
+                            if (!ok) {
+                                emit semantic_error(-1, QString("(%1) %2")
+                                                    .arg(table_ids.at(ids_stack.last().index).name)
+                                                    .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                                result.clear();
+                                return result;
+                            }
+                        } else {
+                            emit semantic_error(-1, QString("(%1) %2")
+                                                .arg(table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name)
+                                                .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                            result.clear();
+                            return result;
+                        }
                         ids_stack.removeLast();
                         ids_stack.removeLast();
                         break;
                     case 106:
+                        // ...
                         ids_stack.removeLast();
                         ids_stack.removeLast();
                         break;
@@ -840,11 +933,19 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         data_type = TYPE_BOOL;
                         break;
                     case 117:
-//                        if (found class with name "table_ids.at(ids_stack.last().index).name" in top block) {
-//                            class_index = ...;
-//                        } else {
-//                            error - class not defined
-//                        }
+                        temp_class_index = indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name,
+                                                                            SYM_CLASS,
+                                                                            0);
+                        if (temp_class_index > -1) {
+                            data_type = TYPE_OBJECT;
+                            class_index = temp_class_index;
+                        } else {
+                            emit semantic_error(-1, QString("(%1) %2")
+                                                .arg(table_ids.at(ids_stack.last().index).name)
+                                                .arg(error_msg(E_INVALID_OBJECT_TYPE)));
+                            result.clear();
+                            return result;
+                        }
                         ids_stack.removeLast();
                         break;
 
@@ -896,6 +997,16 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 //                        ids_stack.removeLast();
 //                        break;
 
+                    // :TODO: delme
+                    case 135:
+                        if (symbol_table_.at(object_symbol_id).data_type != expr_type) {
+                            emit semantic_error(-1, QString("(%1 and %2) %3")
+                                                .arg(dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index))
+                                                .arg(dataTypeToString(expr_type, class_index))
+                                                .arg(error_msg(E_TYPES_MISMATCH)));
+                        }
+                        break;
+
                     default:
                         break;
                     }
@@ -929,9 +1040,9 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                 tokens_accepted = true;
 
                 // save declared symbols & return to parent block
-                addBlockSymbols(parent_block_index, declared_symbols_indexes);
-                parent_block_index = getParentBlockIndex(parent_block_index);
-                Q_ASSERT(parent_block_index == -1);
+                addBlockSymbols(block_index, declared_symbols_indexes);
+                block_index = getParentBlockIndex(block_index);
+                Q_ASSERT(block_index == -1);
                 declared_symbols_indexes.clear();
 
                 break;
