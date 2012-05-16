@@ -478,7 +478,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     int rule_index_full = indexOfGrammarRule(rule.left_token, rule.right_side, Grammar_full);
 
                     // filling up the symbol table
-                    int old_symbol_table_length = symbol_table_.length();
                     switch (rule_index_full) {
 //                    case 7000:
 //                        args_indexes.clear();
@@ -817,10 +816,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     default:
                         break;
                     }
-                    // :TODO: delme
-                    if (old_symbol_table_length != symbol_table_.length()) {
-                        //qDebug() << "rule" << rule_index_full << ":" << symbol_table_;
-                    }
 
                     // ...back to our finite-state machine
                     for (int num = 0; num < rule.right_side.length(); num++) {
@@ -865,7 +860,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
             return result;
         }
     }
-    qDebug() << "\n";
     if (i >= tokens.length()) {
         // error - tokens not accepted
         result.clear();
