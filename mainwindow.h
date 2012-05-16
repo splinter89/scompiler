@@ -74,6 +74,8 @@ private slots:
     void on_open_triggered();
     void on_save_triggered();
     void on_run_triggered();
+    void loadActiveRules();
+    void saveActiveRules();
     void uncheckAllRules();
     void updateGrammar();
 };

@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    grammar_active_rules_ << 1 << 6 << 40 << 48 << 49 << 50 << 51 << 53
 //                          << 54 << 55 << 58 << 59 << 97 << 98 << 101
 //                          << 102 << 103 << 104 << 105 << 106 << 134;
-    grammar_active_rules_ << 1 << 6 << 40 << 41 << 42 << 43 << 44 << 45 << 46 << 47 << 48 << 49 << 50 << 51 << 53 << 54 << 55 << 58 << 59 << 97 << 98 << 101 << 102 << 103 << 104 << 105 << 106 << 113 << 114 << 115 << 116 << 134;
+    grammar_active_rules_ << 1 << 6 << 40 << 41 << 42 << 43 << 44 << 45 << 46 << 47 << 48 << 49 << 50 << 51 << 52 << 53 << 54 << 55 << 58 << 59 << 97 << 98 << 101 << 102 << 103 << 104 << 105 << 106 << 109 << 111 << 113 << 114 << 115 << 116 << 120 << 121 << 134;
     grammar_ = setGrammarRules(grammar_active_rules_);
 
     // init1 ==================================================================
@@ -169,16 +169,26 @@ MainWindow::MainWindow(QWidget *parent) :
             table_synt_5_->setColumnWidth(0, header_num_width);
             table_synt_5_->setColumnWidth(1, header_grammar_width);
             table_synt_5_->verticalHeader()->setVisible(false);
-            grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 2);
+            grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 4);
 
             // buttons
+            QPushButton *b_load_rules = new QPushButton(trUtf8("загрузить"));
+            grid_synt_5->addWidget(b_load_rules, 1, 0);
+            connect(b_load_rules, SIGNAL(clicked()),
+                    this, SLOT(loadActiveRules()));
+
+            QPushButton *b_save_rules = new QPushButton(trUtf8("сохранить"));
+            grid_synt_5->addWidget(b_save_rules, 1, 1);
+            connect(b_save_rules, SIGNAL(clicked()),
+                    this, SLOT(saveActiveRules()));
+
             QPushButton *b_uncheck_all_rules = new QPushButton(trUtf8("очистить"));
-            grid_synt_5->addWidget(b_uncheck_all_rules, 1, 0);
+            grid_synt_5->addWidget(b_uncheck_all_rules, 1, 2);
             connect(b_uncheck_all_rules, SIGNAL(clicked()),
                     this, SLOT(uncheckAllRules()));
 
             b_update_grammar = new QPushButton(trUtf8("применить"));
-            grid_synt_5->addWidget(b_update_grammar, 1, 1);
+            grid_synt_5->addWidget(b_update_grammar, 1, 3);
             connect(b_update_grammar, SIGNAL(clicked()),
                     this, SLOT(updateGrammar()));
 
@@ -329,6 +339,9 @@ MainWindow::MainWindow(QWidget *parent) :
 //            j++;
 //        }
 //    }
+
+    // :TODO: delme (init code)
+    openFile("void_main.cpp");
 }
 
 MainWindow::~MainWindow()
@@ -452,7 +465,7 @@ void MainWindow::saveFile(const QString filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        setStatusError(trUtf8("при сохранении. %1").arg(file.errorString()));
+        setStatusError(trUtf8("при сохранении: %1").arg(file.errorString()));
     }
     QTextStream out(&file);
     QString content = editor_->toPlainText();
@@ -701,15 +714,18 @@ void MainWindow::updateGrammar() {
     b_update_grammar->setEnabled(false);
 
     int i;
+//    QStringList active_indexes;
     grammar_active_rules_.clear();
     grammar_active_rules_ << 0;
     for (i = 1; i < table_synt_5_->rowCount(); i++) {
         QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
         if (chb->isChecked()) {
             grammar_active_rules_ << i;
+//            active_indexes << QString::number(i);
         }
     }
     grammar_ = setGrammarRules(grammar_active_rules_);
+//    qDebug() << "New rules:" << active_indexes.join(" << ");
 
     syntactic_analyzer_->setGrammar(grammar_);
     if (!syntactic_analyzer_->generateSetOfSituations()) {
@@ -738,6 +754,64 @@ void MainWindow::updateGrammar() {
     }
 
     b_update_grammar->setEnabled(true);
+}
+
+void MainWindow::loadActiveRules() {
+    QString res = "";
+
+    // read from file
+    QString fileName = QFileDialog::getOpenFileName(
+                this,
+                trUtf8("Загрузить шаблон..."),
+                QCoreApplication::applicationDirPath(),
+                trUtf8("Config file (*.cfg);;All files (*.*)"));
+    if (!fileName.isEmpty()) {
+        QFile file(fileName);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            setStatusError(trUtf8("при открытии: %1").arg(file.errorString()));
+            return;
+        }
+        QTextStream in(&file);
+        res = in.readAll();     // \n,\r\n,\r -> \n (automatically)
+        file.close();
+
+        if (!res.isEmpty()) {
+            for (int i = 1; i < table_synt_5_->rowCount(); i++) {
+                QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
+                if (i <= res.length()) {
+                    chb->setChecked((res.at(i - 1) == '1') ? true : false);
+                } else {
+                    chb->setChecked(false);
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::saveActiveRules() {
+    QString res = "";
+
+    for (int i = 1; i < table_synt_5_->rowCount(); i++) {
+        QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
+        res += (chb->isChecked()) ? "1" : "0";
+    }
+
+    // write to file
+    QString fileName = QFileDialog::getSaveFileName(
+                this,
+                trUtf8("Сохранить шаблон..."),
+                QCoreApplication::applicationDirPath(),
+                trUtf8("Config file (*.cfg);;All files (*.*)"));
+    if (!fileName.isEmpty()) {
+        QFile file(fileName);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            setStatusError(trUtf8("при сохранении: %1").arg(file.errorString()));
+            return;
+        }
+        QTextStream out(&file);
+        out << res;
+        file.close();
+    }
 }
 
 void MainWindow::uncheckAllRules() {
