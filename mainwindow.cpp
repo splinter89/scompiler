@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     syntactic_analyzer_ = new SSyntacticAnalyzer();
     connect(syntactic_analyzer_, SIGNAL(syntax_error(int,QString)),
             this, SLOT(displayError(int,QString)));
+    connect(syntactic_analyzer_, SIGNAL(semantic_error(int,QString)),
+            this, SLOT(displayError(int,QString)));
 
     syntactic_analyzer_->setGrammar(grammar_);
     if (!syntactic_analyzer_->generateSetOfSituations()) {
@@ -210,25 +212,25 @@ MainWindow::MainWindow(QWidget *parent) :
         tab_synt->setLayout(grid_synt);
 
 
-        QWidget *tab_sem = new QWidget();
-        tab_main_->addTab(tab_sem, trUtf8("Таблицы"));
-            QWidget *tab_sem_0 = new QWidget();
-            QWidget *tab_sem_1 = new QWidget();
-            tab_sem_main_ = new QTabWidget();
-            tab_sem_main_->addTab(tab_sem_0, trUtf8("таблица символов"));
-                QGridLayout *grid_sem_0 = new QGridLayout();
-                edit_sem_0_ = new QPlainTextEdit();
-                edit_sem_0_->setReadOnly(true);
-                edit_sem_0_->setTabStopWidth(tab_stop_width);
-                grid_sem_0->addWidget(edit_sem_0_);
-                tab_sem_0->setLayout(grid_sem_0);
-            tab_sem_main_->addTab(tab_sem_1, trUtf8("таблица блоков"));
-                QGridLayout *grid_sem_1 = new QGridLayout();
-                edit_sem_1_ = new QPlainTextEdit();
-                edit_sem_1_->setReadOnly(true);
-                edit_sem_1_->setTabStopWidth(tab_stop_width);
-                grid_sem_1->addWidget(edit_sem_1_);
-                tab_sem_1->setLayout(grid_sem_1);
+    QWidget *tab_sem = new QWidget();
+    tab_main_->addTab(tab_sem, trUtf8("Таблицы"));
+        QWidget *tab_sem_0 = new QWidget();
+        QWidget *tab_sem_1 = new QWidget();
+        tab_sem_main_ = new QTabWidget();
+        tab_sem_main_->addTab(tab_sem_0, trUtf8("таблица символов"));
+            QGridLayout *grid_sem_0 = new QGridLayout();
+            edit_sem_0_ = new QPlainTextEdit();
+            edit_sem_0_->setReadOnly(true);
+            edit_sem_0_->setTabStopWidth(tab_stop_width);
+            grid_sem_0->addWidget(edit_sem_0_);
+            tab_sem_0->setLayout(grid_sem_0);
+        tab_sem_main_->addTab(tab_sem_1, trUtf8("таблица блоков"));
+            QGridLayout *grid_sem_1 = new QGridLayout();
+            edit_sem_1_ = new QPlainTextEdit();
+            edit_sem_1_->setReadOnly(true);
+            edit_sem_1_->setTabStopWidth(tab_stop_width);
+            grid_sem_1->addWidget(edit_sem_1_);
+            tab_sem_1->setLayout(grid_sem_1);
 
         QGridLayout *grid_sem = new QGridLayout();
         grid_sem->addWidget(tab_sem_main_);

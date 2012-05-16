@@ -55,9 +55,12 @@ private:
     int addEmptyBlock(int parent_block_index);
     void addBlockSymbols(int block_index, QList<int> declared_symbols_indexes);
     int getParentBlockIndex(int block_index);
+    int indexOfSymbolDeclaredInBlock(QString name, SymbolType type, int block_index);
+    int indexOfSymbolInCurrentBlock(QString name, SymbolType type, int block_index);
 
 signals:
     void syntax_error(int pos, QString msg);
+    void semantic_error(int pos, QString msg);
 };
 
 #endif // SSYNTACTICANALYZER_H

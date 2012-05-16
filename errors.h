@@ -12,7 +12,9 @@ enum ErrorType {E_UNKNOWN_ERROR,
                 E_NOT_LR1_GRAMMAR,
                 E_INTERNAL_GENERATING_SITUATIONS, E_INTERNAL_GENERATING_TABLES,
                 E_INTERNAL_GOTO_UNDEFINED, E_INTERNAL_ACTION_UNDEFINED,
-                E_INTERNAL_STATES_STACK_EMPTY, E_CHAIN_REJECTED
+                E_INTERNAL_STATES_STACK_EMPTY, E_CHAIN_REJECTED,
+                // semantic errors
+                E_ALREADY_DECLARED_IN_BLOCK
                };
 
 static QHash<ErrorType, QString> initErrorCodes() {
@@ -35,6 +37,8 @@ static QHash<ErrorType, QString> initErrorCodes() {
         hash.insert(E_INTERNAL_ACTION_UNDEFINED,    "The chain rejected [action-rule undefined (internal)]");
         hash.insert(E_INTERNAL_STATES_STACK_EMPTY,  "The chain rejected [stack of states got broken (internal)]");
         hash.insert(E_CHAIN_REJECTED,               "The chain rejected");
+
+        hash.insert(E_ALREADY_DECLARED_IN_BLOCK,    "Symbol is already declared in this block");
 
         return hash;
 }

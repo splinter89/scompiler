@@ -207,13 +207,54 @@ int SSyntacticAnalyzer::addEmptyBlock(int parent_block_index)
 void SSyntacticAnalyzer::addBlockSymbols(int block_index, QList<int> declared_symbols_indexes)
 {
     Block block = block_table_.at(block_index);
-    block.declared_symbols_indexes += declared_symbols_indexes;
-    block_table_.replace(block_index, block);
+    foreach (int declared_symbols_index, declared_symbols_indexes) {
+        // check for double declaration
+        if (indexOfSymbolDeclaredInBlock(symbol_table_.at(declared_symbols_index).name,
+                                         symbol_table_.at(declared_symbols_index).type,
+                                         block_index) > -1) {
+            emit semantic_error(-1, QString("(%1 @ block #%2) %3")
+                                .arg(symbol_table_.at(declared_symbols_index).toString())
+                                .arg(block_index)
+                                .arg(error_msg(E_ALREADY_DECLARED_IN_BLOCK)));
+        } else {
+            block.declared_symbols_indexes << declared_symbols_index;
+            block_table_.replace(block_index, block);
+        }
+    }
 }
 
 int SSyntacticAnalyzer::getParentBlockIndex(int block_index)
 {
     int res = block_table_.at(block_index).parent_block_index;
+    return res;
+}
+
+int SSyntacticAnalyzer::indexOfSymbolDeclaredInBlock(QString name, SymbolType type, int block_index)
+{
+    int res = -1;
+
+    foreach (int declared_symbols_index, block_table_.at(block_index).declared_symbols_indexes) {
+        if ((symbol_table_.at(declared_symbols_index).name == name)
+            && ((symbol_table_.at(declared_symbols_index).type == type)
+                || ((symbol_table_.at(declared_symbols_index).type == SYM_ARGUMENT)
+                    && (type == SYM_VARIABLE)))) {
+            res = declared_symbols_index;
+        }
+    }
+
+    return res;
+}
+int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name, SymbolType type, int block_index)
+{
+    int res = -1;
+
+    while ((res == -1) && (block_index != -1)) {
+        res = indexOfSymbolDeclaredInBlock(name, type, block_index);
+        if (res == -1) {
+            block_index = block_table_.at(block_index).parent_block_index;
+        }
+    }
+
     return res;
 }
 
