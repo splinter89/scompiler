@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QFileDialog>

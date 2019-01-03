@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT     += core gui
+QT     += core gui widgets
 CONFIG += qt warn_on
 
 TARGET = scompiler
@@ -30,13 +30,3 @@ FORMS += mainwindow.ui
 RESOURCES += scompiler.qrc
 
 RC_FILE = scompiler.rc
-
-
-
-
-
-
-
-
-
-
