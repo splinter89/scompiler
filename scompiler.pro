@@ -5,7 +5,8 @@
 #-------------------------------------------------
 
 QT     += core gui widgets
-CONFIG += qt warn_on
+CONFIG += qt warn_on static
+QMAKE_LFLAGS_RELEASE += -static -static-libgcc
 
 TARGET = scompiler
 TEMPLATE = app
