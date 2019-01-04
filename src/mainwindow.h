@@ -65,6 +65,7 @@ private:
     QPushButton *b_update_grammar;
 
     QString base_window_title_;
+    QString file_dialog_dir_;
 
     void clearLexTables();
     void setLexTableHeaders();

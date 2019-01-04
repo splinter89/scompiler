@@ -67,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    setFixedSize(width(), height());
     statusBar()->showMessage(trUtf8("Status: ok"));
     base_window_title_ = windowTitle();
+    file_dialog_dir_ = QDir::currentPath(); // QCoreApplication::applicationDirPath()
 
     // now draw interface >:[]
     editor_ = new CodeEditor();
@@ -504,6 +505,7 @@ void MainWindow::openFile(const QString filename)
     QFileInfo fi(filename);
     setStatusMsg(trUtf8("file \"%1\" loaded").arg(fi.fileName()));
     setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(base_window_title_));
+    file_dialog_dir_ = fi.absolutePath();
 }
 
 void MainWindow::saveFile(const QString filename)
@@ -520,6 +522,7 @@ void MainWindow::saveFile(const QString filename)
     QFileInfo fi(filename);
     setStatusMsg(trUtf8("file \"%1\" saved successfully").arg(fi.fileName()));
     setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(base_window_title_));
+    file_dialog_dir_ = fi.absolutePath();
 }
 
 void MainWindow::run()
@@ -825,7 +828,7 @@ void MainWindow::loadActiveRules() {
     QString fileName = QFileDialog::getOpenFileName(
                 this,
                 trUtf8("Load template"),
-                QDir::currentPath(), // QCoreApplication::applicationDirPath()
+                file_dialog_dir_,
                 trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
@@ -836,6 +839,9 @@ void MainWindow::loadActiveRules() {
         QTextStream in(&file);
         res = in.readAll();     // \n,\r\n,\r -> \n (automatically)
         file.close();
+
+        QFileInfo fi(fileName);
+        file_dialog_dir_ = fi.absolutePath();
 
         if (!res.isEmpty()) {
             for (int i = 1; i < table_synt_5_->rowCount(); i++) {
@@ -862,7 +868,7 @@ void MainWindow::saveActiveRules() {
     QString fileName = QFileDialog::getSaveFileName(
                 this,
                 trUtf8("Save template"),
-                QDir::currentPath(), // QCoreApplication::applicationDirPath()
+                file_dialog_dir_,
                 trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
@@ -873,6 +879,9 @@ void MainWindow::saveActiveRules() {
         QTextStream out(&file);
         out << res;
         file.close();
+
+        QFileInfo fi(fileName);
+        file_dialog_dir_ = fi.absolutePath();
     }
 }
 
@@ -889,7 +898,7 @@ void MainWindow::on_open_triggered()
     QString fileName = QFileDialog::getOpenFileName(
                 this,
                 trUtf8("Load code"),
-                QDir::currentPath(), // QCoreApplication::applicationDirPath()
+                file_dialog_dir_,
                 trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         openFile(fileName);
@@ -901,7 +910,7 @@ void MainWindow::on_save_triggered()
     QString fileName = QFileDialog::getSaveFileName(
                 this,
                 trUtf8("Save code"),
-                QDir::currentPath(), // QCoreApplication::applicationDirPath()
+                file_dialog_dir_,
                 trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         if (fileName.indexOf(".cpp") == -1) {
