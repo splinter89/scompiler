@@ -825,7 +825,7 @@ void MainWindow::loadActiveRules() {
     QString fileName = QFileDialog::getOpenFileName(
                 this,
                 trUtf8("Load template"),
-                QCoreApplication::applicationDirPath(),
+                QDir::currentPath(), // QCoreApplication::applicationDirPath()
                 trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
@@ -862,7 +862,7 @@ void MainWindow::saveActiveRules() {
     QString fileName = QFileDialog::getSaveFileName(
                 this,
                 trUtf8("Save template"),
-                QCoreApplication::applicationDirPath(),
+                QDir::currentPath(), // QCoreApplication::applicationDirPath()
                 trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
@@ -889,7 +889,7 @@ void MainWindow::on_open_triggered()
     QString fileName = QFileDialog::getOpenFileName(
                 this,
                 trUtf8("Load code"),
-                QCoreApplication::applicationDirPath(),
+                QDir::currentPath(), // QCoreApplication::applicationDirPath()
                 trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         openFile(fileName);
@@ -901,7 +901,7 @@ void MainWindow::on_save_triggered()
     QString fileName = QFileDialog::getSaveFileName(
                 this,
                 trUtf8("Save code"),
-                QCoreApplication::applicationDirPath(),
+                QDir::currentPath(), // QCoreApplication::applicationDirPath()
                 trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         if (fileName.indexOf(".cpp") == -1) {
