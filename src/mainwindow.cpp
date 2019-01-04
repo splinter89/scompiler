@@ -26,14 +26,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // init1 ==================================================================
     lexical_analyzer_ = new SLexicalAnalyzer();
-    connect(lexical_analyzer_, SIGNAL(lexical_error(int,QString)),
-            this, SLOT(displayError(int,QString)));
+    connect(lexical_analyzer_, SIGNAL(lexical_error(int, QString)),
+            this, SLOT(displayError(int, QString)));
     // init2 ==================================================================
     syntactic_analyzer_ = new SSyntacticAnalyzer();
-    connect(syntactic_analyzer_, SIGNAL(syntax_error(int,QString)),
-            this, SLOT(displayError(int,QString)));
-    connect(syntactic_analyzer_, SIGNAL(semantic_error(int,QString)),
-            this, SLOT(displayError(int,QString)));
+    connect(syntactic_analyzer_, SIGNAL(syntax_error(int, QString)),
+            this, SLOT(displayError(int, QString)));
+    connect(syntactic_analyzer_, SIGNAL(semantic_error(int, QString)),
+            this, SLOT(displayError(int, QString)));
 
     syntactic_analyzer_->setGrammar(grammar_);
     if (!syntactic_analyzer_->generateSetOfSituations()) {
@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
         return;
     }
     if (!syntactic_analyzer_->generateActionGotoTables()) {
-//        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
+        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
         return;
     }
     // ========================================================================
@@ -813,13 +813,13 @@ void MainWindow::loadActiveRules() {
     // read from file
     QString fileName = QFileDialog::getOpenFileName(
                 this,
-                trUtf8("Load template..."),
+                trUtf8("Load template"),
                 QCoreApplication::applicationDirPath(),
                 trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            setStatusError(trUtf8("open error: %1").arg(file.errorString()));
+            setStatusError(trUtf8("load error: %1").arg(file.errorString()));
             return;
         }
         QTextStream in(&file);
@@ -850,7 +850,7 @@ void MainWindow::saveActiveRules() {
     // write to file
     QString fileName = QFileDialog::getSaveFileName(
                 this,
-                trUtf8("Save template..."),
+                trUtf8("Save template"),
                 QCoreApplication::applicationDirPath(),
                 trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
@@ -877,7 +877,7 @@ void MainWindow::on_open_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(
                 this,
-                trUtf8("Load code..."),
+                trUtf8("Load code"),
                 QCoreApplication::applicationDirPath(),
                 trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
@@ -889,7 +889,7 @@ void MainWindow::on_save_triggered()
 {
     QString fileName = QFileDialog::getSaveFileName(
                 this,
-                trUtf8("Save code..."),
+                trUtf8("Save code"),
                 QCoreApplication::applicationDirPath(),
                 trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {

@@ -24,7 +24,7 @@ enum ErrorType {E_UNKNOWN_ERROR,
 
 static QHash<ErrorType, QString> initErrorCodes() {
         QHash<ErrorType, QString> hash;
-        hash.insert(E_UNKNOWN_ERROR,                "Unknown error occured...");
+        hash.insert(E_UNKNOWN_ERROR,                "Unknown error occured");
 
         hash.insert(E_UNKNOWN_TERMINAL_ERROR,       "Unknown terminal found");
         hash.insert(E_COMMENT_NOT_CLOSED,           "Multi-line comment is not closed");
