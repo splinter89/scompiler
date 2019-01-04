@@ -14,6 +14,10 @@ SLexicalAnalyzer::~SLexicalAnalyzer()
 bool SLexicalAnalyzer::process(const QString code)
 {
     tokens_.clear();
+    table_ids_.clear();
+    table_consts_.clear();
+    table_keywords_.clear();
+    table_separators_.clear();
 
     Token token_type;
     DataType const_type;
@@ -393,7 +397,6 @@ int SLexicalAnalyzer::indexOfTokenItem(const TokenSeparator item)
     }
     return res;
 }
-
 
 void SLexicalAnalyzer::removeToken(const int list_index)
 {
