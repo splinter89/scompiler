@@ -80,7 +80,7 @@ private slots:
     void on_run_triggered();
     void loadActiveRules();
     void saveActiveRules();
-    void uncheckAllRules();
+    void setCheckedAllRules(int is_checked);
     void updateGrammar();
 };
 

@@ -180,7 +180,7 @@ MainWindow::MainWindow(QWidget *parent) :
             table_synt_5_->setColumnWidth(0, header_num_width);
             table_synt_5_->setColumnWidth(1, header_grammar_width);
             table_synt_5_->verticalHeader()->setVisible(false);
-            grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 4);
+            grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 5);
 
             // buttons
             QPushButton *b_load_rules = new QPushButton(trUtf8("load"));
@@ -193,13 +193,20 @@ MainWindow::MainWindow(QWidget *parent) :
             connect(b_save_rules, SIGNAL(clicked()),
                     this, SLOT(saveActiveRules()));
 
-            QPushButton *b_uncheck_all_rules = new QPushButton(trUtf8("clear"));
-            grid_synt_5->addWidget(b_uncheck_all_rules, 1, 2);
-            connect(b_uncheck_all_rules, SIGNAL(clicked()),
-                    this, SLOT(uncheckAllRules()));
+            QPushButton *b_check_all_rules = new QPushButton(trUtf8("all"));
+            grid_synt_5->addWidget(b_check_all_rules, 1, 2);
+            QPushButton *b_uncheck_all_rules = new QPushButton(trUtf8("none"));
+            grid_synt_5->addWidget(b_uncheck_all_rules, 1, 3);
+
+            QSignalMapper* signalMapper = new QSignalMapper(this);
+            connect(b_check_all_rules, SIGNAL(clicked()), signalMapper, SLOT(map()));
+            connect(b_uncheck_all_rules, SIGNAL(clicked()), signalMapper, SLOT(map()));
+            signalMapper->setMapping(b_check_all_rules, 1);
+            signalMapper->setMapping(b_uncheck_all_rules, 0);
+            connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(setCheckedAllRules(int)));
 
             b_update_grammar = new QPushButton(trUtf8("apply"));
-            grid_synt_5->addWidget(b_update_grammar, 1, 3);
+            grid_synt_5->addWidget(b_update_grammar, 1, 4);
             connect(b_update_grammar, SIGNAL(clicked()),
                     this, SLOT(updateGrammar()));
 
@@ -869,10 +876,10 @@ void MainWindow::saveActiveRules() {
     }
 }
 
-void MainWindow::uncheckAllRules() {
+void MainWindow::setCheckedAllRules(int is_checked) {
     for (int i = 1; i < table_synt_5_->rowCount(); i++) {
         QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
-        chb->setChecked(false);
+        chb->setChecked((bool)is_checked);
     }
 }
 
