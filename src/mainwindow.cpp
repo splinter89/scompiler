@@ -370,8 +370,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //        }
 //    }
 
-    // :TODO: delme (init code)
-    openFile("void_main.cpp");
+    openFile();
 }
 
 MainWindow::~MainWindow()
@@ -478,6 +477,11 @@ void MainWindow::clearSyntTables()
 
 void MainWindow::openFile(const QString filename)
 {
+    if (filename.isEmpty()) {
+        setWindowTitle(QString("Untitled - %1").arg(base_window_title_));
+        return;
+    }
+
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         setStatusError(trUtf8("при открытии: %1").arg(file.errorString()));
