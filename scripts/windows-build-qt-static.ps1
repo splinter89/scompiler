@@ -75,10 +75,10 @@
 
 [CmdletBinding()]
 param(
-    $QtSrcUrl = "http://download.qt-project.org/official_releases/qt/5.3/5.3.0/single/qt-everywhere-opensource-src-5.3.0.7z",
+    $QtSrcUrl = "http://download.qt.io/official_releases/qt/5.11/5.11.3/single/qt-everywhere-src-5.11.3.zip",
     $QtStaticDir = "C:\Qt\Static",
-    $QtVersion = "",
-    $MingwDir = "",
+    $QtVersion = "5.11.3",
+    $MingwDir = "C:\Qt\Tools\mingw530_32",
     [switch]$NoPause = $false
 )
 
@@ -163,7 +163,11 @@ DEFINES += QT_STATIC_BUILD
 
     # Configure, compile and install Qt.
     Push-Location $QtSrcDir
-    cmd /c "configure.bat -static -debug-and-release -platform win32-g++ -prefix $QtDir `        -qt-zlib -qt-pcre -qt-libpng -qt-libjpeg -qt-freetype -opengl desktop -qt-sql-sqlite -no-openssl `        -opensource -confirm-license `        -make libs -nomake tools -nomake examples -nomake tests"
+    cmd /c "configure.bat -static -debug-and-release -platform win32-g++ -prefix $QtDir `
+        -qt-zlib -qt-pcre -qt-libpng -qt-libjpeg -qt-freetype -opengl desktop -no-openssl `
+        -opensource -confirm-license -skip qtwebengine `
+        -make libs -nomake tools -nomake examples -nomake tests"
+    cmd /c "configure.bat -redo -opengl desktop -nomake tools -nomake examples -nomake tests"
     mingw32-make -k -j4
     mingw32-make -k install
     Pop-Location
