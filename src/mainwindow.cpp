@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
         resize(main_width / 2, main_height / 2);
     }
 //    setFixedSize(width(), height());
-    statusBar()->showMessage(trUtf8("Статус: ok"));
+    statusBar()->showMessage(trUtf8("Status: ok"));
     base_window_title_ = windowTitle();
 
     // now draw interface >:[]
@@ -73,14 +73,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     QWidget *tab_lex = new QWidget();
-    tab_main_->addTab(tab_lex, trUtf8("Лексический анализ"));
+    tab_main_->addTab(tab_lex, trUtf8("Lexical analysis"));
         QWidget *tab_lex_0 = new QWidget();
         QWidget *tab_lex_1 = new QWidget();
         QWidget *tab_lex_2 = new QWidget();
         QWidget *tab_lex_3 = new QWidget();
         QWidget *tab_lex_4 = new QWidget();
         tab_lex_main_ = new QTabWidget();
-        tab_lex_main_->addTab(tab_lex_0, trUtf8("свертка"));
+        tab_lex_main_->addTab(tab_lex_0, trUtf8("reduction"));
             QGridLayout *grid_lex_0 = new QGridLayout();
             table_lex_0_ = new QTableWidget(0, 6);
             table_lex_0_->setColumnWidth(0, header_num_width);
@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
             table_lex_0_->verticalHeader()->setVisible(false);
             grid_lex_0->addWidget(table_lex_0_);
             tab_lex_0->setLayout(grid_lex_0);
-        tab_lex_main_->addTab(tab_lex_1, trUtf8("id's"));
+        tab_lex_main_->addTab(tab_lex_1, trUtf8("IDs"));
             QGridLayout *grid_lex_1 = new QGridLayout();
             table_lex_1_ = new QTableWidget(0, 2);
             table_lex_1_->setColumnWidth(0, header_num_width);
@@ -126,7 +126,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     QWidget *tab_synt = new QWidget();
-    tab_main_->addTab(tab_synt, trUtf8("Синтаксический анализ"));
+    tab_main_->addTab(tab_synt, trUtf8("Syntactic analysis"));
         QWidget *tab_synt_0 = new QWidget();
         QWidget *tab_synt_1 = new QWidget();
         QWidget *tab_synt_2 = new QWidget();
@@ -134,7 +134,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QWidget *tab_synt_4 = new QWidget();
         QWidget *tab_synt_5 = new QWidget();
         tab_synt_main_ = new QTabWidget();
-        tab_synt_main_->addTab(tab_synt_0, trUtf8("правый вывод"));
+        tab_synt_main_->addTab(tab_synt_0, trUtf8("rightmost deriv."));
             QGridLayout *grid_synt_0 = new QGridLayout();
             edit_synt_0_ = new QPlainTextEdit();
             edit_synt_0_->setReadOnly(true);
@@ -179,22 +179,22 @@ MainWindow::MainWindow(QWidget *parent) :
             grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 4);
 
             // buttons
-            QPushButton *b_load_rules = new QPushButton(trUtf8("загрузить"));
+            QPushButton *b_load_rules = new QPushButton(trUtf8("load"));
             grid_synt_5->addWidget(b_load_rules, 1, 0);
             connect(b_load_rules, SIGNAL(clicked()),
                     this, SLOT(loadActiveRules()));
 
-            QPushButton *b_save_rules = new QPushButton(trUtf8("сохранить"));
+            QPushButton *b_save_rules = new QPushButton(trUtf8("save"));
             grid_synt_5->addWidget(b_save_rules, 1, 1);
             connect(b_save_rules, SIGNAL(clicked()),
                     this, SLOT(saveActiveRules()));
 
-            QPushButton *b_uncheck_all_rules = new QPushButton(trUtf8("очистить"));
+            QPushButton *b_uncheck_all_rules = new QPushButton(trUtf8("clear"));
             grid_synt_5->addWidget(b_uncheck_all_rules, 1, 2);
             connect(b_uncheck_all_rules, SIGNAL(clicked()),
                     this, SLOT(uncheckAllRules()));
 
-            b_update_grammar = new QPushButton(trUtf8("применить"));
+            b_update_grammar = new QPushButton(trUtf8("apply"));
             grid_synt_5->addWidget(b_update_grammar, 1, 3);
             connect(b_update_grammar, SIGNAL(clicked()),
                     this, SLOT(updateGrammar()));
@@ -202,11 +202,11 @@ MainWindow::MainWindow(QWidget *parent) :
             tab_synt_5->setLayout(grid_synt_5);
 
         QStringList table_synt_1_headers;
-        table_synt_1_headers << trUtf8("#") << trUtf8("правило");
+        table_synt_1_headers << trUtf8("#") << trUtf8("rule");
         table_synt_1_->setHorizontalHeaderLabels(table_synt_1_headers);
 
         QStringList table_synt_5_headers;
-        table_synt_5_headers << trUtf8("#") << trUtf8("правило");
+        table_synt_5_headers << trUtf8("#") << trUtf8("rule");
         table_synt_5_->setHorizontalHeaderLabels(table_synt_5_headers);
 
         QGridLayout *grid_synt = new QGridLayout();
@@ -215,18 +215,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     QWidget *tab_sem = new QWidget();
-    tab_main_->addTab(tab_sem, trUtf8("Таблицы"));
+    tab_main_->addTab(tab_sem, trUtf8("Tables"));
         QWidget *tab_sem_0 = new QWidget();
         QWidget *tab_sem_1 = new QWidget();
         tab_sem_main_ = new QTabWidget();
-        tab_sem_main_->addTab(tab_sem_0, trUtf8("таблица символов"));
+        tab_sem_main_->addTab(tab_sem_0, trUtf8("symbols"));
             QGridLayout *grid_sem_0 = new QGridLayout();
             edit_sem_0_ = new QPlainTextEdit();
             edit_sem_0_->setReadOnly(true);
             edit_sem_0_->setTabStopWidth(tab_stop_width);
             grid_sem_0->addWidget(edit_sem_0_);
             tab_sem_0->setLayout(grid_sem_0);
-        tab_sem_main_->addTab(tab_sem_1, trUtf8("таблица блоков"));
+        tab_sem_main_->addTab(tab_sem_1, trUtf8("blocks"));
             QGridLayout *grid_sem_1 = new QGridLayout();
             edit_sem_1_ = new QPlainTextEdit();
             edit_sem_1_->setReadOnly(true);
@@ -380,8 +380,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-//    int result = QMessageBox::question(0, trUtf8("Подтверждение"),
-//                                       trUtf8("Вы действительно хотите выйти?"),
+//    int result = QMessageBox::question(0, trUtf8("Confirmation"),
+//                                       trUtf8("Exit?"),
 //                                       QMessageBox::Yes, QMessageBox::No);
 
 //    if (result == QMessageBox::Yes) {
@@ -407,35 +407,35 @@ void MainWindow::displayError(int pos, QString msg)
 void MainWindow::setStatusMsg(const QString text)
 {
     statusBar()->setStyleSheet("color: black;");
-    statusBar()->showMessage(trUtf8("Статус: ") + text);
+    statusBar()->showMessage(trUtf8("Status: ") + text);
 }
 void MainWindow::setStatusError(const QString text)
 {
     statusBar()->setStyleSheet("color: red;");
-    statusBar()->showMessage(trUtf8("Ошибка: ") + text);
+    statusBar()->showMessage(trUtf8("Error: ") + text);
 }
 
 void MainWindow::setLexTableHeaders()
 {
     QStringList table_lex_0_headers;
-    table_lex_0_headers << trUtf8("#") << trUtf8("представление") << trUtf8("тип")
-                        << trUtf8("ссылка") << trUtf8("начало") << trUtf8("длина");
+    table_lex_0_headers << trUtf8("#") << trUtf8("representation") << trUtf8("type")
+                        << trUtf8("ref") << trUtf8("start") << trUtf8("length");
     table_lex_0_->setHorizontalHeaderLabels(table_lex_0_headers);
 
     QStringList table_lex_1_headers;
-    table_lex_1_headers << trUtf8("#") << trUtf8("представление");
+    table_lex_1_headers << trUtf8("#") << trUtf8("representation");
     table_lex_1_->setHorizontalHeaderLabels(table_lex_1_headers);
 
     QStringList table_lex_2_headers;
-    table_lex_2_headers << trUtf8("#") << trUtf8("тип") << trUtf8("значение");
+    table_lex_2_headers << trUtf8("#") << trUtf8("type") << trUtf8("value");
     table_lex_2_->setHorizontalHeaderLabels(table_lex_2_headers);
 
     QStringList table_lex_3_headers;
-    table_lex_3_headers << trUtf8("#") << trUtf8("представление");
+    table_lex_3_headers << trUtf8("#") << trUtf8("representation");
     table_lex_3_->setHorizontalHeaderLabels(table_lex_3_headers);
 
     QStringList table_lex_4_headers;
-    table_lex_4_headers << trUtf8("#") << trUtf8("представление");
+    table_lex_4_headers << trUtf8("#") << trUtf8("representation");
     table_lex_4_->setHorizontalHeaderLabels(table_lex_4_headers);
 }
 
@@ -484,14 +484,14 @@ void MainWindow::openFile(const QString filename)
 
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        setStatusError(trUtf8("при открытии: %1").arg(file.errorString()));
+        setStatusError(trUtf8("open error: %1").arg(file.errorString()));
     }
     QTextStream in(&file);
     editor_->setPlainText(in.readAll());     // \n,\r\n,\r -> \n (automatically)
     file.close();
 
     QFileInfo fi(filename);
-    setStatusMsg(trUtf8("файл \"%1\" загружен").arg(fi.fileName()));
+    setStatusMsg(trUtf8("file \"%1\" loaded").arg(fi.fileName()));
     setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(base_window_title_));
 }
 
@@ -499,7 +499,7 @@ void MainWindow::saveFile(const QString filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        setStatusError(trUtf8("при сохранении: %1").arg(file.errorString()));
+        setStatusError(trUtf8("save error: %1").arg(file.errorString()));
     }
     QTextStream out(&file);
     QString content = editor_->toPlainText();
@@ -507,14 +507,14 @@ void MainWindow::saveFile(const QString filename)
     file.close();
 
     QFileInfo fi(filename);
-    setStatusMsg(trUtf8("файл \"%1\" успешно сохранен").arg(fi.fileName()));
+    setStatusMsg(trUtf8("file \"%1\" saved successfully").arg(fi.fileName()));
     setWindowTitle(QString("%1 - %2").arg(fi.fileName()).arg(base_window_title_));
 }
 
 void MainWindow::run()
 {
     if (editor_->toPlainText().length() == 0) {
-        setStatusError(trUtf8("введите код или загрузите его из файла (Ctrl+O)"));
+        setStatusError(trUtf8("type code or open a file (Ctrl+O)"));
         return;
     }
 
@@ -708,8 +708,8 @@ void MainWindow::run()
     }
     setLexTableHeaders();
 
-    tab_lex_main_->setTabText(0, trUtf8("свертка (") + QString::number(tokens.length()) + ")");
-    tab_lex_main_->setTabText(1, "id's (" + QString::number(table_ids.length()) + ")");
+    tab_lex_main_->setTabText(0, trUtf8("reduction (") + QString::number(tokens.length()) + ")");
+    tab_lex_main_->setTabText(1, "IDs (" + QString::number(table_ids.length()) + ")");
     tab_lex_main_->setTabText(2, "constants (" + QString::number(table_consts.length()) + ")");
     tab_lex_main_->setTabText(3, "keywords (" + QString::number(table_keywords.length()) + ")");
     tab_lex_main_->setTabText(4, "separators (" + QString::number(table_separators.length()) + ")");
@@ -738,10 +738,10 @@ void MainWindow::run()
                                  + grammar_.at(rule_index).toString());
         }
         text_rules = text_rule_first.join(" ") + "\n\n"
-                + trUtf8("Подробно:\n=========================================\n")
+                + trUtf8("Details:\n=========================================\n")
                 + text_rule_second.join("\n\n=========================================\n");
     } else {
-        text_rules = trUtf8("Не удалось получить правый вывод в заданной грамматике");
+        text_rules = trUtf8("Failed to get the rightmost derivation for the specified grammar");
     }
     edit_synt_0_->setPlainText(text_rules);
 
@@ -813,13 +813,13 @@ void MainWindow::loadActiveRules() {
     // read from file
     QString fileName = QFileDialog::getOpenFileName(
                 this,
-                trUtf8("Загрузить шаблон..."),
+                trUtf8("Load template..."),
                 QCoreApplication::applicationDirPath(),
                 trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            setStatusError(trUtf8("при открытии: %1").arg(file.errorString()));
+            setStatusError(trUtf8("open error: %1").arg(file.errorString()));
             return;
         }
         QTextStream in(&file);
@@ -850,13 +850,13 @@ void MainWindow::saveActiveRules() {
     // write to file
     QString fileName = QFileDialog::getSaveFileName(
                 this,
-                trUtf8("Сохранить шаблон..."),
+                trUtf8("Save template..."),
                 QCoreApplication::applicationDirPath(),
                 trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            setStatusError(trUtf8("при сохранении: %1").arg(file.errorString()));
+            setStatusError(trUtf8("save error: %1").arg(file.errorString()));
             return;
         }
         QTextStream out(&file);
@@ -877,9 +877,9 @@ void MainWindow::on_open_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(
                 this,
-                trUtf8("Загрузить исходный код..."),
+                trUtf8("Load code..."),
                 QCoreApplication::applicationDirPath(),
-                trUtf8("C++ source file (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
+                trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         openFile(fileName);
     }
@@ -889,9 +889,9 @@ void MainWindow::on_save_triggered()
 {
     QString fileName = QFileDialog::getSaveFileName(
                 this,
-                trUtf8("Сохранить исходный код..."),
+                trUtf8("Save code..."),
                 QCoreApplication::applicationDirPath(),
-                trUtf8("C++ source file (*.cpp *.cp *.cc *.cxx *.c++ *.C);;All files (*.*)"));
+                trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         if (fileName.indexOf(".cpp") == -1) {
             fileName += ".cpp";

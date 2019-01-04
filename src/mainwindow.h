@@ -44,9 +44,9 @@ private:
     QTabWidget *tab_main_;
 
     QTabWidget *tab_lex_main_;
-    QTableWidget *table_lex_0_;     // convolution
-    QTableWidget *table_lex_1_;     // id's
-    QTableWidget *table_lex_2_;     // const's
+    QTableWidget *table_lex_0_;     // reduction
+    QTableWidget *table_lex_1_;     // IDs
+    QTableWidget *table_lex_2_;     // constants
     QTableWidget *table_lex_3_;     // keywords
     QTableWidget *table_lex_4_;     // separators
 

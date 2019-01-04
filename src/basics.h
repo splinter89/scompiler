@@ -90,7 +90,7 @@ struct TokenSeparator {
     Token type;
 };
 
-// lexical convolution item
+// lexical reduction item
 struct TokenPointer {
     Token type;
     int index;

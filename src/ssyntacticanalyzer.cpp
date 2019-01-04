@@ -31,7 +31,7 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token) {
         int old_count;
         do {
             old_count = result.count();
-            // для каждого правила X -> Y0Y1...Yk-1
+            // for each rule X -> Y0Y1...Yk-1
             QList<GrammarRule> rules = getGrammarRulesByLeftToken(token, grammar_);
             for (int rule_i = 0; rule_i < rules.length(); rule_i++) {
                 GrammarRule rule = rules.at(rule_i);
@@ -42,11 +42,11 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token) {
                     int old_first_y_count = first_y.count();
                     first_y.remove(LAMBDA);
 
-                    // добавляем FIRST(Yi)\{e} к FIRST(X);
+                    // add FIRST(Yi)\{e} to FIRST(X);
                     result += first_y;
 
                     if (old_first_y_count == first_y.count()) {
-                        // в FIRST(Yi) не было e
+                        // e wasn't in FIRST(Yi)
                         all_y_got_lambda = false;
                         break;
                     }
@@ -64,18 +64,18 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token) {
 QSet<Token> SSyntacticAnalyzer::first(const QList<Token> tokens) {
     QSet<Token> result;
 
-    // для каждого X0X1...Xk-1
+    // for each X0X1...Xk-1
     bool all_x_got_lambda = true;
     for (int i = 0; i < tokens.length(); i++) {
         QSet<Token> first_x = first(tokens.at(i));
         int old_first_x_count = first_x.count();
         first_x.remove(LAMBDA);
 
-        // добавляем FIRST(Xi)\{e} к FIRST(X);
+        // add FIRST(Xi)\{e} to FIRST(X);
         result += first_x;
 
         if (old_first_x_count == first_x.count()) {
-            // в FIRST(Xi) не было e
+            // e wasn't in FIRST(Xi)
             all_x_got_lambda = false;
             break;
         }
@@ -92,14 +92,14 @@ QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i) {
     int old_count;
     do {
         old_count = i.count();
-        // для каждой ситуации [A -> alpha.Bbeta, a] из I
+        // for each situation [A -> alpha.Bbeta, a] from I
         foreach (const Situation &situation, i) {
             int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
             if ((dot_pos > -1) && (dot_pos < situation.right_side.length() - 1)) {
                 Token b = situation.right_side.at(dot_pos + 1);
                 QList<GrammarRule> rules = getGrammarRulesByLeftToken(b, grammar_);
                 if (!rules.isEmpty()) {
-                    // для каждого правила вывода B -> gamma из G
+                    // for each derivation rule B -> gamma from G
                     foreach (const GrammarRule &rule, rules) {
                         QList<Token> test_right_side;
                         if (dot_pos < situation.right_side.length() - 2) {
@@ -107,12 +107,12 @@ QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i) {
                         }
                         test_right_side << situation.look_ahead_token;  // beta a
                         QSet<Token> first_test = first(test_right_side);
-                        // для каждого терминала c из FIRST(beta a), такого, что [B ->.gamma, c] нет в I
+                        // for each terminal c from FIRST(beta a), s.t. [B ->.gamma, c] isn't in I
                         foreach (const Token &c, first_test) {
                             QList<Token> new_right_rule = EmptyTokenList() << DOT_TOKEN;
                             new_right_rule += rule.right_side;     // .gamma
                             Situation new_situation = {b, new_right_rule, c};
-                            // добавляем [B ->.gamma, c] к I;
+                            // add [B ->.gamma, c] to I;
                             i << new_situation;
                         }
                     }
