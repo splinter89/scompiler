@@ -462,7 +462,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     int class_index;
     AccessSpecifier access_type;
     QList<int> members_indexes;
-//    QList<int> declared_members_indexes;
 
     states_stack.clear();
     tokens_stack.clear();
@@ -481,7 +480,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     class_index = -1;
     access_type = ACCESS_PRIVATE;
     members_indexes.clear();
-//    declared_members_indexes.clear();
 
     while (!tokens_accepted && (i < tokens.length())) {
         int state = states_stack.last();
@@ -548,13 +546,9 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
                     case 9:
                     case 11:
-//                        members_indexes += declared_members_indexes;
-//                        declared_members_indexes.clear();
                         break;
                     case 10:
                     case 12:
-//                        members_indexes += declared_members_indexes;
-//                        declared_members_indexes.clear();
 //                        access_type = ACCESS_PRIVATE;
                         break;
 
