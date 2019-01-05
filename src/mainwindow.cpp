@@ -773,22 +773,7 @@ void MainWindow::updateGrammar() {
         return;
     }
 
-    while (table_synt_1_->rowCount() > 0) {
-        table_synt_1_->removeRow(0);
-    }
-    for (i = 0; i < grammar_.length(); i++) {
-        table_synt_1_->insertRow(i);
-
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
-
-        item_0->setTextAlignment(Qt::AlignCenter);
-        item_0->setText(QString::number(i));
-        item_1->setText(grammar_.at(i).toString());
-        table_synt_1_->setItem(i, 0, item_0);
-        table_synt_1_->setItem(i, 1, item_1);
-    }
-
+    updateSyntTables();
     b_update_grammar->setEnabled(true);
 }
 
