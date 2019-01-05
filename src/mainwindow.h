@@ -70,6 +70,7 @@ private:
     void clearLexTables();
     void setLexTableHeaders();
     void clearSyntTables();
+    void updateSyntTables();
 
 public slots:
     void displayError(int pos, QString msg);

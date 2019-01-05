@@ -255,8 +255,101 @@ MainWindow::MainWindow(QWidget *parent) :
     splitter->addWidget(tab_main_);
     setCentralWidget(splitter);
 
-    // ========================================================================
-    // draw syntax data (grammar, set fo situations, action/goto tables) ======
+    updateSyntTables(); // grammar, set of situations, action/goto tables
+    openFile();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui_;
+}
+
+void MainWindow::displayError(int pos, QString msg)
+{
+    // :TODO: calc (line, col)
+    setStatusError(((pos > -1) ? "[pos " + QString::number(pos) + "] " : "") + msg);
+
+    if (pos > -1) {
+        // move cursor to position
+        QTextCursor cursor(editor_->textCursor());
+        cursor.setPosition(pos);
+        editor_->setTextCursor(cursor);
+    }
+}
+
+void MainWindow::setStatusMsg(const QString text)
+{
+    statusBar()->setStyleSheet("color: black;");
+    statusBar()->showMessage(trUtf8("Status: ") + text);
+}
+
+void MainWindow::setStatusError(const QString text)
+{
+    statusBar()->setStyleSheet("color: red;");
+    statusBar()->showMessage(trUtf8("Error: ") + text);
+}
+
+void MainWindow::setLexTableHeaders()
+{
+    QStringList table_lex_0_headers;
+    table_lex_0_headers << trUtf8("#") << trUtf8("representation") << trUtf8("type")
+                        << trUtf8("ref") << trUtf8("start") << trUtf8("length");
+    table_lex_0_->setHorizontalHeaderLabels(table_lex_0_headers);
+
+    QStringList table_lex_1_headers;
+    table_lex_1_headers << trUtf8("#") << trUtf8("representation");
+    table_lex_1_->setHorizontalHeaderLabels(table_lex_1_headers);
+
+    QStringList table_lex_2_headers;
+    table_lex_2_headers << trUtf8("#") << trUtf8("type") << trUtf8("value");
+    table_lex_2_->setHorizontalHeaderLabels(table_lex_2_headers);
+
+    QStringList table_lex_3_headers;
+    table_lex_3_headers << trUtf8("#") << trUtf8("representation");
+    table_lex_3_->setHorizontalHeaderLabels(table_lex_3_headers);
+
+    QStringList table_lex_4_headers;
+    table_lex_4_headers << trUtf8("#") << trUtf8("representation");
+    table_lex_4_->setHorizontalHeaderLabels(table_lex_4_headers);
+}
+
+void MainWindow::clearLexTables()
+{
+    while (table_lex_0_->rowCount() > 0) {
+        table_lex_0_->removeRow(0);
+    }
+    while (table_lex_1_->rowCount() > 0) {
+        table_lex_1_->removeRow(0);
+    }
+    while (table_lex_2_->rowCount() > 0) {
+        table_lex_2_->removeRow(0);
+    }
+    while (table_lex_3_->rowCount() > 0) {
+      table_lex_3_->removeRow(0);
+    }
+    while (table_lex_4_->rowCount() > 0) {
+        table_lex_4_->removeRow(0);
+    }
+}
+
+void MainWindow::clearSyntTables()
+{
+    while (table_synt_1_->rowCount() > 0) {
+        table_synt_1_->removeRow(0);
+    }
+    while (table_synt_3_->rowCount() > 0) {
+        table_synt_3_->removeRow(0);
+    }
+    while (table_synt_4_->rowCount() > 0) {
+        table_synt_4_->removeRow(0);
+    }
+    while (table_synt_5_->rowCount() > 0) {
+        table_synt_5_->removeRow(0);
+    }
+}
+
+void MainWindow::updateSyntTables()
+{
     int i;
     QList<QSet<Situation>> ultimate_set = syntactic_analyzer_->getUltimateSetOfSituations();
     QList<QHash<Token, Action>> table_action = syntactic_analyzer_->getTableAction();
@@ -366,99 +459,7 @@ MainWindow::MainWindow(QWidget *parent) :
             j++;
         }
     }
-
-    openFile();
 }
-
-MainWindow::~MainWindow()
-{
-    delete ui_;
-}
-
-void MainWindow::displayError(int pos, QString msg)
-{
-    // :TODO: calc (line, col)
-    setStatusError(((pos > -1) ? "[pos " + QString::number(pos) + "] " : "") + msg);
-
-    if (pos > -1) {
-        // move cursor to position
-        QTextCursor cursor(editor_->textCursor());
-        cursor.setPosition(pos);
-        editor_->setTextCursor(cursor);
-    }
-}
-
-
-void MainWindow::setStatusMsg(const QString text)
-{
-    statusBar()->setStyleSheet("color: black;");
-    statusBar()->showMessage(trUtf8("Status: ") + text);
-}
-void MainWindow::setStatusError(const QString text)
-{
-    statusBar()->setStyleSheet("color: red;");
-    statusBar()->showMessage(trUtf8("Error: ") + text);
-}
-
-void MainWindow::setLexTableHeaders()
-{
-    QStringList table_lex_0_headers;
-    table_lex_0_headers << trUtf8("#") << trUtf8("representation") << trUtf8("type")
-                        << trUtf8("ref") << trUtf8("start") << trUtf8("length");
-    table_lex_0_->setHorizontalHeaderLabels(table_lex_0_headers);
-
-    QStringList table_lex_1_headers;
-    table_lex_1_headers << trUtf8("#") << trUtf8("representation");
-    table_lex_1_->setHorizontalHeaderLabels(table_lex_1_headers);
-
-    QStringList table_lex_2_headers;
-    table_lex_2_headers << trUtf8("#") << trUtf8("type") << trUtf8("value");
-    table_lex_2_->setHorizontalHeaderLabels(table_lex_2_headers);
-
-    QStringList table_lex_3_headers;
-    table_lex_3_headers << trUtf8("#") << trUtf8("representation");
-    table_lex_3_->setHorizontalHeaderLabels(table_lex_3_headers);
-
-    QStringList table_lex_4_headers;
-    table_lex_4_headers << trUtf8("#") << trUtf8("representation");
-    table_lex_4_->setHorizontalHeaderLabels(table_lex_4_headers);
-}
-
-void MainWindow::clearLexTables()
-{
-    while (table_lex_0_->rowCount() > 0) {
-        table_lex_0_->removeRow(0);
-    }
-    while (table_lex_1_->rowCount() > 0) {
-        table_lex_1_->removeRow(0);
-    }
-    while (table_lex_2_->rowCount() > 0) {
-        table_lex_2_->removeRow(0);
-    }
-    while (table_lex_3_->rowCount() > 0) {
-      table_lex_3_->removeRow(0);
-    }
-    while (table_lex_4_->rowCount() > 0) {
-        table_lex_4_->removeRow(0);
-    }
-}
-
-void MainWindow::clearSyntTables()
-{
-    while (table_synt_1_->rowCount() > 0) {
-        table_synt_1_->removeRow(0);
-    }
-    while (table_synt_3_->rowCount() > 0) {
-        table_synt_3_->removeRow(0);
-    }
-    while (table_synt_4_->rowCount() > 0) {
-        table_synt_4_->removeRow(0);
-    }
-    while (table_synt_5_->rowCount() > 0) {
-        table_synt_5_->removeRow(0);
-    }
-}
-
 
 void MainWindow::openFile(const QString filename)
 {
