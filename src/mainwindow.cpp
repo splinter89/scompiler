@@ -3,7 +3,6 @@
 
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QCloseEvent>
 #include <QFileDialog>
 #include <QSplitter>
 #include <QGridLayout>
@@ -376,18 +375,6 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
-{
-//    int result = QMessageBox::question(0, trUtf8("Confirmation"),
-//                                       trUtf8("Exit?"),
-//                                       QMessageBox::Yes, QMessageBox::No);
-
-//    if (result == QMessageBox::Yes) {
-        event->accept();
-//    } else {
-//        event->ignore();
-//    }
-}
 void MainWindow::displayError(int pos, QString msg)
 {
     // :TODO: calc (line, col)

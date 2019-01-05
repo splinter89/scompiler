@@ -72,7 +72,6 @@ private:
     void clearSyntTables();
 
 public slots:
-    void closeEvent(QCloseEvent *event);
     void displayError(int pos, QString msg);
 
 private slots:
