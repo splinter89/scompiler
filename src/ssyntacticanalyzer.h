@@ -25,9 +25,9 @@ public:
                        QList<TokenKeyword> table_keywords,
                        QList<TokenSeparator> table_separators);
 
-    QList<QSet<Situation> > getUltimateSetOfSituations() { return ultimate_situations_set_; }
-    QList<QHash<Token, Action> > getTableAction() { return action_table_; }
-    QList<QHash<Token, int> > getTableGoto() { return goto_table_; }
+    QList<QSet<Situation>> getUltimateSetOfSituations() { return ultimate_situations_set_; }
+    QList<QHash<Token, Action>> getTableAction() { return action_table_; }
+    QList<QHash<Token, int>> getTableGoto() { return goto_table_; }
 
     QList<Symbol> getSymbolTable() { return symbol_table_; }
     QList<Block> getBlockTable() { return block_table_; }
@@ -35,9 +35,9 @@ public:
 private:
     QList<GrammarRule> grammar_;
 
-    QList<QSet<Situation> > ultimate_situations_set_;
-    QList<QHash<Token, Action> > action_table_;
-    QList<QHash<Token, int> > goto_table_;
+    QList<QSet<Situation>> ultimate_situations_set_;
+    QList<QHash<Token, Action>> action_table_;
+    QList<QHash<Token, int>> goto_table_;
 
     QList<Symbol> symbol_table_;
     QList<Block> block_table_;

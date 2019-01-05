@@ -139,7 +139,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QWidget *tab_synt_4 = new QWidget();
         QWidget *tab_synt_5 = new QWidget();
         tab_synt_main_ = new QTabWidget();
-        tab_synt_main_->addTab(tab_synt_0, trUtf8("rightmost deriv."));
+        tab_synt_main_->addTab(tab_synt_0, trUtf8("rightmost derivation"));
             QGridLayout *grid_synt_0 = new QGridLayout();
             edit_synt_0_ = new QPlainTextEdit();
             edit_synt_0_->setReadOnly(true);
@@ -259,9 +259,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // ========================================================================
     // draw syntax data (grammar, set fo situations, action/goto tables) ======
     int i;
-    QList<QSet<Situation> > ultimate_set = syntactic_analyzer_->getUltimateSetOfSituations();
-    QList<QHash<Token, Action> > table_action = syntactic_analyzer_->getTableAction();
-    QList<QHash<Token, int> > table_goto = syntactic_analyzer_->getTableGoto();
+    QList<QSet<Situation>> ultimate_set = syntactic_analyzer_->getUltimateSetOfSituations();
+    QList<QHash<Token, Action>> table_action = syntactic_analyzer_->getTableAction();
+    QList<QHash<Token, int>> table_goto = syntactic_analyzer_->getTableGoto();
 
     clearSyntTables();
     for (i = 0; i < grammar_.length(); i++) {
@@ -279,28 +279,14 @@ MainWindow::MainWindow(QWidget *parent) :
     for (i = 0; i < Grammar_full.length(); i++) {
         table_synt_5_->insertRow(i);
 
-//        QTableWidgetItem *item_0 = new QTableWidgetItem;
         QCheckBox *chb = new QCheckBox(QString::number(i));
         QTableWidgetItem *item_1 = new QTableWidgetItem;
 
-//        item_0->setTextAlignment(Qt::AlignCenter);
-//        item_0->setText(QString::number(i));
         if (i == 0) {
-//            // rule #0 must be always active
-//            item_0->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
-            chb->setEnabled(false);
-//        } else {
-//            item_0->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+            chb->setEnabled(false); // rule #0 must be always active
         }
-        if (grammar_active_rules_.contains(i)) {
-//            item_0->setCheckState(Qt::Checked);
-            chb->setChecked(true);
-        } else {
-//            item_0->setCheckState(Qt::Unchecked);
-            chb->setChecked(false);
-        }
+        chb->setChecked(grammar_active_rules_.contains(i));
         item_1->setText(Grammar_full.at(i).toString());
-//        table_synt_5_->setItem(i, 0, item_0);
         table_synt_5_->setCellWidget(i, 0, chb);
         table_synt_5_->setItem(i, 1, item_1);
     }
@@ -779,18 +765,15 @@ void MainWindow::updateGrammar() {
     b_update_grammar->setEnabled(false);
 
     int i;
-//    QStringList active_indexes;
     grammar_active_rules_.clear();
     grammar_active_rules_ << 0;
     for (i = 1; i < table_synt_5_->rowCount(); i++) {
         QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
         if (chb->isChecked()) {
             grammar_active_rules_ << i;
-//            active_indexes << QString::number(i);
         }
     }
     grammar_ = setGrammarRules(grammar_active_rules_);
-//    qDebug() << "New rules:" << active_indexes.join(" << ");
 
     syntactic_analyzer_->setGrammar(grammar_);
     if (!syntactic_analyzer_->generateSetOfSituations()) {
@@ -798,7 +781,7 @@ void MainWindow::updateGrammar() {
         return;
     }
     if (!syntactic_analyzer_->generateActionGotoTables()) {
-//        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
+        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
         return;
     }
 

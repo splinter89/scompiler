@@ -303,7 +303,7 @@ bool SSyntacticAnalyzer::generateSetOfSituations() {
         EOF_TOKEN
     };
     QSet<Situation> i;
-    QList<QSet<Situation> > c;
+    QList<QSet<Situation>> c;
     int q1 = 1;
     QSet<Token> all_tokens = getAllGrammarTokens(grammar_);
 
