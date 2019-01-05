@@ -527,7 +527,7 @@ void MainWindow::saveFile(const QString filename)
 
 void MainWindow::run()
 {
-    if (editor_->toPlainText().length() == 0) {
+    if (editor_->toPlainText().trimmed().length() == 0) {
         setStatusError(trUtf8("type code or open a file (Ctrl+O)"));
         return;
     }
@@ -536,7 +536,7 @@ void MainWindow::run()
     // --------------------------------------------------------------------------------
     // lexical analysis ---------------------------------------------------------------
     // --------------------------------------------------------------------------------
-    if (lexical_analyzer_->process(editor_->toPlainText())) {
+    if (lexical_analyzer_->process(editor_->toPlainText().trimmed())) {
         setStatusMsg("ok");
     }
 
