@@ -304,6 +304,7 @@ bool SSyntacticAnalyzer::generateSetOfSituations() {
     };
     QSet<Situation> i;
     QList<QSet<Situation> > c;
+    int q1 = 1;
     QSet<Token> all_tokens = getAllGrammarTokens(grammar_);
 
     i << s;
@@ -318,11 +319,13 @@ bool SSyntacticAnalyzer::generateSetOfSituations() {
                 QSet<Situation> new_i = makeStep(j, x);
                 if (!new_i.isEmpty() && !c.contains(new_i)) {
                     c << new_i;
+                    q1 += new_i.count();
                 }
             }
         }
     } while (c.count() != old_count);
     ultimate_situations_set_ = c;
+    qDebug() << "ultimate_situations_set_:" << q1;
     return true;
 }
 
@@ -335,6 +338,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
     action_table_.clear();
     goto_table_.clear();
 
+    int q1 = 0, q2 = 0;
     foreach (const QSet<Situation> &i, ultimate_situations_set_) {
         QHash<Token, Action> action_row;
         QHash<Token, int> goto_row;
@@ -422,7 +426,11 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
         }
         action_table_ << action_row;
         goto_table_ << goto_row;
+        q1 += action_row.count();
+        q2 += goto_row.count();
     }
+    qDebug() << "action_table_:" << q1;
+    qDebug() << "goto_table_:" << q2;
     return true;
 }
 
