@@ -27,79 +27,79 @@ QString tokenToString(const Token token) {
         case N_S:
             s = QString::fromUtf8("S"); break;
         case N_PROGRAM:
-            s = QString::fromUtf8("<программа>"); break;
+            s = QString::fromUtf8("<program>"); break;
         case N_PROG_ELEMENT:
-            s = QString::fromUtf8("<элемент_программы>"); break;
+            s = QString::fromUtf8("<program_element>"); break;
         case N_CLASS:
-            s = QString::fromUtf8("<класс>"); break;
+            s = QString::fromUtf8("<class>"); break;
         case N_CLASS_BODY:
-            s = QString::fromUtf8("<тело_класса>"); break;
+            s = QString::fromUtf8("<class_body>"); break;
         case N_CLASS_ELEMENT:
-            s = QString::fromUtf8("<элемент_класса>"); break;
+            s = QString::fromUtf8("<class_element>"); break;
         case N_ACCESS_SPEC:
-            s = QString::fromUtf8("<спецификатор_доступа>"); break;
+            s = QString::fromUtf8("<access_spec>"); break;
         case N_CLASS_METHOD:
-            s = QString::fromUtf8("<метод_класса>"); break;
+            s = QString::fromUtf8("<class_method>"); break;
         case N_CLASS_METHOD_IMPLEMENTATION:
-            s = QString::fromUtf8("<реализация_метода_класса>"); break;
+            s = QString::fromUtf8("<class_method_impl>"); break;
         case N_FUNCTION:
-            s = QString::fromUtf8("<функция>"); break;
+            s = QString::fromUtf8("<function>"); break;
         case N_ARGUMENTS_LIST:
-            s = QString::fromUtf8("<список_аргументов>"); break;
+            s = QString::fromUtf8("<arguments_list>"); break;
         case N_ARGUMENT:
-            s = QString::fromUtf8("<аргумент>"); break;
+            s = QString::fromUtf8("<argument>"); break;
         case N_BLOCK:
-            s = QString::fromUtf8("<блок>"); break;
+            s = QString::fromUtf8("<block>"); break;
         case N_BLOCK_BODY:
-            s = QString::fromUtf8("<тело_блока>"); break;
+            s = QString::fromUtf8("<block_body>"); break;
         case N_BLOCK_ELEMENT:
-            s = QString::fromUtf8("<элемент_блока>"); break;
+            s = QString::fromUtf8("<block_element>"); break;
         case N_RETURN:
-            s = QString::fromUtf8("<возврат>"); break;
+            s = QString::fromUtf8("<return>"); break;
         case N_EXPRESSION:
-            s = QString::fromUtf8("<выражение>"); break;
+            s = QString::fromUtf8("<expression>"); break;
         case N_OP_1:
-            s = QString::fromUtf8("<оператор_1>"); break;
+            s = QString::fromUtf8("<operator_1>"); break;
         case N_OP_2:
-            s = QString::fromUtf8("<оператор_2>"); break;
+            s = QString::fromUtf8("<operator_2>"); break;
         case N_OP_3:
-            s = QString::fromUtf8("<оператор_3>"); break;
+            s = QString::fromUtf8("<operator_3>"); break;
         case N_OP_4:
-            s = QString::fromUtf8("<оператор_4>"); break;
+            s = QString::fromUtf8("<operator_4>"); break;
         case N_OP_5:
-            s = QString::fromUtf8("<оператор_5>"); break;
+            s = QString::fromUtf8("<operator_5>"); break;
         case N_OP_6:
-            s = QString::fromUtf8("<оператор_6>"); break;
+            s = QString::fromUtf8("<operator_6>"); break;
         case N_OP_7:
-            s = QString::fromUtf8("<оператор_7>"); break;
+            s = QString::fromUtf8("<operator_7>"); break;
         case N_OP_8:
-            s = QString::fromUtf8("<оператор_8>"); break;
+            s = QString::fromUtf8("<operator_8>"); break;
         case N_OP_9:
-            s = QString::fromUtf8("<оператор_9>"); break;
+            s = QString::fromUtf8("<operator_9>"); break;
         case N_FUNC_CALL:
-            s = QString::fromUtf8("<вызов_функции>"); break;
+            s = QString::fromUtf8("<function_call>"); break;
         case N_OBJECT:
-            s = QString::fromUtf8("<объект>"); break;
+            s = QString::fromUtf8("<object>"); break;
         case N_CLASS_PROPS_DECLARATION:
-            s = QString::fromUtf8("<декларация_свойств_класса>"); break;
+            s = QString::fromUtf8("<class_props_declaration>"); break;
         case N_VAR_DECLARATION:
-            s = QString::fromUtf8("<декларация_переменных>"); break;
+            s = QString::fromUtf8("<vars_declaration>"); break;
         case N_VAR_TYPE:
-            s = QString::fromUtf8("<тип_переменной>"); break;
+            s = QString::fromUtf8("<var_type>"); break;
         case N_CLASS_PROPS_LIST:
-            s = QString::fromUtf8("<список_свойств_класса>"); break;
+            s = QString::fromUtf8("<class_props_list>"); break;
         case N_VARS_LIST:
-            s = QString::fromUtf8("<список_переменных>"); break;
+            s = QString::fromUtf8("<vars_list>"); break;
         case N_LOOP:
-            s = QString::fromUtf8("<цикл>"); break;
+            s = QString::fromUtf8("<loop>"); break;
         case N_WHILE_LOOP:
-            s = QString::fromUtf8("<while-цикл>"); break;
+            s = QString::fromUtf8("<while-loop>"); break;
         case N_DO_WHILE_LOOP:
-            s = QString::fromUtf8("<do-while-цикл>"); break;
+            s = QString::fromUtf8("<do-while-loop>"); break;
         case N_FOR_LOOP:
-            s = QString::fromUtf8("<for-цикл>"); break;
+            s = QString::fromUtf8("<for-loop>"); break;
         case N_BRANCHING:
-            s = QString::fromUtf8("<ветвление>"); break;
+            s = QString::fromUtf8("<branching>"); break;
         default:
             s = QString::number(token);
             break;
