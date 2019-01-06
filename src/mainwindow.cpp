@@ -742,7 +742,9 @@ void MainWindow::run()
     }
     edit_synt_0_->setPlainText(text_rules);
 
-    // output symbols table, blocks table
+    // --------------------------------------------------------------------------------
+    // semantic analysis --------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     QList<Symbol> symbols_table = syntactic_analyzer_->getSymbolTable();
     QList<Block> blocks_table = syntactic_analyzer_->getBlockTable();
     QStringList text_symbols_list, text_blocks_list;
@@ -756,6 +758,9 @@ void MainWindow::run()
     text_blocks = text_blocks_list.join("\n");
     edit_sem_0_->setPlainText(text_symbols);
     edit_sem_1_->setPlainText(text_blocks);
+
+    tab_sem_main_->setTabText(0, "symbol table (" + QString::number(symbols_table.length()) + ")");
+    tab_sem_main_->setTabText(1, "block structure (" + QString::number(blocks_table.length()) + ")");
 }
 
 void MainWindow::updateGrammar()
