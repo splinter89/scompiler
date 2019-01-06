@@ -3,57 +3,66 @@
 
 #include <QtCore>
 
-enum ErrorType {E_UNKNOWN_ERROR,
-                // lexical errors
-                E_UNKNOWN_TERMINAL_ERROR, E_COMMENT_NOT_CLOSED,
-                E_INVALID_DOUBLE, E_INVALID_INT, E_INVALID_CHAR,
-                E_CHAR_NOT_CLOSED, E_STRING_NOT_CLOSED,
-                // syntax errors
-                E_NOT_LR1_GRAMMAR,
-                E_INTERNAL_GENERATING_SITUATIONS, E_INTERNAL_GENERATING_TABLES,
-                E_INTERNAL_GOTO_UNDEFINED, E_INTERNAL_ACTION_UNDEFINED,
-                E_INTERNAL_STATES_STACK_EMPTY, E_CHAIN_REJECTED,
-                // semantic errors
-                E_ALREADY_DECLARED_IN_BLOCK,//+
-                E_UNDECLARED_SYMBOL,//+
-                E_TYPES_MISMATCH,//+
-                E_INVALID_ARGUMENTS_LIST,
-                E_INVALID_OBJECT_TYPE,//+
-                E_OBJECT_IS_NOT_FUNCTION//+
-               };
+enum ErrorType {
+    E_UNKNOWN_ERROR,
+    // lexical errors
+    E_UNKNOWN_TERMINAL_ERROR,
+    E_COMMENT_NOT_CLOSED,
+    E_INVALID_DOUBLE,
+    E_INVALID_INT,
+    E_INVALID_CHAR,
+    E_CHAR_NOT_CLOSED,
+    E_STRING_NOT_CLOSED,
+    // syntax errors
+    E_NOT_LR1_GRAMMAR,
+    E_INTERNAL_GENERATING_SITUATIONS,
+    E_INTERNAL_GENERATING_TABLES,
+    E_INTERNAL_GOTO_UNDEFINED,
+    E_INTERNAL_ACTION_UNDEFINED,
+    E_INTERNAL_STATES_STACK_EMPTY,
+    E_CHAIN_REJECTED,
+    // semantic errors
+    E_ALREADY_DECLARED_IN_BLOCK,  //+
+    E_UNDECLARED_SYMBOL,          //+
+    E_TYPES_MISMATCH,             //+
+    E_INVALID_ARGUMENTS_LIST,
+    E_INVALID_OBJECT_TYPE,    //+
+    E_OBJECT_IS_NOT_FUNCTION  //+
+};
 
-static QHash<ErrorType, QString> initErrorCodes() {
-        QHash<ErrorType, QString> hash;
-        hash.insert(E_UNKNOWN_ERROR,                "Unknown error occured");
+static QHash<ErrorType, QString> initErrorCodes()
+{
+    QHash<ErrorType, QString> hash;
+    hash.insert(E_UNKNOWN_ERROR, "Unknown error occured");
 
-        hash.insert(E_UNKNOWN_TERMINAL_ERROR,       "Unknown terminal found");
-        hash.insert(E_COMMENT_NOT_CLOSED,           "Multi-line comment is not closed");
-        hash.insert(E_INVALID_DOUBLE,               "Double constant is out of range");
-        hash.insert(E_INVALID_INT,                  "Integer constant is out of range");
-        hash.insert(E_INVALID_CHAR,                 "Char constant must contain a single character");
-        hash.insert(E_CHAR_NOT_CLOSED,              "Char constant is not closed");
-        hash.insert(E_STRING_NOT_CLOSED,            "String constant is not closed");
+    hash.insert(E_UNKNOWN_TERMINAL_ERROR, "Unknown terminal found");
+    hash.insert(E_COMMENT_NOT_CLOSED, "Multi-line comment is not closed");
+    hash.insert(E_INVALID_DOUBLE, "Double constant is out of range");
+    hash.insert(E_INVALID_INT, "Integer constant is out of range");
+    hash.insert(E_INVALID_CHAR, "Char constant must contain a single character");
+    hash.insert(E_CHAR_NOT_CLOSED, "Char constant is not closed");
+    hash.insert(E_STRING_NOT_CLOSED, "String constant is not closed");
 
-//        hash.insert(E_NOT_LR1_GRAMMAR,              "The predefined grammar is not LR(1)");
-        hash.insert(E_NOT_LR1_GRAMMAR,              "The chain rejected [it may be not LR(1)-grammar]");
-        hash.insert(E_INTERNAL_GENERATING_SITUATIONS, "Grammar not loaded [failed to generate situations (internal)]");
-        hash.insert(E_INTERNAL_GENERATING_TABLES,   "The chain rejected [failed to generate action/goto tables (internal)]");
-        hash.insert(E_INTERNAL_GOTO_UNDEFINED,      "The chain rejected [goto-rule undefined (internal)]");
-        hash.insert(E_INTERNAL_ACTION_UNDEFINED,    "The chain rejected [action-rule undefined (internal)]");
-        hash.insert(E_INTERNAL_STATES_STACK_EMPTY,  "The chain rejected [stack of states got broken (internal)]");
-        hash.insert(E_CHAIN_REJECTED,               "The chain rejected");
+    //        hash.insert(E_NOT_LR1_GRAMMAR,              "The predefined grammar is not LR(1)");
+    hash.insert(E_NOT_LR1_GRAMMAR, "The chain rejected [it may be not LR(1)-grammar]");
+    hash.insert(E_INTERNAL_GENERATING_SITUATIONS, "Grammar not loaded [failed to generate situations (internal)]");
+    hash.insert(E_INTERNAL_GENERATING_TABLES, "The chain rejected [failed to generate action/goto tables (internal)]");
+    hash.insert(E_INTERNAL_GOTO_UNDEFINED, "The chain rejected [goto-rule undefined (internal)]");
+    hash.insert(E_INTERNAL_ACTION_UNDEFINED, "The chain rejected [action-rule undefined (internal)]");
+    hash.insert(E_INTERNAL_STATES_STACK_EMPTY, "The chain rejected [stack of states got broken (internal)]");
+    hash.insert(E_CHAIN_REJECTED, "The chain rejected");
 
-        hash.insert(E_ALREADY_DECLARED_IN_BLOCK,    "Symbol is already declared in this block");
-        hash.insert(E_UNDECLARED_SYMBOL,            "Undeclared symbol");
-        hash.insert(E_TYPES_MISMATCH,               "Types mismatch");
-        hash.insert(E_INVALID_ARGUMENTS_LIST,       "Invalid arguments list");
-        hash.insert(E_INVALID_OBJECT_TYPE,          "Invalid object type");
-        hash.insert(E_OBJECT_IS_NOT_FUNCTION,       "Object is not a function");
+    hash.insert(E_ALREADY_DECLARED_IN_BLOCK, "Symbol is already declared in this block");
+    hash.insert(E_UNDECLARED_SYMBOL, "Undeclared symbol");
+    hash.insert(E_TYPES_MISMATCH, "Types mismatch");
+    hash.insert(E_INVALID_ARGUMENTS_LIST, "Invalid arguments list");
+    hash.insert(E_INVALID_OBJECT_TYPE, "Invalid object type");
+    hash.insert(E_OBJECT_IS_NOT_FUNCTION, "Object is not a function");
 
-        return hash;
+    return hash;
 }
 static const QHash<ErrorType, QString> ErrorCodes = initErrorCodes();
 
 QString error_msg(ErrorType type);
 
-#endif // ERRORS_H
+#endif  // ERRORS_H

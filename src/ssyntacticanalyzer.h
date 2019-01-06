@@ -1,17 +1,17 @@
 #ifndef SSYNTACTICANALYZER_H
 #define SSYNTACTICANALYZER_H
 
-#include <QtCore>
 #include <QObject>
-#include "errors.h"
+#include <QtCore>
 #include "basics.h"
+#include "errors.h"
 
 class SSyntacticAnalyzer : public QObject
 {
     Q_OBJECT
 
 public:
-    SSyntacticAnalyzer(QObject * parent = 0);
+    SSyntacticAnalyzer(QObject* parent = 0);
     ~SSyntacticAnalyzer();
 
     void setGrammar(QList<GrammarRule> grammar);
@@ -58,11 +58,14 @@ private:
     void addBlockSymbols(int block_index, QList<int> declared_symbols_indexes);
     int getParentBlockIndex(int block_index);
     int indexOfSymbolDeclaredInBlock(QString name, SymbolType type, int block_index);
-    int indexOfSymbolInCurrentBlock(QString name, SymbolType type, int block_index, QList<int> declared_but_not_in_block_indexes);
+    int indexOfSymbolInCurrentBlock(QString name,
+                                    SymbolType type,
+                                    int block_index,
+                                    QList<int> declared_but_not_in_block_indexes);
 
 signals:
     void syntax_error(int pos, QString msg);
     void semantic_error(int pos, QString msg);
 };
 
-#endif // SSYNTACTICANALYZER_H
+#endif  // SSYNTACTICANALYZER_H

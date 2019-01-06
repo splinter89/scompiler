@@ -1,18 +1,19 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "codeeditor.h"
-#include "errors.h"
-#include "basics.h"
 #include <QMainWindow>
+#include <QPushButton>
 #include <QTabWidget>
 #include <QTableWidget>
-#include <QPushButton>
+#include "basics.h"
+#include "codeeditor.h"
+#include "errors.h"
 
 #include "slexicalanalyzer.h"
 #include "ssyntacticanalyzer.h"
 
-namespace Ui {
+namespace Ui
+{
     class MainWindow;
 }
 
@@ -21,7 +22,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
     void setStatusMsg(const QString text);
@@ -32,37 +33,37 @@ public:
     void run();
 
 private:
-    Ui::MainWindow *ui_;
+    Ui::MainWindow* ui_;
 
     QList<GrammarRule> grammar_;
     QList<int> grammar_active_rules_;
 
-    SLexicalAnalyzer *lexical_analyzer_;
-    SSyntacticAnalyzer *syntactic_analyzer_;
+    SLexicalAnalyzer* lexical_analyzer_;
+    SSyntacticAnalyzer* syntactic_analyzer_;
 
-    CodeEditor *editor_;
-    QTabWidget *tab_main_;
+    CodeEditor* editor_;
+    QTabWidget* tab_main_;
 
-    QTabWidget *tab_lex_main_;
-    QTableWidget *table_lex_0_;     // reduction
-    QTableWidget *table_lex_1_;     // IDs
-    QTableWidget *table_lex_2_;     // constants
-    QTableWidget *table_lex_3_;     // keywords
-    QTableWidget *table_lex_4_;     // separators
+    QTabWidget* tab_lex_main_;
+    QTableWidget* table_lex_0_;  // reduction
+    QTableWidget* table_lex_1_;  // IDs
+    QTableWidget* table_lex_2_;  // constants
+    QTableWidget* table_lex_3_;  // keywords
+    QTableWidget* table_lex_4_;  // separators
 
-    QTabWidget *tab_synt_main_;
-    QPlainTextEdit *edit_synt_0_;   // parse rules
-    QTableWidget *table_synt_1_;    // grammar
-    QPlainTextEdit *edit_synt_2_;   // situations
-    QTableWidget *table_synt_3_;    // action rules
-    QTableWidget *table_synt_4_;    // goto rules
-    QTableWidget *table_synt_5_;    // set grammar
+    QTabWidget* tab_synt_main_;
+    QPlainTextEdit* edit_synt_0_;  // parse rules
+    QTableWidget* table_synt_1_;   // grammar
+    QPlainTextEdit* edit_synt_2_;  // situations
+    QTableWidget* table_synt_3_;   // action rules
+    QTableWidget* table_synt_4_;   // goto rules
+    QTableWidget* table_synt_5_;   // set grammar
 
-    QTabWidget *tab_sem_main_;
-    QPlainTextEdit *edit_sem_0_;    // symbols table
-    QPlainTextEdit *edit_sem_1_;    // blocks table
+    QTabWidget* tab_sem_main_;
+    QPlainTextEdit* edit_sem_0_;  // symbols table
+    QPlainTextEdit* edit_sem_1_;  // blocks table
 
-    QPushButton *b_update_grammar;
+    QPushButton* b_update_grammar;
 
     QString base_window_title_;
     QString file_dialog_dir_;
@@ -85,4 +86,4 @@ private slots:
     void updateGrammar();
 };
 
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

@@ -1,7 +1,7 @@
 #include "ssyntacticanalyzer.h"
 #include <QDebug>
 
-SSyntacticAnalyzer::SSyntacticAnalyzer(QObject * parent)
+SSyntacticAnalyzer::SSyntacticAnalyzer(QObject* parent)
 {
     this->setParent(parent);
 }
@@ -11,11 +11,13 @@ SSyntacticAnalyzer::~SSyntacticAnalyzer()
     // bye
 }
 
-void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar) {
+void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar)
+{
     grammar_ = grammar;
 }
 
-QSet<Token> SSyntacticAnalyzer::first(const Token token) {
+QSet<Token> SSyntacticAnalyzer::first(const Token token)
+{
     QSet<Token> result;
 
     // step 1
@@ -61,7 +63,8 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token) {
     return result;
 }
 
-QSet<Token> SSyntacticAnalyzer::first(const QList<Token> tokens) {
+QSet<Token> SSyntacticAnalyzer::first(const QList<Token> tokens)
+{
     QSet<Token> result;
 
     // for each X0X1...Xk-1
@@ -87,30 +90,30 @@ QSet<Token> SSyntacticAnalyzer::first(const QList<Token> tokens) {
     return result;
 }
 
-
-QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i) {
+QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i)
+{
     int old_count;
     do {
         old_count = i.count();
         // for each situation [A -> alpha.Bbeta, a] from I
-        foreach (const Situation &situation, i) {
+        foreach (const Situation& situation, i) {
             int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
             if ((dot_pos > -1) && (dot_pos < situation.right_side.length() - 1)) {
                 Token b = situation.right_side.at(dot_pos + 1);
                 QList<GrammarRule> rules = getGrammarRulesByLeftToken(b, grammar_);
                 if (!rules.isEmpty()) {
                     // for each derivation rule B -> gamma from G
-                    foreach (const GrammarRule &rule, rules) {
+                    foreach (const GrammarRule& rule, rules) {
                         QList<Token> test_right_side;
                         if (dot_pos < situation.right_side.length() - 2) {
-                            test_right_side = situation.right_side.mid(dot_pos + 2);    // skip .B
+                            test_right_side = situation.right_side.mid(dot_pos + 2);  // skip .B
                         }
                         test_right_side << situation.look_ahead_token;  // beta a
                         QSet<Token> first_test = first(test_right_side);
                         // for each terminal c from FIRST(beta a), s.t. [B ->.gamma, c] isn't in I
-                        foreach (const Token &c, first_test) {
+                        foreach (const Token& c, first_test) {
                             QList<Token> new_right_rule = EmptyTokenList() << DOT_TOKEN;
-                            new_right_rule += rule.right_side;     // .gamma
+                            new_right_rule += rule.right_side;  // .gamma
                             Situation new_situation = {b, new_right_rule, c};
                             // add [B ->.gamma, c] to I;
                             i << new_situation;
@@ -124,14 +127,13 @@ QSet<Situation> SSyntacticAnalyzer::closure(QSet<Situation> i) {
     return i;
 }
 
-QSet<Situation> SSyntacticAnalyzer::makeStep(const QSet<Situation> i, const Token x) {
+QSet<Situation> SSyntacticAnalyzer::makeStep(const QSet<Situation> i, const Token x)
+{
     QSet<Situation> j;
     foreach (Situation situation, i) {
         int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
-        if ((dot_pos > -1)
-            && (dot_pos < situation.right_side.length() - 1)
-            && (situation.right_side.at(dot_pos + 1) == x)
-        ) {
+        if ((dot_pos > -1) && (dot_pos < situation.right_side.length() - 1)
+            && (situation.right_side.at(dot_pos + 1) == x)) {
             situation.right_side.swap(dot_pos, dot_pos + 1);
             j << situation;
         }
@@ -153,7 +155,11 @@ int SSyntacticAnalyzer::addSymbolFunction(QString name, DataType data_type, QLis
     return symbol_table_.length() - 1;
 }
 
-int SSyntacticAnalyzer::addSymbolArgument(QString name, DataType data_type, int class_index, ArgType arg_type, bool is_const)
+int SSyntacticAnalyzer::addSymbolArgument(QString name,
+                                          DataType data_type,
+                                          int class_index,
+                                          ArgType arg_type,
+                                          bool is_const)
 {
     Symbol new_symbol;
     new_symbol.name = name;
@@ -204,8 +210,7 @@ int SSyntacticAnalyzer::addSymbolClass(QString name, QList<int> members_indexes)
 void SSyntacticAnalyzer::setSymbolClassMemberAccessType(int symbol_index, AccessSpecifier access_type)
 {
     Symbol symbol = symbol_table_.at(symbol_index);
-    if ((symbol.type == SYM_FUNCTION)
-            || (symbol.type == SYM_VARIABLE)) {
+    if ((symbol.type == SYM_FUNCTION) || (symbol.type == SYM_VARIABLE)) {
         symbol.access_type = access_type;
         symbol_table_.replace(symbol_index, symbol);
     }
@@ -233,12 +238,12 @@ void SSyntacticAnalyzer::addBlockSymbols(int block_index, QList<int> declared_sy
     foreach (int declared_symbols_index, declared_symbols_indexes) {
         // check for double declaration
         if (indexOfSymbolDeclaredInBlock(symbol_table_.at(declared_symbols_index).name,
-                                         symbol_table_.at(declared_symbols_index).type,
-                                         block_index) > -1) {
+                                         symbol_table_.at(declared_symbols_index).type, block_index)
+            > -1) {
             emit semantic_error(-1, QString("(%1 @ block #%2) %3")
-                                .arg(symbol_table_.at(declared_symbols_index).toString())
-                                .arg(block_index)
-                                .arg(error_msg(E_ALREADY_DECLARED_IN_BLOCK)));
+                                      .arg(symbol_table_.at(declared_symbols_index).toString())
+                                      .arg(block_index)
+                                      .arg(error_msg(E_ALREADY_DECLARED_IN_BLOCK)));
             return;
         } else {
             block.declared_symbols_indexes << declared_symbols_index;
@@ -260,15 +265,17 @@ int SSyntacticAnalyzer::indexOfSymbolDeclaredInBlock(QString name, SymbolType ty
     foreach (int declared_symbols_index, block_table_.at(block_index).declared_symbols_indexes) {
         if ((symbol_table_.at(declared_symbols_index).name == name)
             && ((symbol_table_.at(declared_symbols_index).type == type)
-                || ((symbol_table_.at(declared_symbols_index).type == SYM_ARGUMENT)
-                    && (type == SYM_VARIABLE)))) {
+                || ((symbol_table_.at(declared_symbols_index).type == SYM_ARGUMENT) && (type == SYM_VARIABLE)))) {
             res = declared_symbols_index;
         }
     }
 
     return res;
 }
-int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name, SymbolType type, int block_index, QList<int> declared_but_not_in_block_indexes)
+int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name,
+                                                    SymbolType type,
+                                                    int block_index,
+                                                    QList<int> declared_but_not_in_block_indexes)
 {
     int res = -1;
 
@@ -276,8 +283,7 @@ int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name, SymbolType typ
         foreach (int symbol_index, declared_but_not_in_block_indexes) {
             if ((symbol_table_.at(symbol_index).name == name)
                 && ((symbol_table_.at(symbol_index).type == type)
-                    || ((symbol_table_.at(symbol_index).type == SYM_ARGUMENT)
-                        && (type == SYM_VARIABLE)))) {
+                    || ((symbol_table_.at(symbol_index).type == SYM_ARGUMENT) && (type == SYM_VARIABLE)))) {
                 res = symbol_index;
             }
         }
@@ -293,15 +299,12 @@ int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name, SymbolType typ
     return res;
 }
 
-bool SSyntacticAnalyzer::generateSetOfSituations() {
+bool SSyntacticAnalyzer::generateSetOfSituations()
+{
     if (grammar_.isEmpty()) return false;
 
     // initial situation
-    Situation s = {
-        N_S,
-        EmptyTokenList() << DOT_TOKEN << N_PROGRAM,
-        EOF_TOKEN
-    };
+    Situation s = {N_S, EmptyTokenList() << DOT_TOKEN << N_PROGRAM, EOF_TOKEN};
     QSet<Situation> i;
     QList<QSet<Situation>> c;
     int q1 = 1;
@@ -314,8 +317,8 @@ bool SSyntacticAnalyzer::generateSetOfSituations() {
     int old_count;
     do {
         old_count = c.count();
-        foreach (const QSet<Situation> &j, c) {
-            foreach (const Token &x, all_tokens) {
+        foreach (const QSet<Situation>& j, c) {
+            foreach (const Token& x, all_tokens) {
                 QSet<Situation> new_i = makeStep(j, x);
                 if (!new_i.isEmpty() && !c.contains(new_i)) {
                     c << new_i;
@@ -329,7 +332,8 @@ bool SSyntacticAnalyzer::generateSetOfSituations() {
     return true;
 }
 
-bool SSyntacticAnalyzer::generateActionGotoTables() {
+bool SSyntacticAnalyzer::generateActionGotoTables()
+{
     if (ultimate_situations_set_.isEmpty()) return false;
 
     QSet<Token> terminals = getAllTerminalTokens();
@@ -339,19 +343,17 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
     goto_table_.clear();
 
     int q1 = 0, q2 = 0;
-    foreach (const QSet<Situation> &i, ultimate_situations_set_) {
+    foreach (const QSet<Situation>& i, ultimate_situations_set_) {
         QHash<Token, Action> action_row;
         QHash<Token, int> goto_row;
 
-        foreach (const Situation &situation, i) {
+        foreach (const Situation& situation, i) {
             // action
-            foreach (const Token &terminal, terminals) {
+            foreach (const Token& terminal, terminals) {
                 int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
                 // step 1
-                if ((dot_pos > -1)
-                    && (dot_pos < situation.right_side.length() - 1)
-                    && (situation.right_side.at(dot_pos + 1) == terminal)
-                ) {
+                if ((dot_pos > -1) && (dot_pos < situation.right_side.length() - 1)
+                    && (situation.right_side.at(dot_pos + 1) == terminal)) {
                     QSet<Situation> test_i = makeStep(i, terminal);
                     int j = ultimate_situations_set_.indexOf(test_i);
                     if (j > -1) {
@@ -359,8 +361,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
                         if (!action_row.contains(terminal)) {
                             action_row.insert(terminal, new_action);
                         } else if ((action_row.value(terminal).type != new_action.type)
-                                || (action_row.value(terminal).index != new_action.index)
-                        ) {
+                                   || (action_row.value(terminal).index != new_action.index)) {
                             // error - not LR(1)
                             emit syntax_error(-1, "(step 1 gen)" + error_msg(E_NOT_LR1_GRAMMAR));
                             return false;
@@ -368,15 +369,10 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
                     }
                 }
                 // step 2
-                if ((dot_pos == situation.right_side.length() - 1)
-                    && (situation.left_token != N_S)
-                    && (situation.look_ahead_token == terminal)
-                ) {
+                if ((dot_pos == situation.right_side.length() - 1) && (situation.left_token != N_S)
+                    && (situation.look_ahead_token == terminal)) {
                     int j = indexOfGrammarRule(
-                                situation.left_token,
-                                situation.right_side.mid(0, situation.right_side.length() - 1),
-                                grammar_
-                            );
+                      situation.left_token, situation.right_side.mid(0, situation.right_side.length() - 1), grammar_);
                     if (j > -1) {
                         Action new_action = {A_REDUCE, j};
                         if (!action_row.contains(terminal)) {
@@ -394,10 +390,8 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
                 }
             }
             // step 3
-            if ((situation.left_token == N_S)
-                && (situation.right_side == (EmptyTokenList() << N_PROGRAM << DOT_TOKEN))
-                && (situation.look_ahead_token == EOF_TOKEN)
-            ) {
+            if ((situation.left_token == N_S) && (situation.right_side == (EmptyTokenList() << N_PROGRAM << DOT_TOKEN))
+                && (situation.look_ahead_token == EOF_TOKEN)) {
                 Action new_action = {A_ACCEPT, 0};
                 if (!action_row.contains(EOF_TOKEN)) {
                     action_row.insert(EOF_TOKEN, new_action);
@@ -409,7 +403,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables() {
             }
 
             // goto
-            foreach (const Token &non_terminal, non_terminals) {
+            foreach (const Token& non_terminal, non_terminals) {
                 QSet<Situation> test_i = makeStep(i, non_terminal);
                 int j = ultimate_situations_set_.indexOf(test_i);
                 if (j > -1) {
@@ -438,7 +432,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                                        QList<TokenId> table_ids,
                                        QList<TokenConst> table_consts,
                                        QList<TokenKeyword> table_keywords,
-                                       QList<TokenSeparator> table_separators) {
+                                       QList<TokenSeparator> table_separators)
+{
     QList<int> result;
     if (grammar_.isEmpty() || action_table_.isEmpty() || goto_table_.isEmpty()) return result;
 
@@ -466,12 +461,12 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     states_stack.clear();
     tokens_stack.clear();
     ids_stack.clear();
-    states_stack << 0; // initial state
+    states_stack << 0;  // initial state
 
     symbol_table_.clear();
     block_table_.clear();
 
-    block_index = addEmptyBlock(-1); // global context
+    block_index = addEmptyBlock(-1);  // global context
     declared_symbols_indexes.clear();
     declared_arg_symbols_indexes.clear();
     object_symbol_id = -1;
@@ -495,561 +490,517 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
             GrammarRule rule;
 
             switch (action.type) {
-            case A_SHIFT:
-                states_stack << action.index;
-                if (token == T_ID) {
-                    ids_stack << tokens.at(i);
-                } else if (token == S_CURLY_OPEN) {
-                    // save declared symbols & enter new block
-                    addBlockSymbols(block_index, declared_symbols_indexes);
-                    declared_symbols_indexes.clear();
+                case A_SHIFT:
+                    states_stack << action.index;
+                    if (token == T_ID) {
+                        ids_stack << tokens.at(i);
+                    } else if (token == S_CURLY_OPEN) {
+                        // save declared symbols & enter new block
+                        addBlockSymbols(block_index, declared_symbols_indexes);
+                        declared_symbols_indexes.clear();
 
-                    block_index = addEmptyBlock(block_index);
-                } else if (token == S_CURLY_CLOSE) {
-                    // save declared symbols & return to parent block
-                    addBlockSymbols(block_index, declared_arg_symbols_indexes + declared_symbols_indexes);
-                    declared_symbols_indexes.clear();
-                    declared_arg_symbols_indexes.clear();
+                        block_index = addEmptyBlock(block_index);
+                    } else if (token == S_CURLY_CLOSE) {
+                        // save declared symbols & return to parent block
+                        addBlockSymbols(block_index, declared_arg_symbols_indexes + declared_symbols_indexes);
+                        declared_symbols_indexes.clear();
+                        declared_arg_symbols_indexes.clear();
 
-                    block_index = getParentBlockIndex(block_index);
-                }
-                tokens_stack << token;
-                i++;
-                break;
+                        block_index = getParentBlockIndex(block_index);
+                    }
+                    tokens_stack << token;
+                    i++;
+                    break;
 
-            case A_REDUCE:
-                rule = grammar_.at(action.index);
-                if ((states_stack.length() > rule.right_side.length())
-                     && (tokens_stack.length() >= rule.right_side.length())
-                ) {
-                    // full grammar because we will depend on the number of rules
-                    int rule_index_full = indexOfGrammarRule(rule.left_token, rule.right_side, Grammar_full);
+                case A_REDUCE:
+                    rule = grammar_.at(action.index);
+                    if ((states_stack.length() > rule.right_side.length())
+                        && (tokens_stack.length() >= rule.right_side.length())) {
+                        // full grammar because we will depend on the number of rules
+                        int rule_index_full = indexOfGrammarRule(rule.left_token, rule.right_side, Grammar_full);
 
-                    int temp_class_index;   // for class search
+                        int temp_class_index;  // for class search
 
-                    // filling up the symbol table
-                    switch (rule_index_full) {
-                    case 7:
-                        members_indexes.clear();
-                        declared_symbols_indexes << addSymbolClass(table_ids.at(ids_stack.last().index).name,
-                                                                   members_indexes);
-                        ids_stack.removeLast();
-                        break;
+                        // filling up the symbol table
+                        switch (rule_index_full) {
+                            case 7:
+                                members_indexes.clear();
+                                declared_symbols_indexes
+                                  << addSymbolClass(table_ids.at(ids_stack.last().index).name, members_indexes);
+                                ids_stack.removeLast();
+                                break;
 
-                    case 8:
-                        declared_symbols_indexes << addSymbolClass(table_ids.at(ids_stack.last().index).name,
-                                                                   members_indexes);
-                        members_indexes.clear();
-                        ids_stack.removeLast();
-                        break;
+                            case 8:
+                                declared_symbols_indexes
+                                  << addSymbolClass(table_ids.at(ids_stack.last().index).name, members_indexes);
+                                members_indexes.clear();
+                                ids_stack.removeLast();
+                                break;
 
+                            case 9:
+                            case 11:
+                                break;
+                            case 10:
+                            case 12:
+                                //                        access_type = ACCESS_PRIVATE;
+                                break;
 
-                    case 9:
-                    case 11:
-                        break;
-                    case 10:
-                    case 12:
-//                        access_type = ACCESS_PRIVATE;
-                        break;
+                                //                    case 13:
+                                //                    case 15:
+                                //                        break;
+                                //                    case 14:
+                                //                    case 16:
+                                //                        break;
 
-//                    case 13:
-//                    case 15:
-//                        break;
-//                    case 14:
-//                    case 16:
-//                        break;
+                            case 20:
+                                access_type = ACCESS_PUBLIC;
+                                break;
+                            case 21:
+                                access_type = ACCESS_PRIVATE;
+                                break;
 
+                                //                    case 22000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-                    case 20:
-                        access_type = ACCESS_PUBLIC;
-                        break;
-                    case 21:
-                        access_type = ACCESS_PRIVATE;
-                        break;
+                                //                    case 23000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 22000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                            case 24:
+                                args_indexes.clear();
+                                symbol_index =
+                                  addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
+                                declared_symbols_indexes << symbol_index;
+                                members_indexes << symbol_index;
+                                setSymbolClassMemberAccessType(symbol_index, access_type);
+                                ids_stack.removeLast();
+                                break;
+                            case 25:
+                                symbol_index =
+                                  addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
+                                declared_symbols_indexes << symbol_index;
+                                members_indexes << symbol_index;
+                                setSymbolClassMemberAccessType(symbol_index, access_type);
+                                args_indexes.clear();
+                                ids_stack.removeLast();
+                                break;
+                            case 26:
+                                args_indexes.clear();
+                                symbol_index =
+                                  addSymbolFunction(table_ids.at(ids_stack.last().index).name, TYPE_VOID, args_indexes);
+                                declared_symbols_indexes << symbol_index;
+                                members_indexes << symbol_index;
+                                setSymbolClassMemberAccessType(symbol_index, access_type);
+                                ids_stack.removeLast();
+                                break;
+                            case 27:
+                                symbol_index =
+                                  addSymbolFunction(table_ids.at(ids_stack.last().index).name, TYPE_VOID, args_indexes);
+                                declared_symbols_indexes << symbol_index;
+                                members_indexes << symbol_index;
+                                setSymbolClassMemberAccessType(symbol_index, access_type);
+                                args_indexes.clear();
+                                ids_stack.removeLast();
+                                break;
 
-//                    case 23000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 28000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-                    case 24:
-                        args_indexes.clear();
-                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                                         data_type,
-                                                         args_indexes);
-                        declared_symbols_indexes << symbol_index;
-                        members_indexes << symbol_index;
-                        setSymbolClassMemberAccessType(symbol_index, access_type);
-                        ids_stack.removeLast();
-                        break;
-                    case 25:
-                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                                         data_type,
-                                                         args_indexes);
-                        declared_symbols_indexes << symbol_index;
-                        members_indexes << symbol_index;
-                        setSymbolClassMemberAccessType(symbol_index, access_type);
-                        args_indexes.clear();
-                        ids_stack.removeLast();
-                        break;
-                    case 26:
-                        args_indexes.clear();
-                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                                         TYPE_VOID,
-                                                         args_indexes);
-                        declared_symbols_indexes << symbol_index;
-                        members_indexes << symbol_index;
-                        setSymbolClassMemberAccessType(symbol_index, access_type);
-                        ids_stack.removeLast();
-                        break;
-                    case 27:
-                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                                         TYPE_VOID,
-                                                         args_indexes);
-                        declared_symbols_indexes << symbol_index;
-                        members_indexes << symbol_index;
-                        setSymbolClassMemberAccessType(symbol_index, access_type);
-                        args_indexes.clear();
-                        ids_stack.removeLast();
-                        break;
+                                //                    case 29000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 28000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 30000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 29000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 31000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 30000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 32000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 31000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 33000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 32000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 34000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 33000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 35000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 34000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 36000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 35000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                                //                    case 37000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
 
-//                    case 36000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                            case 38:
+                                args_indexes.clear();
+                                declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                                              data_type, args_indexes);
+                                ids_stack.removeLast();
+                                break;
+                            case 39:
+                                declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                                              data_type, args_indexes);
+                                args_indexes.clear();
+                                ids_stack.removeLast();
+                                break;
+                            case 40:
+                                args_indexes.clear();
+                                declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                                              TYPE_VOID, args_indexes);
+                                ids_stack.removeLast();
+                                break;
+                            case 41:
+                                declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                                              TYPE_VOID, args_indexes);
+                                args_indexes.clear();
+                                ids_stack.removeLast();
+                                break;
 
-//                    case 37000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
+                            case 44:
+                                symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name, data_type,
+                                                                 class_index, ARG_BY_VALUE, false);
+                                args_indexes << symbol_index;
+                                declared_arg_symbols_indexes << symbol_index;
+                                ids_stack.removeLast();
+                                break;
+                            case 45:
+                                symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name, data_type,
+                                                                 class_index, ARG_BY_VALUE, true);
+                                args_indexes << symbol_index;
+                                declared_arg_symbols_indexes << symbol_index;
+                                ids_stack.removeLast();
+                                break;
+                            case 46:
+                                symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name, data_type,
+                                                                 class_index, ARG_BY_REFERENCE, false);
+                                args_indexes << symbol_index;
+                                declared_arg_symbols_indexes << symbol_index;
+                                ids_stack.removeLast();
+                                break;
+                            case 47:
+                                symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name, data_type,
+                                                                 class_index, ARG_BY_REFERENCE, true);
+                                args_indexes << symbol_index;
+                                declared_arg_symbols_indexes << symbol_index;
+                                ids_stack.removeLast();
+                                break;
 
-                    case 38:
-                        args_indexes.clear();
-                        declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                                                      data_type,
-                                                                      args_indexes);
-                        ids_stack.removeLast();
-                        break;
-                    case 39:
-                        declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                                                      data_type,
-                                                                      args_indexes);
-                        args_indexes.clear();
-                        ids_stack.removeLast();
-                        break;
-                    case 40:
-                        args_indexes.clear();
-                        declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                                                      TYPE_VOID,
-                                                                      args_indexes);
-                        ids_stack.removeLast();
-                        break;
-                    case 41:
-                        declared_symbols_indexes << addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-                                                                      TYPE_VOID,
-                                                                      args_indexes);
-                        args_indexes.clear();
-                        ids_stack.removeLast();
-                        break;
+                            case 97:
+                                // :TODO: need to use token_stack - not tokens (??? - check)
+                                // tokens work only for:
+                                // a = 12; but not for: a = 12 + d;
+                                expr_type = table_consts.at(tokens.at(i - 1).index).type;
+                                break;
+                            case 98:
+                            case 101:
+                                expr_type = symbol_table_.at(object_symbol_id).data_type;
+                                //                        qDebug() << dataTypeToString(expr_type, class_index) << "expr_type";
+                                break;
 
-
-                    case 44:
-                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
-                                                         data_type,
-                                                         class_index,
-                                                         ARG_BY_VALUE,
-                                                         false);
-                        args_indexes << symbol_index;
-                        declared_arg_symbols_indexes << symbol_index;
-                        ids_stack.removeLast();
-                        break;
-                    case 45:
-                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
-                                                         data_type,
-                                                         class_index,
-                                                         ARG_BY_VALUE,
-                                                         true);
-                        args_indexes << symbol_index;
-                        declared_arg_symbols_indexes << symbol_index;
-                        ids_stack.removeLast();
-                        break;
-                    case 46:
-                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
-                                                         data_type,
-                                                         class_index,
-                                                         ARG_BY_REFERENCE,
-                                                         false);
-                        args_indexes << symbol_index;
-                        declared_arg_symbols_indexes << symbol_index;
-                        ids_stack.removeLast();
-                        break;
-                    case 47:
-                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
-                                                         data_type,
-                                                         class_index,
-                                                         ARG_BY_REFERENCE,
-                                                         true);
-                        args_indexes << symbol_index;
-                        declared_arg_symbols_indexes << symbol_index;
-                        ids_stack.removeLast();
-                        break;
-
-
-                    case 97:
-                        // :TODO: need to use token_stack - not tokens (??? - check)
-                        // tokens work only for:
-                        // a = 12; but not for: a = 12 + d;
-                        expr_type = table_consts.at(tokens.at(i - 1).index).type;
-                        break;
-                    case 98:
-                    case 101:
-                        expr_type = symbol_table_.at(object_symbol_id).data_type;
-//                        qDebug() << dataTypeToString(expr_type, class_index) << "expr_type";
-                        break;
-
-
-                    case 102:
-                    case 103:
-                        if (symbol_table_.at(object_symbol_id).type != SYM_FUNCTION) {
-                            emit semantic_error(-1, QString("(Call to %1) %2")
-                                                .arg(symbol_table_.at(object_symbol_id).name)
-                                                .arg(error_msg(E_OBJECT_IS_NOT_FUNCTION)));
-                            result.clear();
-                            return result;
-                        }
-                        break;
-
-
-                    case 104:
-                        object_symbol_id = indexOfSymbolInCurrentBlock(
-                                    table_ids.at(ids_stack.last().index).name,
-                                    SYM_ARGUMENT,
-                                    block_index,
-                                    declared_arg_symbols_indexes + declared_symbols_indexes);
-                        if (object_symbol_id == -1) {
-                            object_symbol_id = indexOfSymbolInCurrentBlock(
-                                        table_ids.at(ids_stack.last().index).name,
-                                        SYM_VARIABLE,
-                                        block_index,
-                                        declared_arg_symbols_indexes + declared_symbols_indexes);
-                            if (object_symbol_id == -1) {
-                                object_symbol_id = indexOfSymbolInCurrentBlock(
-                                            table_ids.at(ids_stack.last().index).name,
-                                            SYM_FUNCTION,
-                                            block_index,
-                                            declared_arg_symbols_indexes + declared_symbols_indexes);
-                                if (object_symbol_id == -1) {
-                                    emit semantic_error(-1, QString("(%1) %2")
-                                                        .arg(table_ids.at(ids_stack.last().index).name)
-                                                        .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                            case 102:
+                            case 103:
+                                if (symbol_table_.at(object_symbol_id).type != SYM_FUNCTION) {
+                                    emit semantic_error(-1, QString("(Call to %1) %2")
+                                                              .arg(symbol_table_.at(object_symbol_id).name)
+                                                              .arg(error_msg(E_OBJECT_IS_NOT_FUNCTION)));
                                     result.clear();
                                     return result;
                                 }
-                            }
-                        }
-                        ids_stack.removeLast();
-                        break;
-                    case 105:
-                        temp_class_index = indexOfSymbolInCurrentBlock(
-                                    table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name,
-                                    SYM_CLASS,
-                                    block_index,
-                                    declared_arg_symbols_indexes + declared_symbols_indexes);
-                        if (temp_class_index > -1) {
-                            bool ok = false;
-                            foreach (int members_index, symbol_table_.at(temp_class_index).members_indexes) {
-                                if (symbol_table_.at(members_index).name == table_ids.at(ids_stack.last().index).name) {
-                                    object_symbol_id = members_index;
-                                    ok = true;
-                                    break;
+                                break;
+
+                            case 104:
+                                object_symbol_id = indexOfSymbolInCurrentBlock(
+                                  table_ids.at(ids_stack.last().index).name, SYM_ARGUMENT, block_index,
+                                  declared_arg_symbols_indexes + declared_symbols_indexes);
+                                if (object_symbol_id == -1) {
+                                    object_symbol_id = indexOfSymbolInCurrentBlock(
+                                      table_ids.at(ids_stack.last().index).name, SYM_VARIABLE, block_index,
+                                      declared_arg_symbols_indexes + declared_symbols_indexes);
+                                    if (object_symbol_id == -1) {
+                                        object_symbol_id = indexOfSymbolInCurrentBlock(
+                                          table_ids.at(ids_stack.last().index).name, SYM_FUNCTION, block_index,
+                                          declared_arg_symbols_indexes + declared_symbols_indexes);
+                                        if (object_symbol_id == -1) {
+                                            emit semantic_error(-1, QString("(%1) %2")
+                                                                      .arg(table_ids.at(ids_stack.last().index).name)
+                                                                      .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                                            result.clear();
+                                            return result;
+                                        }
+                                    }
                                 }
-                            }
-                            if (!ok) {
-                                emit semantic_error(-1, QString("(%1) %2")
-                                                    .arg(table_ids.at(ids_stack.last().index).name)
-                                                    .arg(error_msg(E_UNDECLARED_SYMBOL)));
-                                result.clear();
-                                return result;
-                            }
+                                ids_stack.removeLast();
+                                break;
+                            case 105:
+                                temp_class_index = indexOfSymbolInCurrentBlock(
+                                  table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name, SYM_CLASS, block_index,
+                                  declared_arg_symbols_indexes + declared_symbols_indexes);
+                                if (temp_class_index > -1) {
+                                    bool ok = false;
+                                    foreach (int members_index, symbol_table_.at(temp_class_index).members_indexes) {
+                                        if (symbol_table_.at(members_index).name
+                                            == table_ids.at(ids_stack.last().index).name) {
+                                            object_symbol_id = members_index;
+                                            ok = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!ok) {
+                                        emit semantic_error(-1, QString("(%1) %2")
+                                                                  .arg(table_ids.at(ids_stack.last().index).name)
+                                                                  .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                                        result.clear();
+                                        return result;
+                                    }
+                                } else {
+                                    emit semantic_error(
+                                      -1, QString("(%1) %2")
+                                            .arg(table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name)
+                                            .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                                    result.clear();
+                                    return result;
+                                }
+                                ids_stack.removeLast();
+                                ids_stack.removeLast();
+                                break;
+                            case 106:
+                                // ...
+                                ids_stack.removeLast();
+                                ids_stack.removeLast();
+                                break;
+
+                            case 107:
+                                while (decl_vars_count) {
+                                    symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name,
+                                                                     data_type, class_index, false);
+                                    declared_symbols_indexes << symbol_index;
+                                    members_indexes << symbol_index;
+                                    setSymbolClassMemberAccessType(symbol_index, access_type);
+                                    ids_stack.removeLast();
+                                    decl_vars_count--;
+                                }
+                                break;
+                            case 108:
+                                while (decl_vars_count) {
+                                    symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name,
+                                                                     data_type, class_index, true);
+                                    declared_symbols_indexes << symbol_index;
+                                    members_indexes << symbol_index;
+                                    setSymbolClassMemberAccessType(symbol_index, access_type);
+                                    ids_stack.removeLast();
+                                    decl_vars_count--;
+                                }
+                                break;
+
+                            case 109:
+                                while (decl_vars_count) {
+                                    declared_symbols_indexes << addSymbolVariable(
+                                      table_ids.at(ids_stack.last().index).name, data_type, class_index, false);
+                                    ids_stack.removeLast();
+                                    decl_vars_count--;
+                                }
+                                break;
+                                //                    case 110:
+                                //                        break;
+                            case 111:
+                                while (decl_vars_count) {
+                                    declared_symbols_indexes << addSymbolVariable(
+                                      table_ids.at(ids_stack.last().index).name, data_type, class_index, true);
+                                    ids_stack.removeLast();
+                                    decl_vars_count--;
+                                }
+                                break;
+                                //                    case 112:
+                                //                        break;
+
+                            case 113:
+                                data_type = TYPE_INT;
+                                break;
+                            case 114:
+                                data_type = TYPE_DOUBLE;
+                                break;
+                            case 115:
+                                data_type = TYPE_CHAR;
+                                break;
+                            case 116:
+                                data_type = TYPE_BOOL;
+                                break;
+                            case 117:
+                                temp_class_index =
+                                  indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name, SYM_CLASS, 0);
+                                if (temp_class_index > -1) {
+                                    data_type = TYPE_OBJECT;
+                                    class_index = temp_class_index;
+                                } else {
+                                    emit semantic_error(-1, QString("(%1) %2")
+                                                              .arg(table_ids.at(ids_stack.last().index).name)
+                                                              .arg(error_msg(E_INVALID_OBJECT_TYPE)));
+                                    result.clear();
+                                    return result;
+                                }
+                                ids_stack.removeLast();
+                                break;
+
+                            case 118:
+                                decl_vars_count++;
+                                break;
+                            case 119:
+                                decl_vars_count++;
+                                break;
+
+                            case 120:
+                                decl_vars_count++;
+                                break;
+
+                            case 121:
+                                decl_vars_count++;
+                                break;
+
+                                //                    case 122000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
+
+                                //                    case 123000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
+
+                                //                    case 124000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
+
+                                //                    case 125000:
+                                //                        args_indexes.clear();
+                                //                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                //                                          TYPE_VOID,
+                                //                                          args_indexes);
+                                //                        ids_stack.removeLast();
+                                //                        break;
+
+                            // :TODO: delme
+                            case 136:
+                                //                        qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
+                                if (symbol_table_.at(object_symbol_id).data_type != expr_type) {
+                                    emit semantic_error(
+                                      -1, QString("(%1 and %2) %3")
+                                            .arg(dataTypeToString(symbol_table_.at(object_symbol_id).data_type,
+                                                                  class_index))
+                                            .arg(dataTypeToString(expr_type, class_index))
+                                            .arg(error_msg(E_TYPES_MISMATCH)));
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        // ...back to our finite-state machine
+                        for (int num = 0; num < rule.right_side.length(); num++) {
+                            states_stack.removeLast();
+                            tokens_stack.removeLast();
+                        }
+                        if (goto_table_.at(states_stack.last()).contains(rule.left_token)) {
+                            int goto_index = goto_table_.at(states_stack.last()).value(rule.left_token);
+                            states_stack << goto_index;
+                            tokens_stack << rule.left_token;
+
+                            result << action.index;
                         } else {
-                            emit semantic_error(-1, QString("(%1) %2")
-                                                .arg(table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name)
-                                                .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                            // error - goto not defined
                             result.clear();
+                            emit syntax_error(-1, error_msg(E_INTERNAL_GOTO_UNDEFINED));
                             return result;
                         }
-                        ids_stack.removeLast();
-                        ids_stack.removeLast();
-                        break;
-                    case 106:
-                        // ...
-                        ids_stack.removeLast();
-                        ids_stack.removeLast();
-                        break;
-
-
-                    case 107:
-                        while (decl_vars_count) {
-                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name,
-                                                             data_type,
-                                                             class_index,
-                                                             false);
-                            declared_symbols_indexes << symbol_index;
-                            members_indexes << symbol_index;
-                            setSymbolClassMemberAccessType(symbol_index, access_type);
-                            ids_stack.removeLast();
-                            decl_vars_count--;
-                        }
-                        break;
-                    case 108:
-                        while (decl_vars_count) {
-                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name,
-                                                             data_type,
-                                                             class_index,
-                                                             true);
-                            declared_symbols_indexes << symbol_index;
-                            members_indexes << symbol_index;
-                            setSymbolClassMemberAccessType(symbol_index, access_type);
-                            ids_stack.removeLast();
-                            decl_vars_count--;
-                        }
-                        break;
-
-
-                    case 109:
-                        while (decl_vars_count) {
-                            declared_symbols_indexes << addSymbolVariable(table_ids.at(ids_stack.last().index).name,
-                                                                          data_type,
-                                                                          class_index,
-                                                                          false);
-                            ids_stack.removeLast();
-                            decl_vars_count--;
-                        }
-                        break;
-//                    case 110:
-//                        break;
-                    case 111:
-                        while (decl_vars_count) {
-                            declared_symbols_indexes << addSymbolVariable(table_ids.at(ids_stack.last().index).name,
-                                                                          data_type,
-                                                                          class_index,
-                                                                          true);
-                            ids_stack.removeLast();
-                            decl_vars_count--;
-                        }
-                        break;
-//                    case 112:
-//                        break;
-
-
-                    case 113:
-                        data_type = TYPE_INT;
-                        break;
-                    case 114:
-                        data_type = TYPE_DOUBLE;
-                        break;
-                    case 115:
-                        data_type = TYPE_CHAR;
-                        break;
-                    case 116:
-                        data_type = TYPE_BOOL;
-                        break;
-                    case 117:
-                        temp_class_index = indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name,
-                                                                            SYM_CLASS,
-                                                                            0);
-                        if (temp_class_index > -1) {
-                            data_type = TYPE_OBJECT;
-                            class_index = temp_class_index;
-                        } else {
-                            emit semantic_error(-1, QString("(%1) %2")
-                                                .arg(table_ids.at(ids_stack.last().index).name)
-                                                .arg(error_msg(E_INVALID_OBJECT_TYPE)));
-                            result.clear();
-                            return result;
-                        }
-                        ids_stack.removeLast();
-                        break;
-
-
-                    case 118:
-                        decl_vars_count++;
-                        break;
-                    case 119:
-                        decl_vars_count++;
-                        break;
-
-                    case 120:
-                        decl_vars_count++;
-                        break;
-
-                    case 121:
-                        decl_vars_count++;
-                        break;
-
-//                    case 122000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
-
-//                    case 123000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
-
-//                    case 124000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
-
-//                    case 125000:
-//                        args_indexes.clear();
-//                        addSymbolFunction(table_ids.at(ids_stack.last().index).name,
-//                                          TYPE_VOID,
-//                                          args_indexes);
-//                        ids_stack.removeLast();
-//                        break;
-
-                    // :TODO: delme
-                    case 136:
-//                        qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
-                        if (symbol_table_.at(object_symbol_id).data_type != expr_type) {
-                            emit semantic_error(-1, QString("(%1 and %2) %3")
-                                                .arg(dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index))
-                                                .arg(dataTypeToString(expr_type, class_index))
-                                                .arg(error_msg(E_TYPES_MISMATCH)));
-                        }
-                        break;
-
-                    default:
-                        break;
-                    }
-
-                    // ...back to our finite-state machine
-                    for (int num = 0; num < rule.right_side.length(); num++) {
-                        states_stack.removeLast();
-                        tokens_stack.removeLast();
-                    }
-                    if (goto_table_.at(states_stack.last()).contains(rule.left_token)) {
-                        int goto_index = goto_table_.at(states_stack.last()).value(rule.left_token);
-                        states_stack << goto_index;
-                        tokens_stack << rule.left_token;
-
-                        result << action.index;
                     } else {
-                        // error - goto not defined
+                        // error - stacks have too few items
                         result.clear();
-                        emit syntax_error(-1, error_msg(E_INTERNAL_GOTO_UNDEFINED));
+                        emit syntax_error(-1, error_msg(E_INTERNAL_STATES_STACK_EMPTY));
                         return result;
                     }
-                } else {
-                    // error - stacks have too few items
-                    result.clear();
-                    emit syntax_error(-1, error_msg(E_INTERNAL_STATES_STACK_EMPTY));
-                    return result;
-                }
-                break;
+                    break;
 
-            case A_ACCEPT:
-                tokens_accepted = true;
+                case A_ACCEPT:
+                    tokens_accepted = true;
 
-                // save declared symbols & return to parent block
-                addBlockSymbols(block_index, declared_symbols_indexes);
-                block_index = getParentBlockIndex(block_index);
-                Q_ASSERT(block_index == -1);
-                declared_symbols_indexes.clear();
+                    // save declared symbols & return to parent block
+                    addBlockSymbols(block_index, declared_symbols_indexes);
+                    block_index = getParentBlockIndex(block_index);
+                    Q_ASSERT(block_index == -1);
+                    declared_symbols_indexes.clear();
 
-                break;
+                    break;
             }
         } else {
             // error - action not defined

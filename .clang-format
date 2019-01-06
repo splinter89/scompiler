@@ -1,0 +1,15 @@
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+BasedOnStyle: Chromium
+
+AccessModifierOffset: -4
+AllowShortIfStatementsOnASingleLine: true
+BreakBeforeBraces: Linux    # don't merge "foreach"
+BreakBeforeBinaryOperators: NonAssignment
+BreakStringLiterals: false
+ColumnLimit: 120
+ContinuationIndentWidth: 2
+IndentWidth: 4
+ForEachMacros: ['foreach']
+NamespaceIndentation: All
+ReflowComments: false

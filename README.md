@@ -10,7 +10,8 @@ What's implemented: lexical, syntactic, and semantic analysis.
     - in `scripts\deploy_dynamic.bat`
     - and `scripts\windows-build-qt-static.ps1`
 2. Install [UPX](https://github.com/upx/upx).
-3. Configure your builds:
+3. Download `clang-format` binary from [this page](https://llvm.org/builds/). Activate `Beautifier` plugin in Qt Creator and customize its options: set "Clang Format"->"Use predefined style" to "File", check "Enable auto format on file save."
+4. Configure your builds:
 
 |  | dynamic | static |
 |---|---|---|

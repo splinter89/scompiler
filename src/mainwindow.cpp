@@ -1,42 +1,34 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QCheckBox>
+#include <QDesktopWidget>
+#include <QFileDialog>
+#include <QGridLayout>
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QFileDialog>
 #include <QSplitter>
-#include <QGridLayout>
-#include <QDesktopWidget>
-#include <QCheckBox>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui_(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainWindow)
 {
     // init0 ==================================================================
     grammar_active_rules_.clear();
-    grammar_active_rules_ << 0; // rule #0 must be always active
-//    grammar_active_rules_ << 1 << 6 << 40 << 48 << 49 << 50 << 51 << 53
-//                          << 54 << 55 << 58 << 59 << 97 << 98 << 101
-//                          << 102 << 103 << 104 << 105 << 106 << 134;
-    grammar_active_rules_ << 1 << 2 << 5 << 6 << 40 << 41 << 42 << 43
-                          << 44 << 45 << 46 << 47 << 48 << 49 << 50
-                          << 51 << 52 << 53 << 54 << 55 << 58 << 59
-                          << 97 << 98 << 101 << 102 << 103 << 104
-                          << 105 << 106 << 109 << 111 << 113 << 114
-                          << 115 << 116 << 120 << 121 << 134;
+    grammar_active_rules_ << 0;  // rule #0 must be always active
+    /*grammar_active_rules_ << 1 << 6 << 40 << 48 << 49 << 50 << 51 << 53
+                          << 54 << 55 << 58 << 59 << 97 << 98 << 101
+                          << 102 << 103 << 104 << 105 << 106 << 134;*/
+    grammar_active_rules_ << 1 << 2 << 5 << 6 << 40 << 41 << 42 << 43 << 44 << 45 << 46 << 47 << 48 << 49 << 50 << 51
+                          << 52 << 53 << 54 << 55 << 58 << 59 << 97 << 98 << 101 << 102 << 103 << 104 << 105 << 106
+                          << 109 << 111 << 113 << 114 << 115 << 116 << 120 << 121 << 134;
     grammar_ = setGrammarRules(grammar_active_rules_);
 
     // init1 ==================================================================
     lexical_analyzer_ = new SLexicalAnalyzer();
-    connect(lexical_analyzer_, SIGNAL(lexical_error(int, QString)),
-            this, SLOT(displayError(int, QString)));
+    connect(lexical_analyzer_, SIGNAL(lexical_error(int, QString)), this, SLOT(displayError(int, QString)));
     // init2 ==================================================================
     syntactic_analyzer_ = new SSyntacticAnalyzer();
-    connect(syntactic_analyzer_, SIGNAL(syntax_error(int, QString)),
-            this, SLOT(displayError(int, QString)));
-    connect(syntactic_analyzer_, SIGNAL(semantic_error(int, QString)),
-            this, SLOT(displayError(int, QString)));
+    connect(syntactic_analyzer_, SIGNAL(syntax_error(int, QString)), this, SLOT(displayError(int, QString)));
+    connect(syntactic_analyzer_, SIGNAL(semantic_error(int, QString)), this, SLOT(displayError(int, QString)));
 
     syntactic_analyzer_->setGrammar(grammar_);
     if (!syntactic_analyzer_->generateSetOfSituations()) {
@@ -63,10 +55,10 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         resize(main_width / 2, main_height / 2);
     }
-//    setFixedSize(width(), height());
+    //    setFixedSize(width(), height());
     statusBar()->showMessage(trUtf8("Status: ok"));
     base_window_title_ = windowTitle();
-    file_dialog_dir_ = QDir::currentPath(); // QCoreApplication::applicationDirPath()
+    file_dialog_dir_ = QDir::currentPath();  // QCoreApplication::applicationDirPath()
 
     // now draw interface >:[]
     editor_ = new CodeEditor();
@@ -75,187 +67,207 @@ MainWindow::MainWindow(QWidget *parent) :
 
     tab_main_ = new QTabWidget();
 
-
-    QWidget *tab_lex = new QWidget();
+    QWidget* tab_lex = new QWidget();
     tab_main_->addTab(tab_lex, trUtf8("Lexical analysis"));
-        QWidget *tab_lex_0 = new QWidget();
-        QWidget *tab_lex_1 = new QWidget();
-        QWidget *tab_lex_2 = new QWidget();
-        QWidget *tab_lex_3 = new QWidget();
-        QWidget *tab_lex_4 = new QWidget();
-        tab_lex_main_ = new QTabWidget();
-        tab_lex_main_->addTab(tab_lex_0, trUtf8("reduction"));
-            QGridLayout *grid_lex_0 = new QGridLayout();
-            table_lex_0_ = new QTableWidget(0, 6);
-            table_lex_0_->setColumnWidth(0, header_num_width);
-            table_lex_0_->setColumnWidth(3, header_index_width);
-            table_lex_0_->setColumnWidth(4, header_index_width);
-            table_lex_0_->setColumnWidth(5, header_index_width);
-            table_lex_0_->verticalHeader()->setVisible(false);
-            grid_lex_0->addWidget(table_lex_0_);
-            tab_lex_0->setLayout(grid_lex_0);
-        tab_lex_main_->addTab(tab_lex_1, trUtf8("IDs"));
-            QGridLayout *grid_lex_1 = new QGridLayout();
-            table_lex_1_ = new QTableWidget(0, 2);
-            table_lex_1_->setColumnWidth(0, header_num_width);
-            table_lex_1_->verticalHeader()->setVisible(false);
-            grid_lex_1->addWidget(table_lex_1_);
-            tab_lex_1->setLayout(grid_lex_1);
-        tab_lex_main_->addTab(tab_lex_2, trUtf8("constants"));
-            QGridLayout *grid_lex_2 = new QGridLayout();
-            table_lex_2_ = new QTableWidget(0, 3);
-            table_lex_2_->setColumnWidth(0, header_num_width);
-            table_lex_2_->verticalHeader()->setVisible(false);
-            grid_lex_2->addWidget(table_lex_2_);
-            tab_lex_2->setLayout(grid_lex_2);
-        tab_lex_main_->addTab(tab_lex_3, trUtf8("keywords"));
-            QGridLayout *grid_lex_3 = new QGridLayout();
-            table_lex_3_ = new QTableWidget(0, 2);
-            table_lex_3_->setColumnWidth(0, header_num_width);
-            table_lex_3_->verticalHeader()->setVisible(false);
-            grid_lex_3->addWidget(table_lex_3_);
-            tab_lex_3->setLayout(grid_lex_3);
-        tab_lex_main_->addTab(tab_lex_4, trUtf8("separators"));
-            QGridLayout *grid_lex_4 = new QGridLayout();
-            table_lex_4_ = new QTableWidget(0, 2);
-            table_lex_4_->setColumnWidth(0, header_num_width);
-            table_lex_4_->verticalHeader()->setVisible(false);
-            grid_lex_4->addWidget(table_lex_4_);
-            tab_lex_4->setLayout(grid_lex_4);
-        setLexTableHeaders();
+    // ////
+    QWidget* tab_lex_0 = new QWidget();
+    QWidget* tab_lex_1 = new QWidget();
+    QWidget* tab_lex_2 = new QWidget();
+    QWidget* tab_lex_3 = new QWidget();
+    QWidget* tab_lex_4 = new QWidget();
+    tab_lex_main_ = new QTabWidget();
+    tab_lex_main_->addTab(tab_lex_0, trUtf8("reduction"));
+    // //// ////
+    QGridLayout* grid_lex_0 = new QGridLayout();
+    table_lex_0_ = new QTableWidget(0, 6);
+    table_lex_0_->setColumnWidth(0, header_num_width);
+    table_lex_0_->setColumnWidth(3, header_index_width);
+    table_lex_0_->setColumnWidth(4, header_index_width);
+    table_lex_0_->setColumnWidth(5, header_index_width);
+    table_lex_0_->verticalHeader()->setVisible(false);
+    grid_lex_0->addWidget(table_lex_0_);
+    tab_lex_0->setLayout(grid_lex_0);
+    // ////
+    tab_lex_main_->addTab(tab_lex_1, trUtf8("IDs"));
+    // //// ////
+    QGridLayout* grid_lex_1 = new QGridLayout();
+    table_lex_1_ = new QTableWidget(0, 2);
+    table_lex_1_->setColumnWidth(0, header_num_width);
+    table_lex_1_->verticalHeader()->setVisible(false);
+    grid_lex_1->addWidget(table_lex_1_);
+    tab_lex_1->setLayout(grid_lex_1);
+    // ////
+    tab_lex_main_->addTab(tab_lex_2, trUtf8("constants"));
+    // //// ////
+    QGridLayout* grid_lex_2 = new QGridLayout();
+    table_lex_2_ = new QTableWidget(0, 3);
+    table_lex_2_->setColumnWidth(0, header_num_width);
+    table_lex_2_->verticalHeader()->setVisible(false);
+    grid_lex_2->addWidget(table_lex_2_);
+    tab_lex_2->setLayout(grid_lex_2);
+    // ////
+    tab_lex_main_->addTab(tab_lex_3, trUtf8("keywords"));
+    // //// ////
+    QGridLayout* grid_lex_3 = new QGridLayout();
+    table_lex_3_ = new QTableWidget(0, 2);
+    table_lex_3_->setColumnWidth(0, header_num_width);
+    table_lex_3_->verticalHeader()->setVisible(false);
+    grid_lex_3->addWidget(table_lex_3_);
+    tab_lex_3->setLayout(grid_lex_3);
+    // ////
+    tab_lex_main_->addTab(tab_lex_4, trUtf8("separators"));
+    // //// ////
+    QGridLayout* grid_lex_4 = new QGridLayout();
+    table_lex_4_ = new QTableWidget(0, 2);
+    table_lex_4_->setColumnWidth(0, header_num_width);
+    table_lex_4_->verticalHeader()->setVisible(false);
+    grid_lex_4->addWidget(table_lex_4_);
+    tab_lex_4->setLayout(grid_lex_4);
+    // ////
+    setLexTableHeaders();
 
-        QGridLayout *grid_lex = new QGridLayout();
-        grid_lex->addWidget(tab_lex_main_);
-        tab_lex->setLayout(grid_lex);
+    QGridLayout* grid_lex = new QGridLayout();
+    grid_lex->addWidget(tab_lex_main_);
+    tab_lex->setLayout(grid_lex);
 
-
-    QWidget *tab_synt = new QWidget();
+    QWidget* tab_synt = new QWidget();
     tab_main_->addTab(tab_synt, trUtf8("Syntactic analysis"));
-        QWidget *tab_synt_0 = new QWidget();
-        QWidget *tab_synt_1 = new QWidget();
-        QWidget *tab_synt_2 = new QWidget();
-        QWidget *tab_synt_3 = new QWidget();
-        QWidget *tab_synt_4 = new QWidget();
-        QWidget *tab_synt_5 = new QWidget();
-        tab_synt_main_ = new QTabWidget();
-        tab_synt_main_->addTab(tab_synt_0, trUtf8("rightmost derivation"));
-            QGridLayout *grid_synt_0 = new QGridLayout();
-            edit_synt_0_ = new QPlainTextEdit();
-            edit_synt_0_->setReadOnly(true);
-            edit_synt_0_->setTabStopWidth(tab_stop_width);
-            grid_synt_0->addWidget(edit_synt_0_);
-            tab_synt_0->setLayout(grid_synt_0);
-        tab_synt_main_->addTab(tab_synt_1, trUtf8("grammar"));
-            QGridLayout *grid_synt_1 = new QGridLayout();
-            table_synt_1_ = new QTableWidget(0, 2);
-            table_synt_1_->setColumnWidth(0, header_num_width);
-            table_synt_1_->setColumnWidth(1, header_grammar_width);
-            table_synt_1_->verticalHeader()->setVisible(false);
-            grid_synt_1->addWidget(table_synt_1_);
-            tab_synt_1->setLayout(grid_synt_1);
-        tab_synt_main_->addTab(tab_synt_2, trUtf8("sets of situations"));
-            QGridLayout *grid_synt_2 = new QGridLayout();
-            edit_synt_2_ = new QPlainTextEdit();
-            edit_synt_2_->setReadOnly(true);
-            edit_synt_2_->setTabStopWidth(tab_stop_width);
-            grid_synt_2->addWidget(edit_synt_2_);
-            tab_synt_2->setLayout(grid_synt_2);
-        tab_synt_main_->addTab(tab_synt_3, trUtf8("action table"));
-            QGridLayout *grid_synt_3 = new QGridLayout();
-            table_synt_3_ = new QTableWidget(0, 1);
-            table_synt_3_->setColumnWidth(0, header_num_width);
-            table_synt_3_->verticalHeader()->setVisible(false);
-            grid_synt_3->addWidget(table_synt_3_);
-            tab_synt_3->setLayout(grid_synt_3);
-        tab_synt_main_->addTab(tab_synt_4, trUtf8("goto table"));
-            QGridLayout *grid_synt_4 = new QGridLayout();
-            table_synt_4_ = new QTableWidget(0, 1);
-            table_synt_4_->setColumnWidth(0, header_num_width);
-            table_synt_4_->verticalHeader()->setVisible(false);
-            grid_synt_4->addWidget(table_synt_4_);
-            tab_synt_4->setLayout(grid_synt_4);
-        tab_synt_main_->addTab(tab_synt_5, trUtf8("set grammar"));
-            QGridLayout *grid_synt_5 = new QGridLayout();
-            table_synt_5_ = new QTableWidget(0, 2);
-            table_synt_5_->setColumnWidth(0, header_num_width);
-            table_synt_5_->setColumnWidth(1, header_grammar_width);
-            table_synt_5_->verticalHeader()->setVisible(false);
-            grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 5);
+    // ////
+    QWidget* tab_synt_0 = new QWidget();
+    QWidget* tab_synt_1 = new QWidget();
+    QWidget* tab_synt_2 = new QWidget();
+    QWidget* tab_synt_3 = new QWidget();
+    QWidget* tab_synt_4 = new QWidget();
+    QWidget* tab_synt_5 = new QWidget();
+    tab_synt_main_ = new QTabWidget();
+    tab_synt_main_->addTab(tab_synt_0, trUtf8("rightmost derivation"));
+    // //// ////
+    QGridLayout* grid_synt_0 = new QGridLayout();
+    edit_synt_0_ = new QPlainTextEdit();
+    edit_synt_0_->setReadOnly(true);
+    edit_synt_0_->setTabStopWidth(tab_stop_width);
+    grid_synt_0->addWidget(edit_synt_0_);
+    tab_synt_0->setLayout(grid_synt_0);
+    // ////
+    tab_synt_main_->addTab(tab_synt_1, trUtf8("grammar"));
+    // //// ////
+    QGridLayout* grid_synt_1 = new QGridLayout();
+    table_synt_1_ = new QTableWidget(0, 2);
+    table_synt_1_->setColumnWidth(0, header_num_width);
+    table_synt_1_->setColumnWidth(1, header_grammar_width);
+    table_synt_1_->verticalHeader()->setVisible(false);
+    grid_synt_1->addWidget(table_synt_1_);
+    tab_synt_1->setLayout(grid_synt_1);
+    // ////
+    tab_synt_main_->addTab(tab_synt_2, trUtf8("sets of situations"));
+    // //// ////
+    QGridLayout* grid_synt_2 = new QGridLayout();
+    edit_synt_2_ = new QPlainTextEdit();
+    edit_synt_2_->setReadOnly(true);
+    edit_synt_2_->setTabStopWidth(tab_stop_width);
+    grid_synt_2->addWidget(edit_synt_2_);
+    tab_synt_2->setLayout(grid_synt_2);
+    // ////
+    tab_synt_main_->addTab(tab_synt_3, trUtf8("action table"));
+    // //// ////
+    QGridLayout* grid_synt_3 = new QGridLayout();
+    table_synt_3_ = new QTableWidget(0, 1);
+    table_synt_3_->setColumnWidth(0, header_num_width);
+    table_synt_3_->verticalHeader()->setVisible(false);
+    grid_synt_3->addWidget(table_synt_3_);
+    tab_synt_3->setLayout(grid_synt_3);
+    // ////
+    tab_synt_main_->addTab(tab_synt_4, trUtf8("goto table"));
+    // //// ////
+    QGridLayout* grid_synt_4 = new QGridLayout();
+    table_synt_4_ = new QTableWidget(0, 1);
+    table_synt_4_->setColumnWidth(0, header_num_width);
+    table_synt_4_->verticalHeader()->setVisible(false);
+    grid_synt_4->addWidget(table_synt_4_);
+    tab_synt_4->setLayout(grid_synt_4);
+    // ////
+    tab_synt_main_->addTab(tab_synt_5, trUtf8("set grammar"));
+    // //// ////
+    QGridLayout* grid_synt_5 = new QGridLayout();
+    table_synt_5_ = new QTableWidget(0, 2);
+    table_synt_5_->setColumnWidth(0, header_num_width);
+    table_synt_5_->setColumnWidth(1, header_grammar_width);
+    table_synt_5_->verticalHeader()->setVisible(false);
+    grid_synt_5->addWidget(table_synt_5_, 0, 0, 1, 5);
 
-            // buttons
-            QPushButton *b_load_rules = new QPushButton(trUtf8("load"));
-            grid_synt_5->addWidget(b_load_rules, 1, 0);
-            connect(b_load_rules, SIGNAL(clicked()),
-                    this, SLOT(loadActiveRules()));
+    // buttons
+    QPushButton* b_load_rules = new QPushButton(trUtf8("load"));
+    grid_synt_5->addWidget(b_load_rules, 1, 0);
+    connect(b_load_rules, SIGNAL(clicked()), this, SLOT(loadActiveRules()));
 
-            QPushButton *b_save_rules = new QPushButton(trUtf8("save"));
-            grid_synt_5->addWidget(b_save_rules, 1, 1);
-            connect(b_save_rules, SIGNAL(clicked()),
-                    this, SLOT(saveActiveRules()));
+    QPushButton* b_save_rules = new QPushButton(trUtf8("save"));
+    grid_synt_5->addWidget(b_save_rules, 1, 1);
+    connect(b_save_rules, SIGNAL(clicked()), this, SLOT(saveActiveRules()));
 
-            QPushButton *b_check_all_rules = new QPushButton(trUtf8("all"));
-            grid_synt_5->addWidget(b_check_all_rules, 1, 2);
-            QPushButton *b_uncheck_all_rules = new QPushButton(trUtf8("none"));
-            grid_synt_5->addWidget(b_uncheck_all_rules, 1, 3);
+    QPushButton* b_check_all_rules = new QPushButton(trUtf8("all"));
+    grid_synt_5->addWidget(b_check_all_rules, 1, 2);
+    QPushButton* b_uncheck_all_rules = new QPushButton(trUtf8("none"));
+    grid_synt_5->addWidget(b_uncheck_all_rules, 1, 3);
 
-            QSignalMapper* signalMapper = new QSignalMapper(this);
-            connect(b_check_all_rules, SIGNAL(clicked()), signalMapper, SLOT(map()));
-            connect(b_uncheck_all_rules, SIGNAL(clicked()), signalMapper, SLOT(map()));
-            signalMapper->setMapping(b_check_all_rules, 1);
-            signalMapper->setMapping(b_uncheck_all_rules, 0);
-            connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(setCheckedAllRules(int)));
+    QSignalMapper* signalMapper = new QSignalMapper(this);
+    connect(b_check_all_rules, SIGNAL(clicked()), signalMapper, SLOT(map()));
+    connect(b_uncheck_all_rules, SIGNAL(clicked()), signalMapper, SLOT(map()));
+    signalMapper->setMapping(b_check_all_rules, 1);
+    signalMapper->setMapping(b_uncheck_all_rules, 0);
+    connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(setCheckedAllRules(int)));
 
-            b_update_grammar = new QPushButton(trUtf8("apply"));
-            grid_synt_5->addWidget(b_update_grammar, 1, 4);
-            connect(b_update_grammar, SIGNAL(clicked()),
-                    this, SLOT(updateGrammar()));
+    b_update_grammar = new QPushButton(trUtf8("apply"));
+    grid_synt_5->addWidget(b_update_grammar, 1, 4);
+    connect(b_update_grammar, SIGNAL(clicked()), this, SLOT(updateGrammar()));
 
-            tab_synt_5->setLayout(grid_synt_5);
+    tab_synt_5->setLayout(grid_synt_5);
 
-        QStringList table_synt_1_headers;
-        table_synt_1_headers << trUtf8("#") << trUtf8("rule");
-        table_synt_1_->setHorizontalHeaderLabels(table_synt_1_headers);
+    QStringList table_synt_1_headers;
+    table_synt_1_headers << trUtf8("#") << trUtf8("rule");
+    table_synt_1_->setHorizontalHeaderLabels(table_synt_1_headers);
 
-        QStringList table_synt_5_headers;
-        table_synt_5_headers << trUtf8("#") << trUtf8("rule");
-        table_synt_5_->setHorizontalHeaderLabels(table_synt_5_headers);
+    QStringList table_synt_5_headers;
+    table_synt_5_headers << trUtf8("#") << trUtf8("rule");
+    table_synt_5_->setHorizontalHeaderLabels(table_synt_5_headers);
 
-        QGridLayout *grid_synt = new QGridLayout();
-        grid_synt->addWidget(tab_synt_main_);
-        tab_synt->setLayout(grid_synt);
+    QGridLayout* grid_synt = new QGridLayout();
+    grid_synt->addWidget(tab_synt_main_);
+    tab_synt->setLayout(grid_synt);
 
-
-    QWidget *tab_sem = new QWidget();
+    QWidget* tab_sem = new QWidget();
     tab_main_->addTab(tab_sem, trUtf8("Tables"));
-        QWidget *tab_sem_0 = new QWidget();
-        QWidget *tab_sem_1 = new QWidget();
-        tab_sem_main_ = new QTabWidget();
-        tab_sem_main_->addTab(tab_sem_0, trUtf8("symbols"));
-            QGridLayout *grid_sem_0 = new QGridLayout();
-            edit_sem_0_ = new QPlainTextEdit();
-            edit_sem_0_->setReadOnly(true);
-            edit_sem_0_->setTabStopWidth(tab_stop_width);
-            grid_sem_0->addWidget(edit_sem_0_);
-            tab_sem_0->setLayout(grid_sem_0);
-        tab_sem_main_->addTab(tab_sem_1, trUtf8("blocks"));
-            QGridLayout *grid_sem_1 = new QGridLayout();
-            edit_sem_1_ = new QPlainTextEdit();
-            edit_sem_1_->setReadOnly(true);
-            edit_sem_1_->setTabStopWidth(tab_stop_width);
-            grid_sem_1->addWidget(edit_sem_1_);
-            tab_sem_1->setLayout(grid_sem_1);
+    // ////
+    QWidget* tab_sem_0 = new QWidget();
+    QWidget* tab_sem_1 = new QWidget();
+    tab_sem_main_ = new QTabWidget();
+    tab_sem_main_->addTab(tab_sem_0, trUtf8("symbols"));
+    // //// ////
+    QGridLayout* grid_sem_0 = new QGridLayout();
+    edit_sem_0_ = new QPlainTextEdit();
+    edit_sem_0_->setReadOnly(true);
+    edit_sem_0_->setTabStopWidth(tab_stop_width);
+    grid_sem_0->addWidget(edit_sem_0_);
+    tab_sem_0->setLayout(grid_sem_0);
+    // ////
+    tab_sem_main_->addTab(tab_sem_1, trUtf8("blocks"));
+    // //// ////
+    QGridLayout* grid_sem_1 = new QGridLayout();
+    edit_sem_1_ = new QPlainTextEdit();
+    edit_sem_1_->setReadOnly(true);
+    edit_sem_1_->setTabStopWidth(tab_stop_width);
+    grid_sem_1->addWidget(edit_sem_1_);
+    tab_sem_1->setLayout(grid_sem_1);
 
-        QGridLayout *grid_sem = new QGridLayout();
-        grid_sem->addWidget(tab_sem_main_);
-        tab_sem->setLayout(grid_sem);
+    QGridLayout* grid_sem = new QGridLayout();
+    grid_sem->addWidget(tab_sem_main_);
+    tab_sem->setLayout(grid_sem);
 
-
-    QSplitter *splitter = new QSplitter(Qt::Horizontal);
+    QSplitter* splitter = new QSplitter(Qt::Horizontal);
     splitter->addWidget(editor_);
     splitter->addWidget(tab_main_);
     setCentralWidget(splitter);
 
-    updateSyntTables(); // grammar, set of situations, action/goto tables
+    updateSyntTables();  // grammar, set of situations, action/goto tables
     openFile();
 }
 
@@ -292,8 +304,8 @@ void MainWindow::setStatusError(const QString text)
 void MainWindow::setLexTableHeaders()
 {
     QStringList table_lex_0_headers;
-    table_lex_0_headers << trUtf8("#") << trUtf8("representation") << trUtf8("type")
-                        << trUtf8("ref") << trUtf8("start") << trUtf8("length");
+    table_lex_0_headers << trUtf8("#") << trUtf8("representation") << trUtf8("type") << trUtf8("ref") << trUtf8("start")
+                        << trUtf8("length");
     table_lex_0_->setHorizontalHeaderLabels(table_lex_0_headers);
 
     QStringList table_lex_1_headers;
@@ -325,7 +337,7 @@ void MainWindow::clearLexTables()
         table_lex_2_->removeRow(0);
     }
     while (table_lex_3_->rowCount() > 0) {
-      table_lex_3_->removeRow(0);
+        table_lex_3_->removeRow(0);
     }
     while (table_lex_4_->rowCount() > 0) {
         table_lex_4_->removeRow(0);
@@ -359,8 +371,8 @@ void MainWindow::updateSyntTables()
     for (i = 0; i < grammar_.length(); i++) {
         table_synt_1_->insertRow(i);
 
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        QTableWidgetItem* item_0 = new QTableWidgetItem;
+        QTableWidgetItem* item_1 = new QTableWidgetItem;
 
         item_0->setTextAlignment(Qt::AlignCenter);
         item_0->setText(QString::number(i));
@@ -371,11 +383,11 @@ void MainWindow::updateSyntTables()
     for (i = 0; i < Grammar_full.length(); i++) {
         table_synt_5_->insertRow(i);
 
-        QCheckBox *chb = new QCheckBox(QString::number(i));
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        QCheckBox* chb = new QCheckBox(QString::number(i));
+        QTableWidgetItem* item_1 = new QTableWidgetItem;
 
         if (i == 0) {
-            chb->setEnabled(false); // rule #0 must be always active
+            chb->setEnabled(false);  // rule #0 must be always active
         }
         chb->setChecked(grammar_active_rules_.contains(i));
         item_1->setText(Grammar_full.at(i).toString());
@@ -404,7 +416,7 @@ void MainWindow::updateSyntTables()
     table_synt_3_->setRowCount(table_action.length());
     table_synt_3_->setHorizontalHeaderLabels(table_synt_3_headers);
     for (i = 0; i < table_action.length(); i++) {
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem* item_0 = new QTableWidgetItem;
         item_0->setTextAlignment(Qt::AlignCenter);
         item_0->setText(QString::number(i));
         table_synt_3_->setItem(i, 0, item_0);
@@ -414,7 +426,7 @@ void MainWindow::updateSyntTables()
         bool empty_col = true;
         for (i = 0; i < table_action.length(); i++) {
             if (table_action.at(i).contains(terminal)) {
-                QTableWidgetItem *item = new QTableWidgetItem;
+                QTableWidgetItem* item = new QTableWidgetItem;
                 item->setText(table_action.at(i).value(terminal).toString());
                 table_synt_3_->setItem(i, j, item);
                 empty_col = false;
@@ -437,7 +449,7 @@ void MainWindow::updateSyntTables()
     table_synt_4_->setRowCount(table_goto.length());
     table_synt_4_->setHorizontalHeaderLabels(table_synt_4_headers);
     for (i = 0; i < table_goto.length(); i++) {
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
+        QTableWidgetItem* item_0 = new QTableWidgetItem;
         item_0->setTextAlignment(Qt::AlignCenter);
         item_0->setText(QString::number(i));
         table_synt_4_->setItem(i, 0, item_0);
@@ -447,7 +459,7 @@ void MainWindow::updateSyntTables()
         bool empty_col = true;
         for (i = 0; i < table_goto.length(); i++) {
             if (table_goto.at(i).contains(nonterminal)) {
-                QTableWidgetItem *item = new QTableWidgetItem;
+                QTableWidgetItem* item = new QTableWidgetItem;
                 item->setText(QString::number(table_goto.at(i).value(nonterminal)));
                 table_synt_4_->setItem(i, j, item);
                 empty_col = false;
@@ -473,7 +485,7 @@ void MainWindow::openFile(const QString filename)
         setStatusError(trUtf8("open error: %1").arg(file.errorString()));
     }
     QTextStream in(&file);
-    editor_->setPlainText(in.readAll());     // \n,\r\n,\r -> \n (automatically)
+    editor_->setPlainText(in.readAll());  // \n,\r\n,\r -> \n (automatically)
     file.close();
 
     QFileInfo fi(filename);
@@ -514,12 +526,11 @@ void MainWindow::run()
         setStatusMsg("ok");
     }
 
-    QList<TokenPointer>   tokens           = lexical_analyzer_->getAllTokens();
-    QList<TokenId>        table_ids        = lexical_analyzer_->getTableIds();
-    QList<TokenConst>     table_consts     = lexical_analyzer_->getTableConsts();
-    QList<TokenKeyword>   table_keywords   = lexical_analyzer_->getTableKeywords();
+    QList<TokenPointer> tokens = lexical_analyzer_->getAllTokens();
+    QList<TokenId> table_ids = lexical_analyzer_->getTableIds();
+    QList<TokenConst> table_consts = lexical_analyzer_->getTableConsts();
+    QList<TokenKeyword> table_keywords = lexical_analyzer_->getTableKeywords();
     QList<TokenSeparator> table_separators = lexical_analyzer_->getTableSeparators();
-
 
     clearLexTables();
     for (i = 0; i < tokens.length(); i++) {
@@ -527,68 +538,68 @@ void MainWindow::run()
 
         QString token_type_temp, const_type_temp, code_temp;
         switch (tokens.at(i).type) {
-        case T_ID:
-            token_type_temp = "id";
-            code_temp = table_ids.at(tokens.at(i).index).name;
-            break;
-
-        case T_CONST:
-            switch (table_consts.at(tokens.at(i).index).type) {
-            case TYPE_BOOL:
-                const_type_temp = "bool";
+            case T_ID:
+                token_type_temp = "id";
+                code_temp = table_ids.at(tokens.at(i).index).name;
                 break;
 
-            case TYPE_INT:
-                const_type_temp = "int";
+            case T_CONST:
+                switch (table_consts.at(tokens.at(i).index).type) {
+                    case TYPE_BOOL:
+                        const_type_temp = "bool";
+                        break;
+
+                    case TYPE_INT:
+                        const_type_temp = "int";
+                        break;
+
+                    case TYPE_DOUBLE:
+                        const_type_temp = "double";
+                        break;
+
+                    case TYPE_CHAR:
+                        const_type_temp = "char";
+                        break;
+
+                    case TYPE_STRING:
+                        const_type_temp = "string";
+                        break;
+
+                    default:
+                        const_type_temp = "???";
+                }
+
+                token_type_temp = "const (" + const_type_temp + ")";
+                code_temp = table_consts.at(tokens.at(i).index).value.toString();
                 break;
 
-            case TYPE_DOUBLE:
-                const_type_temp = "double";
+            case T_KEYWORD:
+                token_type_temp = "keyword";
+                code_temp = KeywordCodes.key(table_keywords.at(tokens.at(i).index).type);
                 break;
 
-            case TYPE_CHAR:
-                const_type_temp = "char";
+            case T_SEPARATOR:
+                token_type_temp = "separator";
+                code_temp = (SeparatorCodes.key(table_separators.at(tokens.at(i).index).type) == " ")
+                              ? "[space]"
+                              : SeparatorCodes.key(table_separators.at(tokens.at(i).index).type);
                 break;
 
-            case TYPE_STRING:
-                const_type_temp = "string";
+            case EOF_TOKEN:
+                token_type_temp = "eof";
+                code_temp = "$";
                 break;
 
             default:
-                const_type_temp = "???";
-            }
-
-            token_type_temp = "const (" + const_type_temp + ")";
-            code_temp = table_consts.at(tokens.at(i).index).value.toString();
-            break;
-
-        case T_KEYWORD:
-            token_type_temp = "keyword";
-            code_temp = KeywordCodes.key(table_keywords.at(tokens.at(i).index).type);
-            break;
-
-        case T_SEPARATOR:
-            token_type_temp = "separator";
-            code_temp = (SeparatorCodes.key(table_separators.at(tokens.at(i).index).type) == " ")
-                    ? "[space]"
-                    : SeparatorCodes.key(table_separators.at(tokens.at(i).index).type);
-            break;
-
-        case EOF_TOKEN:
-            token_type_temp = "eof";
-            code_temp = "$";
-            break;
-
-        default:
-            break;
+                break;
         }
 
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
-        QTableWidgetItem *item_2 = new QTableWidgetItem;
-        QTableWidgetItem *item_3 = new QTableWidgetItem;
-        QTableWidgetItem *item_4 = new QTableWidgetItem;
-        QTableWidgetItem *item_5 = new QTableWidgetItem;
+        QTableWidgetItem* item_0 = new QTableWidgetItem;
+        QTableWidgetItem* item_1 = new QTableWidgetItem;
+        QTableWidgetItem* item_2 = new QTableWidgetItem;
+        QTableWidgetItem* item_3 = new QTableWidgetItem;
+        QTableWidgetItem* item_4 = new QTableWidgetItem;
+        QTableWidgetItem* item_5 = new QTableWidgetItem;
         item_0->setTextAlignment(Qt::AlignCenter);
         item_3->setTextAlignment(Qt::AlignCenter);
         item_4->setTextAlignment(Qt::AlignCenter);
@@ -614,8 +625,8 @@ void MainWindow::run()
     for (i = 0; i < table_ids.length(); i++) {
         table_lex_1_->insertRow(i);
 
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        QTableWidgetItem* item_0 = new QTableWidgetItem;
+        QTableWidgetItem* item_1 = new QTableWidgetItem;
         item_0->setTextAlignment(Qt::AlignCenter);
 
         item_0->setText(QString::number(i));
@@ -628,34 +639,34 @@ void MainWindow::run()
 
         QString const_type_temp;
         switch (table_consts.at(i).type) {
-        case TYPE_BOOL:
-            const_type_temp = "bool";
-            break;
+            case TYPE_BOOL:
+                const_type_temp = "bool";
+                break;
 
-        case TYPE_INT:
-            const_type_temp = "int";
-            break;
+            case TYPE_INT:
+                const_type_temp = "int";
+                break;
 
-        case TYPE_DOUBLE:
-            const_type_temp = "double";
-            break;
+            case TYPE_DOUBLE:
+                const_type_temp = "double";
+                break;
 
-        case TYPE_CHAR:
-            const_type_temp = "char";
-            break;
+            case TYPE_CHAR:
+                const_type_temp = "char";
+                break;
 
-        case TYPE_STRING:
-            const_type_temp = "string";
-            break;
+            case TYPE_STRING:
+                const_type_temp = "string";
+                break;
 
-        default:
-            const_type_temp = "";
-            break;
+            default:
+                const_type_temp = "";
+                break;
         }
 
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
-        QTableWidgetItem *item_2 = new QTableWidgetItem;
+        QTableWidgetItem* item_0 = new QTableWidgetItem;
+        QTableWidgetItem* item_1 = new QTableWidgetItem;
+        QTableWidgetItem* item_2 = new QTableWidgetItem;
         item_0->setTextAlignment(Qt::AlignCenter);
 
         item_0->setText(QString::number(i));
@@ -669,8 +680,8 @@ void MainWindow::run()
     for (i = 0; i < table_keywords.length(); i++) {
         table_lex_3_->insertRow(i);
 
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        QTableWidgetItem* item_0 = new QTableWidgetItem;
+        QTableWidgetItem* item_1 = new QTableWidgetItem;
         item_0->setTextAlignment(Qt::AlignCenter);
 
         item_0->setText(QString::number(i));
@@ -682,14 +693,14 @@ void MainWindow::run()
     for (i = 0; i < table_separators.length(); i++) {
         table_lex_4_->insertRow(i);
 
-        QTableWidgetItem *item_0 = new QTableWidgetItem;
-        QTableWidgetItem *item_1 = new QTableWidgetItem;
+        QTableWidgetItem* item_0 = new QTableWidgetItem;
+        QTableWidgetItem* item_1 = new QTableWidgetItem;
         item_0->setTextAlignment(Qt::AlignCenter);
 
         item_0->setText(QString::number(i));
         item_1->setText((SeparatorCodes.key(table_separators.at(i).type) == " ")
-                        ? "[space]"
-                        : SeparatorCodes.key(table_separators.at(i).type));
+                          ? "[space]"
+                          : SeparatorCodes.key(table_separators.at(i).type));
 
         table_lex_4_->setItem(i, 0, item_0);
         table_lex_4_->setItem(i, 1, item_1);
@@ -705,10 +716,11 @@ void MainWindow::run()
     // --------------------------------------------------------------------------------
     // syntax analysis ----------------------------------------------------------------
     // --------------------------------------------------------------------------------
-    QList<int> parse_rules = syntactic_analyzer_->process(tokens,table_ids, table_consts,
-                                                         table_keywords, table_separators);
+    QList<int> parse_rules =
+      syntactic_analyzer_->process(tokens, table_ids, table_consts, table_keywords, table_separators);
     // reverse the list
-    for(int k = 0; k < (parse_rules.size()/2); k++) parse_rules.swap(k, parse_rules.size()-(1+k));
+    for (int k = 0; k < (parse_rules.size() / 2); k++)
+        parse_rules.swap(k, parse_rules.size() - (1 + k));
 
     QString text_rules, text_symbols, text_blocks;
 
@@ -716,18 +728,15 @@ void MainWindow::run()
     if (!parse_rules.isEmpty()) {
         QStringList text_rule_first, text_rule_second;
         foreach (int rule_index, parse_rules) {
-            int rule_index_full = indexOfGrammarRule(
-                        grammar_.at(rule_index).left_token,
-                        grammar_.at(rule_index).right_side,
-                        Grammar_full
-                        );
+            int rule_index_full =
+              indexOfGrammarRule(grammar_.at(rule_index).left_token, grammar_.at(rule_index).right_side, Grammar_full);
             text_rule_first << QString::number(rule_index);
             text_rule_second << (QString("#%1 (%2)\n\t").arg(rule_index).arg(rule_index_full)
                                  + grammar_.at(rule_index).toString());
         }
         text_rules = text_rule_first.join(" ") + "\n\n"
-                + trUtf8("Details:\n=========================================\n")
-                + text_rule_second.join("\n\n=========================================\n");
+                     + trUtf8("Details:\n=========================================\n")
+                     + text_rule_second.join("\n\n=========================================\n");
     } else {
         text_rules = trUtf8("Failed to get the rightmost derivation for the specified grammar");
     }
@@ -749,14 +758,15 @@ void MainWindow::run()
     edit_sem_1_->setPlainText(text_blocks);
 }
 
-void MainWindow::updateGrammar() {
+void MainWindow::updateGrammar()
+{
     b_update_grammar->setEnabled(false);
 
     int i;
     grammar_active_rules_.clear();
     grammar_active_rules_ << 0;
     for (i = 1; i < table_synt_5_->rowCount(); i++) {
-        QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
+        QCheckBox* chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
         if (chb->isChecked()) {
             grammar_active_rules_ << i;
         }
@@ -777,15 +787,13 @@ void MainWindow::updateGrammar() {
     b_update_grammar->setEnabled(true);
 }
 
-void MainWindow::loadActiveRules() {
+void MainWindow::loadActiveRules()
+{
     QString res = "";
 
     // read from file
-    QString fileName = QFileDialog::getOpenFileName(
-                this,
-                trUtf8("Load template"),
-                file_dialog_dir_,
-                trUtf8("Config file (*.cfg);;All files (*.*)"));
+    QString fileName = QFileDialog::getOpenFileName(this, trUtf8("Load template"), file_dialog_dir_,
+                                                    trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -793,7 +801,7 @@ void MainWindow::loadActiveRules() {
             return;
         }
         QTextStream in(&file);
-        res = in.readAll();     // \n,\r\n,\r -> \n (automatically)
+        res = in.readAll();  // \n,\r\n,\r -> \n (automatically)
         file.close();
 
         QFileInfo fi(fileName);
@@ -801,7 +809,7 @@ void MainWindow::loadActiveRules() {
 
         if (!res.isEmpty()) {
             for (int i = 1; i < table_synt_5_->rowCount(); i++) {
-                QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
+                QCheckBox* chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
                 if (i <= res.length()) {
                     chb->setChecked((res.at(i - 1) == '1') ? true : false);
                 } else {
@@ -812,20 +820,18 @@ void MainWindow::loadActiveRules() {
     }
 }
 
-void MainWindow::saveActiveRules() {
+void MainWindow::saveActiveRules()
+{
     QString res = "";
 
     for (int i = 1; i < table_synt_5_->rowCount(); i++) {
-        QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
+        QCheckBox* chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
         res += (chb->isChecked()) ? "1" : "0";
     }
 
     // write to file
-    QString fileName = QFileDialog::getSaveFileName(
-                this,
-                trUtf8("Save template"),
-                file_dialog_dir_,
-                trUtf8("Config file (*.cfg);;All files (*.*)"));
+    QString fileName = QFileDialog::getSaveFileName(this, trUtf8("Save template"), file_dialog_dir_,
+                                                    trUtf8("Config file (*.cfg);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -841,21 +847,19 @@ void MainWindow::saveActiveRules() {
     }
 }
 
-void MainWindow::setCheckedAllRules(int is_checked) {
+void MainWindow::setCheckedAllRules(int is_checked)
+{
     for (int i = 1; i < table_synt_5_->rowCount(); i++) {
-        QCheckBox *chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
+        QCheckBox* chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
         chb->setChecked((bool)is_checked);
     }
 }
 
-
 void MainWindow::on_open_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(
-                this,
-                trUtf8("Load code"),
-                file_dialog_dir_,
-                trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
+    QString fileName =
+      QFileDialog::getOpenFileName(this, trUtf8("Load code"), file_dialog_dir_,
+                                   trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         openFile(fileName);
     }
@@ -863,11 +867,9 @@ void MainWindow::on_open_triggered()
 
 void MainWindow::on_save_triggered()
 {
-    QString fileName = QFileDialog::getSaveFileName(
-                this,
-                trUtf8("Save code"),
-                file_dialog_dir_,
-                trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
+    QString fileName =
+      QFileDialog::getSaveFileName(this, trUtf8("Save code"), file_dialog_dir_,
+                                   trUtf8("C++ sources (*.cpp *.cp *.cc *.cxx *.c++ *.c);;All files (*.*)"));
     if (!fileName.isEmpty()) {
         if (fileName.indexOf(".cpp") == -1) {
             fileName += ".cpp";

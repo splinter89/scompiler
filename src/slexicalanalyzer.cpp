@@ -1,7 +1,7 @@
 #include "slexicalanalyzer.h"
 #include <QDebug>
 
-SLexicalAnalyzer::SLexicalAnalyzer(QObject * parent)
+SLexicalAnalyzer::SLexicalAnalyzer(QObject* parent)
 {
     this->setParent(parent);
 }
@@ -24,7 +24,7 @@ bool SLexicalAnalyzer::process(const QString code)
 
     QString identifier;
     QVariant const_value;
-    Token token;    // keyword/separator
+    Token token;  // keyword/separator
 
     int i, start;
 
@@ -57,22 +57,19 @@ bool SLexicalAnalyzer::process(const QString code)
                 emit lexical_error(code.length(), error_msg(E_COMMENT_NOT_CLOSED));
                 return false;
             } else {
-                i += 2; // */
+                i += 2;  // */
             }
             continue;
         } else if ((code.at(i) == ' ') || (code.at(i) == '\t')) {
             // space (have special behavior)
-            while ((i < code.length() - 1)
-                   && ((code.at(i + 1) == ' ') || (code.at(i + 1) == '\t'))) {
+            while ((i < code.length() - 1) && ((code.at(i + 1) == ' ') || (code.at(i + 1) == '\t'))) {
                 i++;
             }
 
             token_type = T_SEPARATOR;
             token = S_SPACE;
         } else if (code.at(i).isLetter()) {
-
-            while ((i < code.length() - 1)
-                    &&(code.at(i + 1).isLetterOrNumber() || (code.at(i + 1) == '_'))) {
+            while ((i < code.length() - 1) && (code.at(i + 1).isLetterOrNumber() || (code.at(i + 1) == '_'))) {
                 i++;
             }
             identifier = code.mid(start, i - start + 1);
@@ -85,7 +82,7 @@ bool SLexicalAnalyzer::process(const QString code)
                 // keyword
                 token_type = T_KEYWORD;
                 token = KeywordCodes.value(identifier);
-            } else  {
+            } else {
                 // identifier
                 token_type = T_ID;
             }
@@ -94,7 +91,7 @@ bool SLexicalAnalyzer::process(const QString code)
             token_type = T_CONST;
 
             QString str = code.mid(i);
-            bool ok;   // error flag while converting string to int/double
+            bool ok;  // error flag while converting string to int/double
 
             QRegExp rx_double("^(\\d+)?\\.(\\d+)?(?:[eE]([+-]?\\d+))?");
             QRegExp rx_int("^((?:0x[\\dabcdef]+)|(?:0[01234567]+)|(?:\\d+))");
@@ -143,12 +140,7 @@ bool SLexicalAnalyzer::process(const QString code)
         } else if (code.at(i) == '\'') {
             // char const
             while ((i < code.length() - 1)
-                   && ((code.at(i + 1) != '\'')
-                       || ((code.at(i - 1) != '\\')
-                           && (code.at(i) == '\\')
-                           )
-                       )
-            ) {
+                   && ((code.at(i + 1) != '\'') || ((code.at(i - 1) != '\\') && (code.at(i) == '\\')))) {
                 i++;
             }
             if (i == code.length() - 1) {
@@ -157,7 +149,7 @@ bool SLexicalAnalyzer::process(const QString code)
                 return false;
             }
 
-            identifier = code.mid(start + 1, i - start);    // +1 because of opening apostrophe
+            identifier = code.mid(start + 1, i - start);  // +1 because of opening apostrophe
             if (identifier == "\\'") {
                 const_value = '\'';
             } else if (identifier == "\\\"") {
@@ -175,18 +167,13 @@ bool SLexicalAnalyzer::process(const QString code)
                 emit lexical_error(i + 2, error_msg(E_INVALID_CHAR));
                 return false;
             }
-            i++;    // closing apostrophe
+            i++;  // closing apostrophe
             token_type = T_CONST;
             const_type = TYPE_CHAR;
         } else if (code.at(i) == '"') {
             // string const
             while ((i < code.length() - 1)
-                   && ((code.at(i + 1) != '\"')
-                       || ((code.at(i - 1) != '\\')
-                           && (code.at(i) == '\\')
-                           )
-                       )
-            ) {
+                   && ((code.at(i + 1) != '\"') || ((code.at(i - 1) != '\\') && (code.at(i) == '\\')))) {
                 i++;
             }
             if (i == code.length() - 1) {
@@ -195,13 +182,14 @@ bool SLexicalAnalyzer::process(const QString code)
                 return false;
             }
 
-            const_value = code.mid(start + 1, i - start)    // +1 because of opening double quotes
-                    .replace("\\'", "'")
-                    .replace("\\\"", "\"")
-                    .replace("\\\\", "\\")
-                    .replace("\\n", "\n")
-                    .replace("\\t", "\t");
-            i++;    // closing double quotes
+            const_value = code
+                            .mid(start + 1, i - start)  // +1 because of opening double quotes
+                            .replace("\\'", "'")
+                            .replace("\\\"", "\"")
+                            .replace("\\\\", "\\")
+                            .replace("\\n", "\n")
+                            .replace("\\t", "\t");
+            i++;  // closing double quotes
             token_type = T_CONST;
             const_type = TYPE_STRING;
         } else {
@@ -209,37 +197,35 @@ bool SLexicalAnalyzer::process(const QString code)
         }
 
         switch (token_type) {
-        case T_ID:
-            addToken(start, i - start + 1, token_type, identifier);
-            break;
+            case T_ID:
+                addToken(start, i - start + 1, token_type, identifier);
+                break;
 
-        case T_CONST:
-            addToken(start, i - start + 1, token_type, const_type, const_value);
-            break;
+            case T_CONST:
+                addToken(start, i - start + 1, token_type, const_type, const_value);
+                break;
 
-        case T_KEYWORD:
-            addToken(start, i - start + 1, token_type, token);
-            break;
+            case T_KEYWORD:
+                addToken(start, i - start + 1, token_type, token);
+                break;
 
-        case T_SEPARATOR:
-            addToken(start, i - start + 1, token_type, token);
-            break;
+            case T_SEPARATOR:
+                addToken(start, i - start + 1, token_type, token);
+                break;
 
-        default:
-            tokens_.clear();
-            emit lexical_error(i + 1, error_msg(E_UNKNOWN_TERMINAL_ERROR));
-            return false;
-            break;
+            default:
+                tokens_.clear();
+                emit lexical_error(i + 1, error_msg(E_UNKNOWN_TERMINAL_ERROR));
+                return false;
+                break;
         }
     }
 
     // trim spaces
-    while ((tokens_.first().type == T_SEPARATOR)
-           && table_separators_.at(tokens_.first().index).type == S_SPACE) {
+    while ((tokens_.first().type == T_SEPARATOR) && table_separators_.at(tokens_.first().index).type == S_SPACE) {
         removeToken(0);
     }
-    while ((tokens_.last().type == T_SEPARATOR)
-           && table_separators_.at(tokens_.last().index).type == S_SPACE) {
+    while ((tokens_.last().type == T_SEPARATOR) && table_separators_.at(tokens_.last().index).type == S_SPACE) {
         removeToken(tokens_.length() - 1);
     }
 
@@ -248,7 +234,6 @@ bool SLexicalAnalyzer::process(const QString code)
 
     return true;
 }
-
 
 // add id
 void SLexicalAnalyzer::addToken(const int start, const int length, const Token type, const QString identifier)
@@ -267,22 +252,20 @@ void SLexicalAnalyzer::addToken(const int start, const int length, const Token t
 }
 
 // add const
-void SLexicalAnalyzer::addToken(const int start, const int length, const Token type, const DataType const_type,
+void SLexicalAnalyzer::addToken(const int start,
+                                const int length,
+                                const Token type,
+                                const DataType const_type,
                                 QVariant value)
 {
     if (type == T_CONST) {
-        if (((const_type == TYPE_INT) || (const_type == TYPE_DOUBLE))
-            && (tokens_.length() >= 1)
+        if (((const_type == TYPE_INT) || (const_type == TYPE_DOUBLE)) && (tokens_.length() >= 1)
             && (tokens_.last().type == T_SEPARATOR)
             && ((table_separators_.at(tokens_.last().index).type == S_PLUS)
                 || (table_separators_.at(tokens_.last().index).type == S_MINUS))
             && ((tokens_.length() == 1)
-                || ((tokens_.length() >= 2)
-                    && (tokens_.at(tokens_.length() - 2).type == T_SEPARATOR)
-                    && (table_separators_.at(tokens_.at(tokens_.length() - 2).index).type != S_ROUND_CLOSE)
-                )
-            )
-        ) {
+                || ((tokens_.length() >= 2) && (tokens_.at(tokens_.length() - 2).type == T_SEPARATOR)
+                    && (table_separators_.at(tokens_.at(tokens_.length() - 2).index).type != S_ROUND_CLOSE)))) {
             // (some separator (excluding ")") -> unary plus/minus -> number) => (separator -> signed number)
             if (table_separators_.at(tokens_.last().index).type == S_MINUS) {
                 if (const_type == TYPE_INT) {
@@ -291,16 +274,16 @@ void SLexicalAnalyzer::addToken(const int start, const int length, const Token t
                     value = -value.toDouble();
                 }
             }
-            removeToken(tokens_.length() - 1);   // remove that unary +/-
+            removeToken(tokens_.length() - 1);  // remove that unary +/-
         }
-    
+
         TokenConst new_item = {const_type, value};
         int index = indexOfTokenItem(new_item);
         if (index == -1) {
             table_consts_ << new_item;
             index = table_consts_.length() - 1;
         }
-    
+
         TokenPointer new_token = {T_CONST, index, start, length};
         tokens_ << new_token;
     }
@@ -321,18 +304,13 @@ void SLexicalAnalyzer::addToken(const int start, const int length, const Token t
         tokens_ << new_token;
     } else if (type == T_SEPARATOR) {
         // don't add space after separator
-        if (token == S_SPACE
-            && !tokens_.isEmpty()
-            && (tokens_.last().type == T_SEPARATOR)
-        ) {
+        if (token == S_SPACE && !tokens_.isEmpty() && (tokens_.last().type == T_SEPARATOR)) {
             return;
         }
 
         // remove space before separator
-        if (!tokens_.isEmpty()
-            && (tokens_.last().type == T_SEPARATOR)
-            && (table_separators_.at(tokens_.last().index).type == S_SPACE)
-        ) {
+        if (!tokens_.isEmpty() && (tokens_.last().type == T_SEPARATOR)
+            && (table_separators_.at(tokens_.last().index).type == S_SPACE)) {
             removeToken(tokens_.length() - 1);
         }
 
@@ -347,7 +325,6 @@ void SLexicalAnalyzer::addToken(const int start, const int length, const Token t
         tokens_ << new_token;
     }
 }
-
 
 int SLexicalAnalyzer::indexOfTokenItem(const TokenId item)
 {
@@ -366,7 +343,7 @@ int SLexicalAnalyzer::indexOfTokenItem(const TokenConst item)
     int i, res = -1;
     for (i = 0; i < table_consts_.length(); i++) {
         if ((item.type == table_consts_.at(i).type)
-                && (item.value.toString() == table_consts_.at(i).value.toString())) {
+            && (item.value.toString() == table_consts_.at(i).value.toString())) {
             res = i;
             break;
         }
@@ -412,23 +389,23 @@ void SLexicalAnalyzer::removeToken(const int list_index)
     }
     if (!got_other_links) {
         switch (token.type) {
-        case T_ID:
-            table_ids_.removeAt(token.index);
-            break;
+            case T_ID:
+                table_ids_.removeAt(token.index);
+                break;
 
-        case T_CONST:
-            table_consts_.removeAt(token.index);
-            break;
+            case T_CONST:
+                table_consts_.removeAt(token.index);
+                break;
 
-        case T_KEYWORD:
-            table_keywords_.removeAt(token.index);
-            break;
+            case T_KEYWORD:
+                table_keywords_.removeAt(token.index);
+                break;
 
-        case T_SEPARATOR:
-            table_separators_.removeAt(token.index);
-            break;
-        default:
-            break;
+            case T_SEPARATOR:
+                table_separators_.removeAt(token.index);
+                break;
+            default:
+                break;
         }
     }
 

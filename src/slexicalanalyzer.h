@@ -1,17 +1,17 @@
 #ifndef SLEXICALANALYZER_H
 #define SLEXICALANALYZER_H
 
-#include <QtCore>
 #include <QObject>
-#include "errors.h"
+#include <QtCore>
 #include "basics.h"
+#include "errors.h"
 
 class SLexicalAnalyzer : public QObject
 {
     Q_OBJECT
 
 public:
-    SLexicalAnalyzer(QObject * parent = 0);
+    SLexicalAnalyzer(QObject* parent = 0);
     ~SLexicalAnalyzer();
 
     bool process(const QString);
@@ -33,8 +33,7 @@ private:
 
     // add id, const, keyword/separator
     void addToken(const int start, const int length, const Token type, const QString identifier);
-    void addToken(const int start, const int length, const Token type, const DataType const_type,
-                  QVariant value);
+    void addToken(const int start, const int length, const Token type, const DataType const_type, QVariant value);
     void addToken(const int start, const int length, const Token type, const Token token);
 
     int indexOfTokenItem(const TokenId item);
@@ -48,4 +47,4 @@ signals:
     void lexical_error(int pos, QString msg);
 };
 
-#endif // SLEXICAL_ANALYZER_H
+#endif  // SLEXICAL_ANALYZER_H
