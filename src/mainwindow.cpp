@@ -131,7 +131,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainW
     tab_lex->setLayout(grid_lex);
 
     QWidget* tab_synt = new QWidget();
-    tab_main_->addTab(tab_synt, trUtf8("Syntactic analysis"));
+    tab_main_->addTab(tab_synt, trUtf8("Syntax"));
     // ////
     QWidget* tab_synt_0 = new QWidget();
     QWidget* tab_synt_1 = new QWidget();
@@ -235,12 +235,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainW
     tab_synt->setLayout(grid_synt);
 
     QWidget* tab_sem = new QWidget();
-    tab_main_->addTab(tab_sem, trUtf8("Tables"));
+    tab_main_->addTab(tab_sem, trUtf8("Semantics"));
     // ////
     QWidget* tab_sem_0 = new QWidget();
     QWidget* tab_sem_1 = new QWidget();
     tab_sem_main_ = new QTabWidget();
-    tab_sem_main_->addTab(tab_sem_0, trUtf8("symbols"));
+    tab_sem_main_->addTab(tab_sem_0, trUtf8("symbol table"));
     // //// ////
     QGridLayout* grid_sem_0 = new QGridLayout();
     edit_sem_0_ = new QPlainTextEdit();
@@ -249,7 +249,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainW
     grid_sem_0->addWidget(edit_sem_0_);
     tab_sem_0->setLayout(grid_sem_0);
     // ////
-    tab_sem_main_->addTab(tab_sem_1, trUtf8("blocks"));
+    tab_sem_main_->addTab(tab_sem_1, trUtf8("block structure"));
     // //// ////
     QGridLayout* grid_sem_1 = new QGridLayout();
     edit_sem_1_ = new QPlainTextEdit();
