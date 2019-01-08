@@ -14,9 +14,6 @@
 <class_element> ::= <class_method>
 <class_element> ::= <class_element><class_props_declaration>
 <class_element> ::= <class_element><class_method>
-<class_element> ::= ::
-<class_element> ::= :::
-<class_element> ::= ::::
 <access_spec> ::= public
 <access_spec> ::= private
 <class_method> ::= <id>"()"<block>

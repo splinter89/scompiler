@@ -309,10 +309,6 @@ static QList<GrammarRule> initGrammarFullRules()
          << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_CLASS_METHOD)
          << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_CLASS_ELEMENT << N_CLASS_PROPS_DECLARATION)
          << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << N_CLASS_ELEMENT << N_CLASS_METHOD)
-         // dummy rules
-         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << S_COLON << S_COLON)
-         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << S_COLON << S_COLON << S_COLON << S_COLON)
-         << GrammarRule(N_CLASS_ELEMENT, EmptyTokenList() << S_COLON << S_COLON << S_COLON << S_COLON << S_COLON)
 
          << GrammarRule(N_ACCESS_SPEC, EmptyTokenList() << K_PUBLIC)
          << GrammarRule(N_ACCESS_SPEC, EmptyTokenList() << K_PRIVATE)
