@@ -306,7 +306,7 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
     // initial situation
     Situation s = {N_S, EmptyTokenList() << DOT_TOKEN << N_PROGRAM, EOF_TOKEN};
     QSet<Situation> i;
-    QList<QSet<Situation>> c;
+    QList<QSet<Situation>> c, c_new;
     int q1 = 1;
     QSet<Token> all_tokens = getAllGrammarTokens(grammar_);
 
@@ -320,12 +320,14 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
         foreach (const QSet<Situation>& j, c) {
             foreach (const Token& x, all_tokens) {
                 QSet<Situation> new_i = makeStep(j, x);
-                if (!new_i.isEmpty() && !c.contains(new_i)) {
-                    c << new_i;
+                if (!new_i.isEmpty() && !c.contains(new_i) && !c_new.contains(new_i)) {
+                    c_new << new_i;
                     q1 += new_i.count();
                 }
             }
         }
+        c << c_new;
+        c_new.clear();
     } while (c.count() != old_count);
     ultimate_situations_set_ = c;
     qDebug() << "ultimate_situations_set_:" << q1;
