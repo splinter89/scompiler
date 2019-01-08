@@ -11,55 +11,39 @@
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainWindow)
 {
-    // init0 ==================================================================
-    grammar_active_rules_.clear();
-    grammar_active_rules_ << 0;  // rule #0 must be always active
-    //grammar_active_rules_ << 1 << 6 << 40 << 48 << 49 << 50 << 51 << 53 << 54 << 55 << 58 << 59 << 97 << 98 << 101
-    //                      << 102 << 103 << 104 << 105 << 106 << 134;
-    //grammar_active_rules_ << 1 << 2 << 5 << 6 << 40 << 41 << 42 << 43 << 44 << 45 << 46 << 47 << 48 << 49 << 50 << 51
-    //                      << 52 << 53 << 54 << 55 << 58 << 59 << 97 << 98 << 101 << 102 << 103 << 104 << 105 << 106
-    //                      << 109 << 111 << 113 << 114 << 115 << 116 << 120 << 121 << 134;
-    grammar_ = setGrammarRules(grammar_active_rules_);
+    int width = 1050, height = 650;
 
-    // init1 ==================================================================
-    lexical_analyzer_ = new SLexicalAnalyzer();
-    connect(lexical_analyzer_, SIGNAL(lexical_error(int, QString)), this, SLOT(displayError(int, QString)));
-    // init2 ==================================================================
-    syntactic_analyzer_ = new SSyntacticAnalyzer();
-    connect(syntactic_analyzer_, SIGNAL(syntax_error(int, QString)), this, SLOT(displayError(int, QString)));
-    connect(syntactic_analyzer_, SIGNAL(semantic_error(int, QString)), this, SLOT(displayError(int, QString)));
+    ui_->setupUi(this);
+    resize(width, height);
+    QRect desktop = QApplication::desktop()->availableGeometry();
+    if ((desktop.width() > width) && (desktop.height() > height + 10)) {
+        move((desktop.width() - width) / 2, (desktop.height() - height) / 2 - 20);
+    } else {
+        resize(width / 2, height / 2);
+    }
+    //setFixedSize(width(), height());
 
-    syntactic_analyzer_->setGrammar(grammar_);
-    if (!syntactic_analyzer_->generateSetOfSituations()) {
-        displayError(-1, error_msg(E_INTERNAL_GENERATING_SITUATIONS));
-        return;
-    }
-    if (!syntactic_analyzer_->generateActionGotoTables()) {
-        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
-        return;
-    }
-    // ========================================================================
-    //
+    initInterface();  // >:[]
+    initLogic();
+
+    base_window_title_ = windowTitle();
+    file_dialog_dir_ = QDir::currentPath();  // QCoreApplication::applicationDirPath()
+    openFile();
+    setStatusMsg("ok");
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui_;
+}
+
+void MainWindow::initInterface()
+{
     // first width is for '#' column; second - 'index', 'start', 'length'
     int header_num_width = 50, header_index_width = 60;
     int header_grammar_width = 440;
-    int main_width = 1050, main_height = 650;
     int tab_stop_width = 20;
 
-    ui_->setupUi(this);
-    resize(main_width, main_height);
-    QRect desktop = QApplication::desktop()->availableGeometry();
-    if ((desktop.width() > main_width) && (desktop.height() > main_height + 10)) {
-        move((desktop.width() - main_width) / 2, (desktop.height() - main_height) / 2 - 20);
-    } else {
-        resize(main_width / 2, main_height / 2);
-    }
-    //    setFixedSize(width(), height());
-    statusBar()->showMessage(trUtf8("Status: ok"));
-    base_window_title_ = windowTitle();
-    file_dialog_dir_ = QDir::currentPath();  // QCoreApplication::applicationDirPath()
-
-    // now draw interface >:[]
     editor_ = new CodeEditor();
     editor_->setTabStopWidth(tab_stop_width);
     editor_->setCursor(Qt::IBeamCursor);
@@ -265,14 +249,27 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainW
     splitter->addWidget(editor_);
     splitter->addWidget(tab_main_);
     setCentralWidget(splitter);
-
-    updateSyntTables();  // grammar, set of situations, action/goto tables
-    openFile();
 }
 
-MainWindow::~MainWindow()
+void MainWindow::initLogic()
 {
-    delete ui_;
+    lexical_analyzer_ = new SLexicalAnalyzer();
+    connect(lexical_analyzer_, SIGNAL(lexical_error(int, QString)), this, SLOT(displayError(int, QString)));
+    syntactic_analyzer_ = new SSyntacticAnalyzer();
+    connect(syntactic_analyzer_, SIGNAL(syntax_error(int, QString)), this, SLOT(displayError(int, QString)));
+    connect(syntactic_analyzer_, SIGNAL(semantic_error(int, QString)), this, SLOT(displayError(int, QString)));
+
+    grammar_active_rules_.clear();
+    grammar_active_rules_ << 0;  // rule #0 must be always active
+    //grammar_active_rules_ << 1 << 6 << 40 << 48 << 49 << 50 << 51 << 53 << 54 << 55 << 58 << 59 << 97 << 98 << 101
+    //                      << 102 << 103 << 104 << 105 << 106 << 134;
+    //grammar_active_rules_ << 1 << 2 << 5 << 6 << 40 << 41 << 42 << 43 << 44 << 45 << 46 << 47 << 48 << 49 << 50 << 51
+    //                      << 52 << 53 << 54 << 55 << 58 << 59 << 97 << 98 << 101 << 102 << 103 << 104 << 105 << 106
+    //                      << 109 << 111 << 113 << 114 << 115 << 116 << 120 << 121 << 134;
+    grammar_ = setGrammarRules(grammar_active_rules_);
+
+    updateSyntTables();  // init checkboxes
+    updateGrammar();     // generate stuff
 }
 
 void MainWindow::displayError(int pos, QString msg)

@@ -68,6 +68,8 @@ private:
     QString base_window_title_;
     QString file_dialog_dir_;
 
+    void initInterface();
+    void initLogic();
     void clearLexTables();
     void setLexTableHeaders();
     void clearSyntTables();
