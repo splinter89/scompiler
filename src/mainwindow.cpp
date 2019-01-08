@@ -775,14 +775,8 @@ void MainWindow::updateGrammar()
     grammar_ = setGrammarRules(grammar_active_rules_);
 
     syntactic_analyzer_->setGrammar(grammar_);
-    if (!syntactic_analyzer_->generateSetOfSituations()) {
-        displayError(-1, error_msg(E_INTERNAL_GENERATING_SITUATIONS));
-        return;
-    }
-    if (!syntactic_analyzer_->generateActionGotoTables()) {
-        displayError(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
-        return;
-    }
+    if (!syntactic_analyzer_->generateSetOfSituations()) return;
+    if (!syntactic_analyzer_->generateActionGotoTables()) return;
 
     updateSyntTables();
     b_update_grammar->setEnabled(true);

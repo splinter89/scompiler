@@ -301,7 +301,10 @@ int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name,
 
 bool SSyntacticAnalyzer::generateSetOfSituations()
 {
-    if (grammar_.isEmpty()) return false;
+    if (grammar_.isEmpty()) {
+        emit syntax_error(-1, error_msg(E_INTERNAL_GENERATING_SITUATIONS));
+        return false;
+    }
 
     // initial situation
     Situation s = {N_S, EmptyTokenList() << DOT_TOKEN << N_PROGRAM, EOF_TOKEN};
@@ -336,7 +339,10 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
 
 bool SSyntacticAnalyzer::generateActionGotoTables()
 {
-    if (ultimate_situations_set_.isEmpty()) return false;
+    if (ultimate_situations_set_.isEmpty()) {
+        emit syntax_error(-1, error_msg(E_INTERNAL_GENERATING_TABLES));
+        return false;
+    }
 
     QSet<Token> terminals = getAllTerminalTokens();
     QSet<Token> non_terminals = getAllNonTerminalTokens(grammar_);
