@@ -9,9 +9,9 @@ What's implemented: lexical, syntactic, and semantic analysis.
 1. Update paths to your Qt/MinGW
     - in `scripts\deploy_dynamic.bat`
     - and `scripts\windows-build-qt-static.ps1`
-2. Install [UPX](https://github.com/upx/upx).
-3. Download `clang-format` binary from [this page](https://llvm.org/builds/). Activate `Beautifier` plugin in Qt Creator and customize its options: set "Clang Format"->"Use predefined style" to "File", check "Enable auto format on file save."
-4. Configure your builds:
+1. Install [UPX](https://github.com/upx/upx).
+1. Download `clang-format` binary from [this page](https://llvm.org/builds/). Activate `Beautifier` plugin in Qt Creator and customize its options: set "Clang Format"->"Use predefined style" to "File", check "Enable auto format on file save."
+1. Configure your builds:
 
 |  | dynamic | static |
 |---|---|---|
