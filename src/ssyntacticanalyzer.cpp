@@ -349,8 +349,8 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
 
         foreach (const Situation& situation, i) {
             // action
+            int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
             foreach (const Token& terminal, terminals) {
-                int dot_pos = situation.right_side.indexOf(DOT_TOKEN);
                 // step 1
                 if ((dot_pos > -1) && (dot_pos < situation.right_side.length() - 1)
                     && (situation.right_side.at(dot_pos + 1) == terminal)) {
@@ -362,8 +362,8 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                             action_row.insert(terminal, new_action);
                         } else if ((action_row.value(terminal).type != new_action.type)
                                    || (action_row.value(terminal).index != new_action.index)) {
-                            // error - not LR(1)
-                            emit syntax_error(-1, "(step 1 gen)" + error_msg(E_NOT_LR1_GRAMMAR));
+                            // not LR(1)
+                            emit syntax_error(-1, "(step 1)" + error_msg(E_NOT_LR1_GRAMMAR));
                             return false;
                         }
                     }
@@ -378,13 +378,13 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                         if (!action_row.contains(terminal)) {
                             action_row.insert(terminal, new_action);
                         } else {
-                            // error - not LR(1)
-                            emit syntax_error(-1, "(step 2-1 gen)" + error_msg(E_NOT_LR1_GRAMMAR));
+                            // not LR(1)
+                            emit syntax_error(-1, "(step 2.1)" + error_msg(E_NOT_LR1_GRAMMAR));
                             return false;
                         }
                     } else {
-                        // error - grammar rule not found
-                        emit syntax_error(-1, "(step 2-2 gen)" + error_msg(E_INTERNAL_GENERATING_TABLES));
+                        // grammar rule not found
+                        emit syntax_error(-1, "(step 2.2)" + error_msg(E_INTERNAL_GENERATING_TABLES));
                         return false;
                     }
                 }
@@ -397,7 +397,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                     action_row.insert(EOF_TOKEN, new_action);
                 } else {
                     // error
-                    emit syntax_error(-1, "(step 3 gen)" + error_msg(E_INTERNAL_GENERATING_TABLES));
+                    emit syntax_error(-1, "(step 3)" + error_msg(E_INTERNAL_GENERATING_TABLES));
                     return false;
                 }
             }
@@ -411,7 +411,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                     if (!goto_row.contains(non_terminal)) {
                         goto_row.insert(non_terminal, new_goto);
                     } else if (goto_row.value(non_terminal) != new_goto) {
-                        // error - not LR(1)
+                        // not LR(1)
                         emit syntax_error(-1, "(step goto)" + error_msg(E_NOT_LR1_GRAMMAR));
                         return false;
                     }
@@ -978,13 +978,13 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
                             result << action.index;
                         } else {
-                            // error - goto not defined
+                            // goto not defined
                             result.clear();
                             emit syntax_error(-1, error_msg(E_INTERNAL_GOTO_UNDEFINED));
                             return result;
                         }
                     } else {
-                        // error - stacks have too few items
+                        // stacks have too few items
                         result.clear();
                         emit syntax_error(-1, error_msg(E_INTERNAL_STATES_STACK_EMPTY));
                         return result;
@@ -1003,14 +1003,14 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     break;
             }
         } else {
-            // error - action not defined
+            // action not defined
             result.clear();
             emit syntax_error(-1, error_msg(E_INTERNAL_ACTION_UNDEFINED));
             return result;
         }
     }
     if (i >= tokens.length()) {
-        // error - tokens not accepted
+        // tokens not accepted
         result.clear();
         emit syntax_error(-1, error_msg(E_CHAIN_REJECTED));
         return result;
