@@ -15,9 +15,12 @@ void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar)
 {
     grammar_ = grammar;
 
+    QTime timer;
+    timer.start();
     first_by_token_.clear();
     if (!generateSetOfSituations()) return;
     if (!generateActionGotoTables()) return;
+    qDebug() << QString("update grammar time: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
 }
 
 QSet<Token> SSyntacticAnalyzer::first(const Token token)
