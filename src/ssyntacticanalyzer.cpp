@@ -67,17 +67,13 @@ QSet<Token> SSyntacticAnalyzer::first(const QList<Token> tokens)
     bool all_x_got_lambda = true;
     for (int i = 0; i < tokens.length(); i++) {
         QSet<Token> first_x = first(tokens.at(i));
-        int old_first_x_count = first_x.count();
-        first_x.remove(LAMBDA);
+        bool this_x_got_lambda = first_x.remove(LAMBDA);
 
-        // add FIRST(Xi)\{e} to FIRST(X);
-        result += first_x;
-
-        if (old_first_x_count == first_x.count()) {
-            // e wasn't in FIRST(Xi)
-            all_x_got_lambda = false;
-            break;
+        if (all_x_got_lambda) {  // if all previous first(X) got e
+            result += first_x;   // add FIRST(Xi)\{e}
         }
+        all_x_got_lambda &= this_x_got_lambda;
+        if (!all_x_got_lambda) break;
     }
     if (all_x_got_lambda) {
         result << LAMBDA;
