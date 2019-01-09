@@ -39,6 +39,7 @@ private:
     QList<QHash<Token, Action>> action_table_;
     QList<QHash<Token, int>> goto_table_;
 
+    QHash<Token, QSet<Token>> first_by_token_;
     QList<Symbol> symbol_table_;
     QList<Block> block_table_;
 

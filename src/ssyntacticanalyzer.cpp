@@ -18,7 +18,10 @@ void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar)
 
 QSet<Token> SSyntacticAnalyzer::first(const Token token)
 {
+    if (first_by_token_.contains(token)) return first_by_token_.value(token);
+
     QSet<Token> result;
+    first_by_token_.insert(token, QSet<Token>());  // to stop infinite recursion
 
     // step 1
     if (isTokenTerminal(token)) {
@@ -61,6 +64,8 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token)
         } while (result.count() != old_count);
     }
 
+    first_by_token_.remove(token);
+    first_by_token_.insert(token, result);
     return result;
 }
 
@@ -304,6 +309,7 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
     }
 
     ultimate_situations_set_.clear();
+    first_by_token_.clear();
 
     // initial situation
     Situation s = {N_S, EmptyTokenList() << DOT_TOKEN << N_PROGRAM, EOF_TOKEN};
