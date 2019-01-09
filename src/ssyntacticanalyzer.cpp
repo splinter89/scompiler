@@ -41,17 +41,13 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token)
                 bool all_y_got_lambda = true;
                 for (int i = 0; i < rule.right_side.length(); i++) {
                     QSet<Token> first_y = first(rule.right_side.at(i));
-                    int old_first_y_count = first_y.count();
-                    first_y.remove(LAMBDA);
+                    bool this_y_got_lambda = first_y.remove(LAMBDA);
 
-                    // add FIRST(Yi)\{e} to FIRST(X);
-                    result += first_y;
-
-                    if (old_first_y_count == first_y.count()) {
-                        // e wasn't in FIRST(Yi)
-                        all_y_got_lambda = false;
-                        break;
+                    if (all_y_got_lambda) {  // if all previous Y got e
+                        result += first_y;   // add FIRST(Yi)\{e} to FIRST(X)
                     }
+                    all_y_got_lambda &= this_y_got_lambda;
+                    if (!all_y_got_lambda) break;
                 }
                 if (all_y_got_lambda) {
                     result << LAMBDA;
