@@ -11,9 +11,22 @@ SSyntacticAnalyzer::~SSyntacticAnalyzer()
     // bye
 }
 
-void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar)
+void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar, const QString cache_filename)
 {
     grammar_ = grammar;
+
+    bool use_cache = (grammar_.length() > 1);
+    QFile cache_file(cache_filename);
+    if (use_cache) {
+        // try to read from cache
+        if (cache_file.open(QIODevice::ReadOnly)) {
+            QDataStream in(&cache_file);
+            in >> ultimate_situations_set_ >> action_table_ >> goto_table_;
+            cache_file.close();
+            qDebug() << "synt tables read from" << cache_filename;
+            return;
+        }
+    }
 
     QTime timer;
     timer.start();
@@ -21,6 +34,16 @@ void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar)
     if (!generateSetOfSituations()) return;
     if (!generateActionGotoTables()) return;
     qDebug() << QString("update grammar time: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
+
+    if (use_cache) {
+        // write to cache
+        if (cache_file.open(QIODevice::WriteOnly)) {
+            QDataStream out(&cache_file);
+            out << ultimate_situations_set_ << action_table_ << goto_table_;
+            cache_file.close();
+            qDebug() << "synt tables written to" << cache_filename;
+        }
+    }
 }
 
 QSet<Token> SSyntacticAnalyzer::first(const Token token)

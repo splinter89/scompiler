@@ -359,6 +359,47 @@ bool operator==(const Situation& e1, const Situation& e2)
             && (e1.look_ahead_token == e2.look_ahead_token));
 }
 
+QDataStream& operator<<(QDataStream& out, const Token& token)
+{
+    out << (int)token;
+    return out;
+}
+QDataStream& operator>>(QDataStream& in, Token& token)
+{
+    in >> (int&)token;
+    return in;
+}
+QDataStream& operator<<(QDataStream& out, const ActionType& action_type)
+{
+    out << (int)action_type;
+    return out;
+}
+QDataStream& operator>>(QDataStream& in, ActionType& action_type)
+{
+    in >> (int&)action_type;
+    return in;
+}
+QDataStream& operator<<(QDataStream& out, const Situation& situation)
+{
+    out << situation.left_token << situation.right_side << situation.look_ahead_token;
+    return out;
+}
+QDataStream& operator>>(QDataStream& in, Situation& situation)
+{
+    in >> situation.left_token >> situation.right_side >> situation.look_ahead_token;
+    return in;
+}
+QDataStream& operator<<(QDataStream& out, const Action& action)
+{
+    out << action.type << action.index;
+    return out;
+}
+QDataStream& operator>>(QDataStream& in, Action& action)
+{
+    in >> action.type >> action.index;
+    return in;
+}
+
 QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule>& grammar)
 {
     QList<GrammarRule> result;

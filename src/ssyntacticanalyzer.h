@@ -14,7 +14,7 @@ public:
     SSyntacticAnalyzer(QObject* parent = 0);
     ~SSyntacticAnalyzer();
 
-    void setGrammar(QList<GrammarRule> grammar);
+    void setGrammar(QList<GrammarRule> grammar, const QString cache_filename);
 
     QList<int> process(QList<TokenPointer> tokens,
                        QList<TokenId> table_ids,

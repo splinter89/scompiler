@@ -512,6 +512,14 @@ QDebug operator<<(QDebug d, const GrammarRule rule);
 bool operator==(const Situation& e1, const Situation& e2);
 QDebug operator<<(QDebug d, const Situation situation);
 QDebug operator<<(QDebug d, const Symbol symbol);
+QDataStream& operator<<(QDataStream& out, const Token& token);
+QDataStream& operator>>(QDataStream& in, Token& token);
+QDataStream& operator<<(QDataStream& out, const ActionType& action_type);
+QDataStream& operator>>(QDataStream& in, ActionType& action_type);
+QDataStream& operator<<(QDataStream& out, const Situation& situation);
+QDataStream& operator>>(QDataStream& in, Situation& situation);
+QDataStream& operator<<(QDataStream& out, const Action& action);
+QDataStream& operator>>(QDataStream& in, Action& action);
 
 QList<GrammarRule> getGrammarRulesByLeftToken(Token token, const QList<GrammarRule>& grammar);
 int indexOfGrammarRule(Token left, QList<Token> right, const QList<GrammarRule>& grammar);

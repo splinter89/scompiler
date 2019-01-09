@@ -773,7 +773,7 @@ void MainWindow::updateGrammar()
     }
     grammar_ = setGrammarRules(grammar_active_rules_);
 
-    syntactic_analyzer_->setGrammar(grammar_);
+    syntactic_analyzer_->setGrammar(grammar_, cache_filename_);
     updateSyntTables();
 
     b_update_grammar->setEnabled(true);
