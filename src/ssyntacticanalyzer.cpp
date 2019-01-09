@@ -14,6 +14,10 @@ SSyntacticAnalyzer::~SSyntacticAnalyzer()
 void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar)
 {
     grammar_ = grammar;
+
+    first_by_token_.clear();
+    if (!generateSetOfSituations()) return;
+    if (!generateActionGotoTables()) return;
 }
 
 QSet<Token> SSyntacticAnalyzer::first(const Token token)
@@ -309,7 +313,6 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
     }
 
     ultimate_situations_set_.clear();
-    first_by_token_.clear();
 
     // initial situation
     Situation s = {N_S, EmptyTokenList() << DOT_TOKEN << N_PROGRAM, EOF_TOKEN};

@@ -16,9 +16,6 @@ public:
 
     void setGrammar(QList<GrammarRule> grammar);
 
-    bool generateSetOfSituations();
-    bool generateActionGotoTables();
-
     QList<int> process(QList<TokenPointer> tokens,
                        QList<TokenId> table_ids,
                        QList<TokenConst> table_consts,
@@ -42,6 +39,9 @@ private:
     QHash<Token, QSet<Token>> first_by_token_;
     QList<Symbol> symbol_table_;
     QList<Block> block_table_;
+
+    bool generateSetOfSituations();
+    bool generateActionGotoTables();
 
     QSet<Token> first(const Token token);
     QSet<Token> first(const QList<Token> tokens);
