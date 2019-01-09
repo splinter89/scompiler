@@ -44,7 +44,12 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token)
                     bool this_y_got_lambda = first_y.remove(LAMBDA);
 
                     if (all_y_got_lambda) {  // if all previous Y got e
-                        result += first_y;   // add FIRST(Yi)\{e} to FIRST(X)
+                        // add each terminal a from FIRST(Yi)\{e} to FIRST(X)
+                        foreach (const Token a, first_y) {
+                            if (isTokenTerminal(a)) {
+                                result << a;
+                            }
+                        }
                     }
                     all_y_got_lambda &= this_y_got_lambda;
                     if (!all_y_got_lambda) break;
