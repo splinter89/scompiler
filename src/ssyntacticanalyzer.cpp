@@ -306,6 +306,8 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
         return false;
     }
 
+    ultimate_situations_set_.clear();
+
     // initial situation
     Situation s = {N_S, EmptyTokenList() << DOT_TOKEN << N_PROGRAM, EOF_TOKEN};
     QSet<Situation> i;

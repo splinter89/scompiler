@@ -763,10 +763,9 @@ void MainWindow::updateGrammar()
 {
     b_update_grammar->setEnabled(false);
 
-    int i;
     grammar_active_rules_.clear();
-    grammar_active_rules_ << 0;
-    for (i = 1; i < table_synt_5_->rowCount(); i++) {
+    grammar_active_rules_ << 0;  // rule #0 must be always active
+    for (int i = 1; i < table_synt_5_->rowCount(); i++) {
         QCheckBox* chb = qobject_cast<QCheckBox*>(table_synt_5_->cellWidget(i, 0));
         if (chb->isChecked()) {
             grammar_active_rules_ << i;
@@ -779,6 +778,7 @@ void MainWindow::updateGrammar()
     if (!syntactic_analyzer_->generateActionGotoTables()) return;
 
     updateSyntTables();
+
     b_update_grammar->setEnabled(true);
 }
 
