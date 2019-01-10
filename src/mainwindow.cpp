@@ -261,9 +261,9 @@ void MainWindow::initLogic()
 
     grammar_active_rules_.clear();
     grammar_active_rules_ << 0;  // rule #0 must be always active
-    grammar_active_rules_ << 1 << 2 << 5 << 6 << 37 << 38 << 39 << 40 << 41 << 42 << 43 << 44 << 45 << 46 << 47 << 48
-                          << 49 << 50 << 51 << 52 << 55 << 56 << 94 << 95 << 98 << 99 << 100 << 101 << 102 << 103 << 106
-                          << 108 << 110 << 111 << 112 << 113 << 117 << 118 << 131;
+    //grammar_active_rules_ << 1 << 2 << 5 << 6 << 37 << 38 << 39 << 40 << 41 << 42 << 43 << 44 << 45 << 46 << 47 << 48
+    //                      << 49 << 50 << 51 << 52 << 55 << 56 << 94 << 95 << 98 << 99 << 100 << 101 << 102 << 103 << 106
+    //                      << 108 << 110 << 111 << 112 << 113 << 117 << 118;
     grammar_ = setGrammarRules(grammar_active_rules_);
 
     updateSyntTables();  // init checkboxes

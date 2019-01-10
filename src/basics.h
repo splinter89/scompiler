@@ -482,8 +482,7 @@ static QList<GrammarRule> initGrammarFullRules()
          << GrammarRule(N_BRANCHING, EmptyTokenList()
                                        << K_IF << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE << N_BLOCK)
          << GrammarRule(N_BRANCHING, EmptyTokenList() << K_IF << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE
-                                                      << N_BLOCK << K_ELSE << N_BLOCK)
-         << GrammarRule(N_EXPRESSION, EmptyTokenList() << N_OP_9);
+                                                      << N_BLOCK << K_ELSE << N_BLOCK);
 
     return list;
 }
