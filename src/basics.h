@@ -492,14 +492,7 @@ QList<GrammarRule> setGrammarRules(QList<int> grammar_active_rules);
 // cool xD - in order to use QSet<Situation>
 inline uint qHash(const Situation& e)
 {
-    QStringList res;
-    res << QString::number(e.left_token) << "+";
-    foreach (const Token tok, e.right_side) {
-        res << QString::number(tok);
-    }
-    res << "+" << QString::number(e.look_ahead_token);
-
-    return qHash(res.join("-"));
+    return qHash(e.toString());
 }
 
 QString tokenToString(const Token token);
