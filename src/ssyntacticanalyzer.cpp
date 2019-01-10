@@ -33,7 +33,7 @@ void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar, const QString ca
     first_by_token_.clear();
     if (!generateSetOfSituations()) return;
     if (!generateActionGotoTables()) return;
-    qDebug() << QString("update grammar time: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
+    qDebug() << QString("grammar updated: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
 
     if (use_cache) {
         // write to cache
@@ -429,12 +429,12 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                             qDebug() << terminal;
                             qDebug() << action_row.value(terminal);
                             qDebug() << new_action;
-                            emit syntax_error(-1, "(step 2.1) " + error_msg(E_NOT_LR1_GRAMMAR));
+                            emit syntax_error(-1, "(step 2) " + error_msg(E_NOT_LR1_GRAMMAR));
                             return false;
                         }
                     } else {
                         // grammar rule not found
-                        emit syntax_error(-1, "(step 2.2) " + error_msg(E_INTERNAL_GENERATING_TABLES));
+                        emit syntax_error(-1, "(step 2) " + error_msg(E_INTERNAL_GENERATING_TABLES));
                         return false;
                     }
                 }
@@ -462,7 +462,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                         goto_row.insert(non_terminal, new_goto);
                     } else if (goto_row.value(non_terminal) != new_goto) {
                         // not LR(1)
-                        emit syntax_error(-1, "(step goto) " + error_msg(E_NOT_LR1_GRAMMAR));
+                        emit syntax_error(-1, "(goto) " + error_msg(E_NOT_LR1_GRAMMAR));
                         return false;
                     }
                 }

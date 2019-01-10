@@ -7,12 +7,9 @@ int main(int argc, char* argv[])
 
     QTime timer;
     timer.start();
-
-    // init
     MainWindow w;
     w.show();
-
-    qDebug() << QString("loading time: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
+    qDebug() << QString("loaded: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
 
     return a.exec();
 }
