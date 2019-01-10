@@ -6,11 +6,6 @@ SSyntacticAnalyzer::SSyntacticAnalyzer(QObject* parent)
     this->setParent(parent);
 }
 
-SSyntacticAnalyzer::~SSyntacticAnalyzer()
-{
-    // bye
-}
-
 void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar, const QString cache_filename)
 {
     grammar_ = grammar;
@@ -254,10 +249,10 @@ int SSyntacticAnalyzer::addSymbolClass(QString name, QList<int> members_indexes)
 void SSyntacticAnalyzer::setSymbolClassMemberAccessType(int symbol_index, AccessSpecifier access_type)
 {
     Symbol symbol = symbol_table_.at(symbol_index);
-    if ((symbol.type == SYM_FUNCTION) || (symbol.type == SYM_VARIABLE)) {
-        symbol.access_type = access_type;
-        symbol_table_.replace(symbol_index, symbol);
-    }
+    if ((symbol.type != SYM_FUNCTION) && (symbol.type != SYM_VARIABLE)) return;
+
+    symbol.access_type = access_type;
+    symbol_table_.replace(symbol_index, symbol);
 }
 
 int SSyntacticAnalyzer::addEmptyBlock(int parent_block_index)
@@ -291,16 +286,15 @@ void SSyntacticAnalyzer::addBlockSymbols(int block_index, QList<int> declared_sy
                                       .arg(error_msg(E_ALREADY_DECLARED_IN_BLOCK)));
             return;
         }
-
-        block.declared_symbols_indexes << declared_symbols_index;
-        block_table_.replace(block_index, block);
     }
+
+    block.declared_symbols_indexes << declared_symbols_indexes;
+    block_table_.replace(block_index, block);
 }
 
 int SSyntacticAnalyzer::getParentBlockIndex(int block_index)
 {
-    int res = block_table_.at(block_index).parent_block_index;
-    return res;
+    return block_table_.at(block_index).parent_block_index;
 }
 
 int SSyntacticAnalyzer::indexOfSymbolDeclaredInBlock(QString name, SymbolType type, int block_index)
@@ -414,10 +408,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                         if (action_row.value(terminal) == new_action) continue;
 
                         // conflict
-                        qDebug() << situation;
-                        qDebug() << terminal;
-                        qDebug() << action_row.value(terminal);
-                        qDebug() << new_action;
+                        qDebug() << "(step 1)" << situation << terminal << action_row.value(terminal) << new_action;
                         emit syntax_error(-1, "(step 1) " + error_msg(E_NOT_LR1_GRAMMAR));
                         return false;
                     }
@@ -437,10 +428,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                     Action new_action = {A_REDUCE, j};
                     if (action_row.contains(terminal)) {
                         // conflict
-                        qDebug() << situation;
-                        qDebug() << terminal;
-                        qDebug() << action_row.value(terminal);
-                        qDebug() << new_action;
+                        qDebug() << "(step 2)" << situation << terminal << action_row.value(terminal) << new_action;
                         emit syntax_error(-1, "(step 2) " + error_msg(E_NOT_LR1_GRAMMAR));
                         return false;
                     }
@@ -470,6 +458,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                     if (goto_row.value(non_terminal) == j) continue;
 
                     // conflict
+                    qDebug() << "(goto)" << situation << non_terminal << goto_row.value(non_terminal) << j;
                     emit syntax_error(-1, "(goto) " + error_msg(E_NOT_LR1_GRAMMAR));
                     return false;
                 }
@@ -580,295 +569,293 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                 i++;
                 break;
 
-            case A_REDUCE:
+            case A_REDUCE: {
                 rule = grammar_.at(action.index);
-                if ((states_stack.length() > rule.right_side.length())
-                    && (tokens_stack.length() >= rule.right_side.length())) {
-                    // full grammar because we logic depends on the indices
-                    int rule_index_full = indexOfGrammarRule(rule.left_token, rule.right_side, Grammar_full);
+                if ((states_stack.length() <= rule.right_side.length())
+                    || (tokens_stack.length() < rule.right_side.length())) {
+                    // stacks have too few items
+                    result.clear();
+                    emit syntax_error(-1, error_msg(E_INTERNAL_STATES_STACK_EMPTY));
+                    return result;
+                }
 
-                    int temp_class_index;  // for class search
+                // full grammar because we logic depends on the indices
+                int rule_index_full = indexOfGrammarRule(rule.left_token, rule.right_side, Grammar_full);
 
-                    // filling up the symbol table
-                    switch (rule_index_full) {
-                        case 7:
-                        case 8:
-                            if (rule_index_full == 7) members_indexes.clear();
-                            declared_symbols_indexes
-                              << addSymbolClass(table_ids.at(ids_stack.last().index).name, members_indexes);
-                            if (rule_index_full == 8) members_indexes.clear();
-                            ids_stack.removeLast();
-                            break;
+                int temp_class_index;  // for class search
 
-                        case 10:
-                        case 12:
-                            // <class_body> with <access_spec>
-                            // access_type = ...
-                            break;
-                        case 17:
-                            access_type = ACCESS_PUBLIC;
-                            break;
-                        case 18:
-                            access_type = ACCESS_PRIVATE;
-                            break;
+                // filling up the symbol table
+                switch (rule_index_full) {
+                    case 7:
+                    case 8:
+                        if (rule_index_full == 7) members_indexes.clear();
+                        declared_symbols_indexes
+                          << addSymbolClass(table_ids.at(ids_stack.last().index).name, members_indexes);
+                        if (rule_index_full == 8) members_indexes.clear();
+                        ids_stack.removeLast();
+                        break;
 
-                        case 21:
-                        case 22:
-                        case 23:
-                        case 24:
-                            // <class_method>
-                            if ((rule_index_full == 21 || (rule_index_full == 23))) args_indexes.clear();
-                            if ((rule_index_full == 23 || (rule_index_full == 24))) data_type = TYPE_VOID;
-                            symbol_index =
-                              addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
-                            declared_symbols_indexes << symbol_index;
-                            members_indexes << symbol_index;
-                            setSymbolClassMemberAccessType(symbol_index, access_type);
-                            if ((rule_index_full == 22 || (rule_index_full == 24))) args_indexes.clear();
-                            ids_stack.removeLast();
-                            break;
+                    case 10:
+                    case 12:
+                        // <class_body> with <access_spec>
+                        // access_type = ...
+                        break;
+                    case 17:
+                        access_type = ACCESS_PUBLIC;
+                        break;
+                    case 18:
+                        access_type = ACCESS_PRIVATE;
+                        break;
 
-                        case 35:
-                        case 36:
-                        case 37:
-                        case 38:
-                            // <function>
-                            if ((rule_index_full == 35 || (rule_index_full == 37))) args_indexes.clear();
-                            if ((rule_index_full == 37 || (rule_index_full == 38))) data_type = TYPE_VOID;
-                            declared_symbols_indexes
-                              << addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
-                            if ((rule_index_full == 36 || (rule_index_full == 38))) args_indexes.clear();
-                            ids_stack.removeLast();
-                            break;
+                    case 21:
+                    case 22:
+                    case 23:
+                    case 24:
+                        // <class_method>
+                        if ((rule_index_full == 21 || (rule_index_full == 23))) args_indexes.clear();
+                        if ((rule_index_full == 23 || (rule_index_full == 24))) data_type = TYPE_VOID;
+                        symbol_index =
+                          addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
+                        declared_symbols_indexes << symbol_index;
+                        members_indexes << symbol_index;
+                        setSymbolClassMemberAccessType(symbol_index, access_type);
+                        if ((rule_index_full == 22 || (rule_index_full == 24))) args_indexes.clear();
+                        ids_stack.removeLast();
+                        break;
 
-                        case 41:
-                        case 42:
-                        case 43:
-                        case 44:
-                            // <argument>
-                            is_const = ((rule_index_full == 42) || (rule_index_full == 44));
-                            arg_type =
-                              ((rule_index_full == 41) || (rule_index_full == 42)) ? ARG_BY_VALUE : ARG_BY_REFERENCE;
-                            symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name, data_type,
-                                                             class_index, arg_type, is_const);
-                            args_indexes << symbol_index;
-                            declared_arg_symbols_indexes << symbol_index;
-                            ids_stack.removeLast();
-                            break;
+                    case 35:
+                    case 36:
+                    case 37:
+                    case 38:
+                        // <function>
+                        if ((rule_index_full == 35 || (rule_index_full == 37))) args_indexes.clear();
+                        if ((rule_index_full == 37 || (rule_index_full == 38))) data_type = TYPE_VOID;
+                        declared_symbols_indexes
+                          << addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
+                        if ((rule_index_full == 36 || (rule_index_full == 38))) args_indexes.clear();
+                        ids_stack.removeLast();
+                        break;
 
-                        case 60:
-                        case 61:
-                        case 62:
-                        case 63:
-                        case 64:
-                        case 65:
-                            // <operator_1> with assignment
-                        case 120:
-                        case 121:
-                            // <vars_list> with assignment
-                            rvalue_type =
-                              ((rule_index_full == 120) || (rule_index_full == 121)) ? expr_type : data_type;
-                            //qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
-                            if (symbol_table_.at(object_symbol_id).data_type != rvalue_type) {
-                                emit semantic_error(-1, QString("(%1 and %2) %3")
-                                                          .arg(dataTypeToString(
-                                                            symbol_table_.at(object_symbol_id).data_type, class_index))
-                                                          .arg(dataTypeToString(rvalue_type, class_index))
-                                                          .arg(error_msg(E_TYPES_MISMATCH)));
-                            }
-                            break;
+                    case 41:
+                    case 42:
+                    case 43:
+                    case 44:
+                        // <argument>
+                        is_const = ((rule_index_full == 42) || (rule_index_full == 44));
+                        arg_type =
+                          ((rule_index_full == 41) || (rule_index_full == 42)) ? ARG_BY_VALUE : ARG_BY_REFERENCE;
+                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name, data_type,
+                                                         class_index, arg_type, is_const);
+                        args_indexes << symbol_index;
+                        declared_arg_symbols_indexes << symbol_index;
+                        ids_stack.removeLast();
+                        break;
 
-                        case 94:
-                            // <operator_9> ::= <literal>
-                            expr_type = table_consts.at(tokens.at(i - 1).index).type;
-                            // :TODO: need to use token_stack - not tokens (??? - check)
-                            // tokens only work for "a = 12" but not for "a = 12 + d"
-                            break;
-                        case 95:
-                        case 98:
-                            expr_type = symbol_table_.at(object_symbol_id).data_type;
-                            //qDebug() << dataTypeToString(expr_type, class_index) << "expr_type";
-                            // :TODO: use expr_type_stack to check compatibility in rules that combine two operands
-                            break;
+                    case 60:
+                    case 61:
+                    case 62:
+                    case 63:
+                    case 64:
+                    case 65:
+                        // <operator_1> with assignment
+                    case 120:
+                    case 121:
+                        // <vars_list> with assignment
+                        rvalue_type = ((rule_index_full == 120) || (rule_index_full == 121)) ? expr_type : data_type;
+                        //qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
+                        if (symbol_table_.at(object_symbol_id).data_type != rvalue_type) {
+                            emit semantic_error(
+                              -1, QString("(%1 and %2) %3")
+                                    .arg(dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index))
+                                    .arg(dataTypeToString(rvalue_type, class_index))
+                                    .arg(error_msg(E_TYPES_MISMATCH)));
+                        }
+                        break;
 
-                        case 99:
-                        case 100:
-                            // <function_call>
-                            if (symbol_table_.at(object_symbol_id).type != SYM_FUNCTION) {
-                                emit semantic_error(-1, QString("(Call to %1) %2")
-                                                          .arg(symbol_table_.at(object_symbol_id).name)
-                                                          .arg(error_msg(E_OBJECT_IS_NOT_FUNCTION)));
-                                result.clear();
-                                return result;
-                            }
-                            break;
+                    case 94:
+                        // <operator_9> ::= <literal>
+                        expr_type = table_consts.at(tokens.at(i - 1).index).type;
+                        // :TODO: need to use token_stack - not tokens (??? - check)
+                        // tokens only work for "a = 12" but not for "a = 12 + d"
+                        break;
+                    case 95:
+                    case 98:
+                        expr_type = symbol_table_.at(object_symbol_id).data_type;
+                        //qDebug() << dataTypeToString(expr_type, class_index) << "expr_type";
+                        // :TODO: use expr_type_stack to check compatibility in rules that combine two operands
+                        break;
 
-                        case 101:
-                            // <object> ::= <id>
+                    case 99:
+                    case 100:
+                        // <function_call>
+                        if (symbol_table_.at(object_symbol_id).type != SYM_FUNCTION) {
+                            emit semantic_error(-1, QString("(Call to %1) %2")
+                                                      .arg(symbol_table_.at(object_symbol_id).name)
+                                                      .arg(error_msg(E_OBJECT_IS_NOT_FUNCTION)));
+                            result.clear();
+                            return result;
+                        }
+                        break;
+
+                    case 101:
+                        // <object> ::= <id>
+                        object_symbol_id = indexOfSymbolInCurrentBlock(
+                          table_ids.at(ids_stack.last().index).name, SYM_ARGUMENT, block_index,
+                          declared_arg_symbols_indexes + declared_symbols_indexes);
+                        if (object_symbol_id == -1) {
                             object_symbol_id = indexOfSymbolInCurrentBlock(
-                              table_ids.at(ids_stack.last().index).name, SYM_ARGUMENT, block_index,
+                              table_ids.at(ids_stack.last().index).name, SYM_VARIABLE, block_index,
                               declared_arg_symbols_indexes + declared_symbols_indexes);
                             if (object_symbol_id == -1) {
                                 object_symbol_id = indexOfSymbolInCurrentBlock(
-                                  table_ids.at(ids_stack.last().index).name, SYM_VARIABLE, block_index,
+                                  table_ids.at(ids_stack.last().index).name, SYM_FUNCTION, block_index,
                                   declared_arg_symbols_indexes + declared_symbols_indexes);
                                 if (object_symbol_id == -1) {
-                                    object_symbol_id = indexOfSymbolInCurrentBlock(
-                                      table_ids.at(ids_stack.last().index).name, SYM_FUNCTION, block_index,
-                                      declared_arg_symbols_indexes + declared_symbols_indexes);
-                                    if (object_symbol_id == -1) {
-                                        emit semantic_error(-1, QString("(%1) %2")
-                                                                  .arg(table_ids.at(ids_stack.last().index).name)
-                                                                  .arg(error_msg(E_UNDECLARED_SYMBOL)));
-                                        result.clear();
-                                        return result;
-                                    }
-                                }
-                            }
-                            ids_stack.removeLast();
-                            break;
-                        case 102:
-                            // <object> ::= <id>.<id>
-                            temp_class_index = indexOfSymbolInCurrentBlock(
-                              table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name, SYM_CLASS, block_index,
-                              declared_arg_symbols_indexes + declared_symbols_indexes);
-                            if (temp_class_index > -1) {
-                                bool ok = false;
-                                foreach (int members_index, symbol_table_.at(temp_class_index).members_indexes) {
-                                    if (symbol_table_.at(members_index).name
-                                        == table_ids.at(ids_stack.last().index).name) {
-                                        object_symbol_id = members_index;
-                                        ok = true;
-                                        break;
-                                    }
-                                }
-                                if (!ok) {
                                     emit semantic_error(-1, QString("(%1) %2")
                                                               .arg(table_ids.at(ids_stack.last().index).name)
                                                               .arg(error_msg(E_UNDECLARED_SYMBOL)));
                                     result.clear();
                                     return result;
                                 }
-                            } else {
-                                emit semantic_error(
-                                  -1, QString("(%1) %2")
-                                        .arg(table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name)
-                                        .arg(error_msg(E_UNDECLARED_SYMBOL)));
-                                result.clear();
-                                return result;
                             }
-                            ids_stack.removeLast();
-                            ids_stack.removeLast();
-                            break;
-                        case 103:
-                            // <object> ::= <id>-">"<id>
-                            // :TODO:
-                            ids_stack.removeLast();
-                            ids_stack.removeLast();
-                            break;
-
-                        case 104:
-                        case 105:
-                            // <class_props_declaration>
-                            is_const = (rule_index_full == 105);
-                            while (decl_vars_count) {
-                                symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name, data_type,
-                                                                 class_index, is_const);
-                                declared_symbols_indexes << symbol_index;
-                                members_indexes << symbol_index;
-                                setSymbolClassMemberAccessType(symbol_index, access_type);
-                                ids_stack.removeLast();
-                                decl_vars_count--;
+                        }
+                        ids_stack.removeLast();
+                        break;
+                    case 102:
+                        // <object> ::= <id>.<id>
+                        temp_class_index = indexOfSymbolInCurrentBlock(
+                          table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name, SYM_CLASS, block_index,
+                          declared_arg_symbols_indexes + declared_symbols_indexes);
+                        if (temp_class_index > -1) {
+                            bool ok = false;
+                            foreach (int members_index, symbol_table_.at(temp_class_index).members_indexes) {
+                                if (symbol_table_.at(members_index).name == table_ids.at(ids_stack.last().index).name) {
+                                    object_symbol_id = members_index;
+                                    ok = true;
+                                    break;
+                                }
                             }
-                            break;
-
-                        case 106:
-                        //case 107:
-                        case 108:
-                            //case 109:
-                            // <vars_declaration>
-                            is_const = ((rule_index_full == 108) || (rule_index_full == 109));
-                            while (decl_vars_count) {
-                                declared_symbols_indexes << addSymbolVariable(table_ids.at(ids_stack.last().index).name,
-                                                                              data_type, class_index, is_const);
-                                ids_stack.removeLast();
-                                decl_vars_count--;
-                            }
-                            break;
-
-                        case 110:
-                            data_type = TYPE_INT;
-                            break;
-                        case 111:
-                            data_type = TYPE_DOUBLE;
-                            break;
-                        case 112:
-                            data_type = TYPE_CHAR;
-                            break;
-                        case 113:
-                            data_type = TYPE_BOOL;
-                            break;
-                        case 114:
-                            temp_class_index =
-                              indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name, SYM_CLASS, 0);
-                            if (temp_class_index > -1) {
-                                data_type = TYPE_OBJECT;
-                                class_index = temp_class_index;
-                            } else {
+                            if (!ok) {
                                 emit semantic_error(-1, QString("(%1) %2")
                                                           .arg(table_ids.at(ids_stack.last().index).name)
-                                                          .arg(error_msg(E_INVALID_OBJECT_TYPE)));
+                                                          .arg(error_msg(E_UNDECLARED_SYMBOL)));
                                 result.clear();
                                 return result;
                             }
+                        } else {
+                            emit semantic_error(-1,
+                                                QString("(%1) %2")
+                                                  .arg(table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name)
+                                                  .arg(error_msg(E_UNDECLARED_SYMBOL)));
+                            result.clear();
+                            return result;
+                        }
+                        ids_stack.removeLast();
+                        ids_stack.removeLast();
+                        break;
+                    case 103:
+                        // <object> ::= <id>-">"<id>
+                        // :TODO:
+                        ids_stack.removeLast();
+                        ids_stack.removeLast();
+                        break;
+
+                    case 104:
+                    case 105:
+                        // <class_props_declaration>
+                        is_const = (rule_index_full == 105);
+                        while (decl_vars_count) {
+                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name, data_type,
+                                                             class_index, is_const);
+                            declared_symbols_indexes << symbol_index;
+                            members_indexes << symbol_index;
+                            setSymbolClassMemberAccessType(symbol_index, access_type);
                             ids_stack.removeLast();
-                            break;
+                            decl_vars_count--;
+                        }
+                        break;
 
-                        case 115:
-                        case 116:
-                            // <class_props_list>
-                        case 117:
-                        case 118:
-                            // vars_list
-                            decl_vars_count++;
-                            break;
+                    case 106:
+                    //case 107:
+                    case 108:
+                        //case 109:
+                        // <vars_declaration>
+                        is_const = ((rule_index_full == 108) || (rule_index_full == 109));
+                        while (decl_vars_count) {
+                            declared_symbols_indexes << addSymbolVariable(table_ids.at(ids_stack.last().index).name,
+                                                                          data_type, class_index, is_const);
+                            ids_stack.removeLast();
+                            decl_vars_count--;
+                        }
+                        break;
 
-                            //case 120:
-                            //case 121:
-                            // see 60
+                    case 110:
+                        data_type = TYPE_INT;
+                        break;
+                    case 111:
+                        data_type = TYPE_DOUBLE;
+                        break;
+                    case 112:
+                        data_type = TYPE_CHAR;
+                        break;
+                    case 113:
+                        data_type = TYPE_BOOL;
+                        break;
+                    case 114:
+                        temp_class_index =
+                          indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name, SYM_CLASS, 0);
+                        if (temp_class_index > -1) {
+                            data_type = TYPE_OBJECT;
+                            class_index = temp_class_index;
+                        } else {
+                            emit semantic_error(-1, QString("(%1) %2")
+                                                      .arg(table_ids.at(ids_stack.last().index).name)
+                                                      .arg(error_msg(E_INVALID_OBJECT_TYPE)));
+                            result.clear();
+                            return result;
+                        }
+                        ids_stack.removeLast();
+                        break;
 
-                        default:
-                            //args_indexes.clear();
-                            //addSymbolFunction(table_ids.at(ids_stack.last().index).name, TYPE_VOID, args_indexes);
-                            //ids_stack.removeLast();
-                            break;
-                    }
+                    case 115:
+                    case 116:
+                        // <class_props_list>
+                    case 117:
+                    case 118:
+                        // vars_list
+                        decl_vars_count++;
+                        break;
 
-                    // ...back to our finite-state machine
-                    for (int num = 0; num < rule.right_side.length(); num++) {
-                        states_stack.removeLast();
-                        tokens_stack.removeLast();
-                    }
-                    if (goto_table_.at(states_stack.last()).contains(rule.left_token)) {
-                        int goto_index = goto_table_.at(states_stack.last()).value(rule.left_token);
-                        states_stack << goto_index;
-                        tokens_stack << rule.left_token;
+                        //case 120:
+                        //case 121:
+                        // see 60
 
-                        result << action.index;
-                    } else {
-                        // goto not defined
-                        result.clear();
-                        emit syntax_error(-1, error_msg(E_INTERNAL_GOTO_UNDEFINED));
-                        return result;
-                    }
+                    default:
+                        //args_indexes.clear();
+                        //addSymbolFunction(table_ids.at(ids_stack.last().index).name, TYPE_VOID, args_indexes);
+                        //ids_stack.removeLast();
+                        break;
+                }
+
+                // ...back to our finite-state machine
+                for (int num = 0; num < rule.right_side.length(); num++) {
+                    states_stack.removeLast();
+                    tokens_stack.removeLast();
+                }
+                if (goto_table_.at(states_stack.last()).contains(rule.left_token)) {
+                    int goto_index = goto_table_.at(states_stack.last()).value(rule.left_token);
+                    states_stack << goto_index;
+                    tokens_stack << rule.left_token;
+
+                    result << action.index;
                 } else {
-                    // stacks have too few items
+                    // goto not defined
                     result.clear();
-                    emit syntax_error(-1, error_msg(E_INTERNAL_STATES_STACK_EMPTY));
+                    emit syntax_error(-1, error_msg(E_INTERNAL_GOTO_UNDEFINED));
                     return result;
                 }
                 break;
-
+            }
             case A_ACCEPT:
                 tokens_accepted = true;
 

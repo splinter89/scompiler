@@ -6,11 +6,6 @@ SLexicalAnalyzer::SLexicalAnalyzer(QObject* parent)
     this->setParent(parent);
 }
 
-SLexicalAnalyzer::~SLexicalAnalyzer()
-{
-    // bye
-}
-
 bool SLexicalAnalyzer::process(const QString code)
 {
     tokens_.clear();

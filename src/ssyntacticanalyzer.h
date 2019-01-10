@@ -12,7 +12,6 @@ class SSyntacticAnalyzer : public QObject
 
 public:
     SSyntacticAnalyzer(QObject* parent = 0);
-    ~SSyntacticAnalyzer();
 
     void setGrammar(QList<GrammarRule> grammar, const QString cache_filename);
 

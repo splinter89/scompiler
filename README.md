@@ -36,8 +36,7 @@ Set-ExecutionPolicy Restricted  // restore the policy
 
 ## Todo
 
-- add **new** operator, **void** data type
-- comma or block at the end of class methods
+- "unknown" data type
 - Reverse Polish notation (poliz)
     - cycle 1: syntax, symbol/block tables
     - cycle 2: rpn, semantics

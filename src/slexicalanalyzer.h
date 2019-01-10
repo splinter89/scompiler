@@ -12,7 +12,6 @@ class SLexicalAnalyzer : public QObject
 
 public:
     SLexicalAnalyzer(QObject* parent = 0);
-    ~SLexicalAnalyzer();
 
     bool process(const QString);
 
