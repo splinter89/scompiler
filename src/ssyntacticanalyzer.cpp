@@ -18,7 +18,10 @@ void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar)
 
 QSet<Token> SSyntacticAnalyzer::first(const Token token)
 {
+    if (first_by_token_.contains(token)) return first_by_token_.value(token);
+
     QSet<Token> result;
+    first_by_token_.insert(token, QSet<Token>());  // to stop infinite recursion
 
     // step 1
     if (isTokenTerminal(token)) {
@@ -41,17 +44,18 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token)
                 bool all_y_got_lambda = true;
                 for (int i = 0; i < rule.right_side.length(); i++) {
                     QSet<Token> first_y = first(rule.right_side.at(i));
-                    int old_first_y_count = first_y.count();
-                    first_y.remove(LAMBDA);
+                    bool this_y_got_lambda = first_y.remove(LAMBDA);
 
-                    // add FIRST(Yi)\{e} to FIRST(X);
-                    result += first_y;
-
-                    if (old_first_y_count == first_y.count()) {
-                        // e wasn't in FIRST(Yi)
-                        all_y_got_lambda = false;
-                        break;
+                    if (all_y_got_lambda) {  // if all previous Y got e
+                        // add each terminal a from FIRST(Yi)\{e} to FIRST(X)
+                        foreach (const Token a, first_y) {
+                            if (isTokenTerminal(a)) {
+                                result << a;
+                            }
+                        }
                     }
+                    all_y_got_lambda &= this_y_got_lambda;
+                    if (!all_y_got_lambda) break;
                 }
                 if (all_y_got_lambda) {
                     result << LAMBDA;
@@ -60,6 +64,8 @@ QSet<Token> SSyntacticAnalyzer::first(const Token token)
         } while (result.count() != old_count);
     }
 
+    first_by_token_.remove(token);
+    first_by_token_.insert(token, result);
     return result;
 }
 
@@ -71,17 +77,13 @@ QSet<Token> SSyntacticAnalyzer::first(const QList<Token> tokens)
     bool all_x_got_lambda = true;
     for (int i = 0; i < tokens.length(); i++) {
         QSet<Token> first_x = first(tokens.at(i));
-        int old_first_x_count = first_x.count();
-        first_x.remove(LAMBDA);
+        bool this_x_got_lambda = first_x.remove(LAMBDA);
 
-        // add FIRST(Xi)\{e} to FIRST(X);
-        result += first_x;
-
-        if (old_first_x_count == first_x.count()) {
-            // e wasn't in FIRST(Xi)
-            all_x_got_lambda = false;
-            break;
+        if (all_x_got_lambda) {  // if all previous first(X) got e
+            result += first_x;   // add FIRST(Xi)\{e}
         }
+        all_x_got_lambda &= this_x_got_lambda;
+        if (!all_x_got_lambda) break;
     }
     if (all_x_got_lambda) {
         result << LAMBDA;
@@ -307,6 +309,7 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
     }
 
     ultimate_situations_set_.clear();
+    first_by_token_.clear();
 
     // initial situation
     Situation s = {N_S, EmptyTokenList() << DOT_TOKEN << N_PROGRAM, EOF_TOKEN};
