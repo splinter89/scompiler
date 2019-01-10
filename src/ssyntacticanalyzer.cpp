@@ -405,7 +405,11 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                         } else if ((action_row.value(terminal).type != new_action.type)
                                    || (action_row.value(terminal).index != new_action.index)) {
                             // not LR(1)
-                            emit syntax_error(-1, "(step 1)" + error_msg(E_NOT_LR1_GRAMMAR));
+                            qDebug() << situation;
+                            qDebug() << terminal;
+                            qDebug() << action_row.value(terminal);
+                            qDebug() << new_action;
+                            emit syntax_error(-1, "(step 1) " + error_msg(E_NOT_LR1_GRAMMAR));
                             return false;
                         }
                     }
@@ -421,12 +425,16 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                             action_row.insert(terminal, new_action);
                         } else {
                             // not LR(1)
-                            emit syntax_error(-1, "(step 2.1)" + error_msg(E_NOT_LR1_GRAMMAR));
+                            qDebug() << situation;
+                            qDebug() << terminal;
+                            qDebug() << action_row.value(terminal);
+                            qDebug() << new_action;
+                            emit syntax_error(-1, "(step 2.1) " + error_msg(E_NOT_LR1_GRAMMAR));
                             return false;
                         }
                     } else {
                         // grammar rule not found
-                        emit syntax_error(-1, "(step 2.2)" + error_msg(E_INTERNAL_GENERATING_TABLES));
+                        emit syntax_error(-1, "(step 2.2) " + error_msg(E_INTERNAL_GENERATING_TABLES));
                         return false;
                     }
                 }
@@ -439,7 +447,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                     action_row.insert(EOF_TOKEN, new_action);
                 } else {
                     // error
-                    emit syntax_error(-1, "(step 3)" + error_msg(E_INTERNAL_GENERATING_TABLES));
+                    emit syntax_error(-1, "(step 3) " + error_msg(E_INTERNAL_GENERATING_TABLES));
                     return false;
                 }
             }
@@ -454,7 +462,7 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
                         goto_row.insert(non_terminal, new_goto);
                     } else if (goto_row.value(non_terminal) != new_goto) {
                         // not LR(1)
-                        emit syntax_error(-1, "(step goto)" + error_msg(E_NOT_LR1_GRAMMAR));
+                        emit syntax_error(-1, "(step goto) " + error_msg(E_NOT_LR1_GRAMMAR));
                         return false;
                     }
                 }
