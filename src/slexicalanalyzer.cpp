@@ -238,17 +238,17 @@ bool SLexicalAnalyzer::process(const QString code)
 // add id
 void SLexicalAnalyzer::addToken(const int start, const int length, const Token type, const QString identifier)
 {
-    if (type == T_ID) {
-        TokenId new_item = {identifier};
-        int index = indexOfTokenItem(new_item);
-        if (index == -1) {
-            table_ids_ << new_item;
-            index = table_ids_.length() - 1;
-        }
+    if (type != T_ID) return;
 
-        TokenPointer new_token = {T_ID, index, start, length};
-        tokens_ << new_token;
+    TokenId new_item = {identifier};
+    int index = indexOfTokenItem(new_item);
+    if (index == -1) {
+        table_ids_ << new_item;
+        index = table_ids_.length() - 1;
     }
+
+    TokenPointer new_token = {T_ID, index, start, length};
+    tokens_ << new_token;
 }
 
 // add const
@@ -258,35 +258,35 @@ void SLexicalAnalyzer::addToken(const int start,
                                 const DataType const_type,
                                 QVariant value)
 {
-    if (type == T_CONST) {
-        if (((const_type == TYPE_INT) || (const_type == TYPE_DOUBLE)) && (tokens_.length() >= 1)
-            && (tokens_.last().type == T_SEPARATOR)
-            && ((table_separators_.at(tokens_.last().index).type == S_PLUS)
-                || (table_separators_.at(tokens_.last().index).type == S_MINUS))
-            && ((tokens_.length() == 1)
-                || ((tokens_.length() >= 2) && (tokens_.at(tokens_.length() - 2).type == T_SEPARATOR)
-                    && (table_separators_.at(tokens_.at(tokens_.length() - 2).index).type != S_ROUND_CLOSE)))) {
-            // (some separator (excluding ")") -> unary plus/minus -> number) => (separator -> signed number)
-            if (table_separators_.at(tokens_.last().index).type == S_MINUS) {
-                if (const_type == TYPE_INT) {
-                    value = -value.toInt();
-                } else {
-                    value = -value.toDouble();
-                }
+    if (type != T_CONST) return;
+
+    if (((const_type == TYPE_INT) || (const_type == TYPE_DOUBLE)) && (tokens_.length() >= 1)
+        && (tokens_.last().type == T_SEPARATOR)
+        && ((table_separators_.at(tokens_.last().index).type == S_PLUS)
+            || (table_separators_.at(tokens_.last().index).type == S_MINUS))
+        && ((tokens_.length() == 1)
+            || ((tokens_.length() >= 2) && (tokens_.at(tokens_.length() - 2).type == T_SEPARATOR)
+                && (table_separators_.at(tokens_.at(tokens_.length() - 2).index).type != S_ROUND_CLOSE)))) {
+        // (some separator (excluding ")") -> unary plus/minus -> number) => (separator -> signed number)
+        if (table_separators_.at(tokens_.last().index).type == S_MINUS) {
+            if (const_type == TYPE_INT) {
+                value = -value.toInt();
+            } else {
+                value = -value.toDouble();
             }
-            removeToken(tokens_.length() - 1);  // remove that unary +/-
         }
-
-        TokenConst new_item = {const_type, value};
-        int index = indexOfTokenItem(new_item);
-        if (index == -1) {
-            table_consts_ << new_item;
-            index = table_consts_.length() - 1;
-        }
-
-        TokenPointer new_token = {T_CONST, index, start, length};
-        tokens_ << new_token;
+        removeToken(tokens_.length() - 1);  // remove that unary +/-
     }
+
+    TokenConst new_item = {const_type, value};
+    int index = indexOfTokenItem(new_item);
+    if (index == -1) {
+        table_consts_ << new_item;
+        index = table_consts_.length() - 1;
+    }
+
+    TokenPointer new_token = {T_CONST, index, start, length};
+    tokens_ << new_token;
 }
 
 // add keyword/separator

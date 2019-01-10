@@ -503,6 +503,7 @@ QDebug operator<<(QDebug d, const Action action);
 QDebug operator<<(QDebug d, const QList<Token> tokens);
 QDebug operator<<(QDebug d, const GrammarRule rule);
 bool operator==(const Situation& e1, const Situation& e2);
+bool operator==(const Action& e1, const Action& e2);
 QDebug operator<<(QDebug d, const Situation situation);
 QDebug operator<<(QDebug d, const Symbol symbol);
 QDataStream& operator<<(QDataStream& out, const Token& token);

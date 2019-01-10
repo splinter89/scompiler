@@ -355,8 +355,13 @@ QDebug operator<<(QDebug d, const Symbol symbol)
 
 bool operator==(const Situation& e1, const Situation& e2)
 {
-    return ((e1.left_token == e2.left_token) && (e1.right_side == e2.right_side)
-            && (e1.look_ahead_token == e2.look_ahead_token));
+    return (e1.left_token == e2.left_token) && (e1.right_side == e2.right_side)
+           && (e1.look_ahead_token == e2.look_ahead_token);
+}
+
+bool operator==(const Action& e1, const Action& e2)
+{
+    return (e1.type == e2.type) && (e1.index == e2.index);
 }
 
 QDataStream& operator<<(QDataStream& out, const Token& token)
