@@ -15,35 +15,54 @@ void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar, const QString ca
 {
     grammar_ = grammar;
 
-    bool use_cache = (grammar_.length() > 1);
-    QFile cache_file(cache_filename);
-    if (use_cache) {
-        // try to read from cache
-        if (cache_file.open(QIODevice::ReadOnly)) {
-            QDataStream in(&cache_file);
-            in >> ultimate_situations_set_ >> action_table_ >> goto_table_;
-            cache_file.close();
-            qDebug() << "synt tables read from" << cache_filename;
-            return;
-        }
-    }
+    ultimate_situations_set_.clear();
+    action_table_.clear();
+    goto_table_.clear();
+    first_by_token_.clear();
 
     QTime timer;
     timer.start();
-    first_by_token_.clear();
-    if (!generateSetOfSituations()) return;
-    if (!generateActionGotoTables()) return;
-    qDebug() << QString("grammar updated: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
+    bool use_cache = (grammar_.length() > 1);
+    if (!use_cache || !readFromCache(cache_filename, true)) {
+        if (!generateSetOfSituations()) return;
 
-    if (use_cache) {
-        // write to cache
-        if (cache_file.open(QIODevice::WriteOnly)) {
-            QDataStream out(&cache_file);
-            out << ultimate_situations_set_ << action_table_ << goto_table_;
-            cache_file.close();
-            qDebug() << "synt tables written to" << cache_filename;
-        }
+        if (use_cache) writeToCache(cache_filename);
     }
+    if (!use_cache || !readFromCache(cache_filename, false)) {
+        if (!generateActionGotoTables()) return;
+
+        if (use_cache) writeToCache(cache_filename);
+    }
+    qDebug() << QString("grammar updated: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
+}
+
+bool SSyntacticAnalyzer::readFromCache(const QString filename, const bool only_situations_set)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly)) return false;
+
+    QDataStream in(&file);
+    in >> ultimate_situations_set_ >> action_table_ >> goto_table_;
+    file.close();
+
+    if (ultimate_situations_set_.isEmpty()) return false;
+    if (!only_situations_set && (action_table_.isEmpty() || goto_table_.isEmpty())) return false;
+
+    qDebug() << "read syntactic tables from" << filename << (only_situations_set ? "(situations only)" : "(all)");
+    return true;
+}
+
+bool SSyntacticAnalyzer::writeToCache(const QString filename)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly)) return false;
+
+    QDataStream out(&file);
+    out << ultimate_situations_set_ << action_table_ << goto_table_;
+    file.close();
+
+    qDebug() << "written syntactic tables to" << filename;
+    return true;
 }
 
 QSet<Token> SSyntacticAnalyzer::first(const Token token)
@@ -338,8 +357,6 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
         return false;
     }
 
-    ultimate_situations_set_.clear();
-
     // initial situation
     Situation s = {N_S, EmptyTokenList() << DOT_TOKEN << N_PROGRAM, EOF_TOKEN};
     QSet<Situation> i;
@@ -366,6 +383,7 @@ bool SSyntacticAnalyzer::generateSetOfSituations()
         c << c_new;
         c_new.clear();
     } while (c.count() != old_count);
+
     ultimate_situations_set_ = c;
     qDebug() << "ultimate_situations_set_:" << q1;
     return true;
@@ -380,9 +398,6 @@ bool SSyntacticAnalyzer::generateActionGotoTables()
 
     QSet<Token> terminals = getAllTerminalTokens();
     QSet<Token> non_terminals = getAllNonTerminalTokens(grammar_);
-
-    action_table_.clear();
-    goto_table_.clear();
 
     int q1 = 0, q2 = 0;
     foreach (const QSet<Situation>& i, ultimate_situations_set_) {

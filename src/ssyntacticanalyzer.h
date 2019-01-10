@@ -42,6 +42,8 @@ private:
 
     bool generateSetOfSituations();
     bool generateActionGotoTables();
+    bool readFromCache(const QString filename, const bool only_situations_set);
+    bool writeToCache(const QString filename);
 
     QSet<Token> first(const Token token);
     QSet<Token> first(const QList<Token> tokens);
