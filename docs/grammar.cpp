@@ -1,14 +1,15 @@
 <program> ::= {<program>}<program_element>
-<program_element> ::= (<class>|<class_method_impl>|<vars_declaration>|<function>)
-<class> ::= class <id>"{"{[<access_spec>:]{(<class_props_declaration>|<class_method>)}}"}";
+<program_element> ::= (<class>|<vars_or_function>)
+<class> ::= class <id>"{"{[<access_spec>:]<vars_or_function>}"}";
 <access_spec> ::= (public|private)
-<class_method> ::= [((<var_type>|void) |~)]<id>"("[<arguments_list>]")"<block>
-<class_method_impl> ::= ([(<var_type>|void) ]<id>::|<id>::~)<id>"("[<arguments_list>]")"<block>
-<function> ::= (<var_type>|void) <id>"("[<arguments_list>]")"<block>
-<arguments_list> ::= {<arguments_list>,}<argument>
-<argument> ::= [const ]<var_type>[&]<id>
+<vars_or_function> ::= (<vars>|[(<var_type>|void) ][<id>::]<id><function>|[<id>::]~<id><function>)
+<vars> ::= [const ]<var_type>( |*)<id>[=<operator_2>][<more_vars>];
+<var_type> ::= (int|double|char|bool|<id>)
+<more_vars> ::= {<more_vars>},[*]<id>[=<operator_2>]
+<function> ::= "("[<arguments>]")"(;|<block>)
+<arguments> ::= {<arguments>,}[const ]<var_type>[(&| <id>|&<id>)][=<literal>]
 <block> ::= "{"{<block_element>}"}"
-<block_element> ::= (<vars_declaration>|[(<expression>|<return>)];|<loop>|<branching>)
+<block_element> ::= (<vars>|[(<expression>|<return>)];|<loop>|<branching>)
 <return> ::= return[ <expression>]
 <expression> ::= [<expression>,]<operator_1>
 <operator_1> ::= (<object>(=|+=|-=|*=|/=|%=)<operator_1>|<operator_2>)
@@ -22,15 +23,10 @@
 <operator_9> ::= ("("<expression>")"|<literal>|<object>[(++|--)]|<function_call>)
 <function_call> ::= <object>"("[<expression>]")"
 <object> ::= [<id>(.|-">")]<id>
-<class_props_declaration> ::= [const ]<var_type> <class_props_list>;
-<vars_declaration> ::= [const ]<var_type> <vars_list>;
-<var_type> ::= (int|double|char|bool|<id>)
-<class_props_list> ::= {<class_props_list>,}[*]<id>
-<vars_list> ::= {<vars_list>,}[*]<id>[=<operator_1>]
-<loop> ::= (<while-loop>|<do-while-loop>|<for-loop>)
-<while-loop> ::= while"("<expression>")"<block>
-<do-while-loop> ::= do<block>while"("<expression>")";
-<for-loop> ::= for"("<expression>;<expression>;<expression>")"<block>
+<loop> ::= (<while_loop>|<do_while_loop>|<for_loop>)
+<while_loop> ::= while"("<expression>")"<block>
+<do_while_loop> ::= do<block>while"("<expression>")";
+<for_loop> ::= for"("<expression>;<expression>;<expression>")"<block>
 <branching> ::= if"("<expression>")"<block>[else<block>]
 
 // lexical stuff

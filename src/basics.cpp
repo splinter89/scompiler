@@ -51,17 +51,23 @@ QString tokenToString(const Token token)
             case N_ACCESS_SPEC:
                 s = QString::fromUtf8("<access_spec>");
                 break;
-            case N_CLASS_METHOD:
-                s = QString::fromUtf8("<class_method>");
+            case N_VARS_OR_FUNCTION:
+                s = "<vars_or_function>";
                 break;
-            case N_CLASS_METHOD_IMPLEMENTATION:
-                s = QString::fromUtf8("<class_method_impl>");
+            case N_VARS:
+                s = "<vars>";
+                break;
+            case N_VAR_TYPE:
+                s = QString::fromUtf8("<var_type>");
+                break;
+            case N_MORE_VARS:
+                s = "<more_vars>";
                 break;
             case N_FUNCTION:
                 s = QString::fromUtf8("<function>");
                 break;
-            case N_ARGUMENTS_LIST:
-                s = QString::fromUtf8("<arguments_list>");
+            case N_ARGUMENTS:
+                s = QString::fromUtf8("<arguments>");
                 break;
             case N_ARGUMENT:
                 s = QString::fromUtf8("<argument>");
@@ -114,36 +120,22 @@ QString tokenToString(const Token token)
             case N_OBJECT:
                 s = QString::fromUtf8("<object>");
                 break;
-            case N_CLASS_PROPS_DECLARATION:
-                s = QString::fromUtf8("<class_props_declaration>");
-                break;
-            case N_VAR_DECLARATION:
-                s = QString::fromUtf8("<vars_declaration>");
-                break;
-            case N_VAR_TYPE:
-                s = QString::fromUtf8("<var_type>");
-                break;
-            case N_CLASS_PROPS_LIST:
-                s = QString::fromUtf8("<class_props_list>");
-                break;
-            case N_VARS_LIST:
-                s = QString::fromUtf8("<vars_list>");
-                break;
             case N_LOOP:
                 s = QString::fromUtf8("<loop>");
                 break;
             case N_WHILE_LOOP:
-                s = QString::fromUtf8("<while-loop>");
+                s = QString::fromUtf8("<while_loop>");
                 break;
             case N_DO_WHILE_LOOP:
-                s = QString::fromUtf8("<do-while-loop>");
+                s = QString::fromUtf8("<do_while_loop>");
                 break;
             case N_FOR_LOOP:
-                s = QString::fromUtf8("<for-loop>");
+                s = QString::fromUtf8("<for_loop>");
                 break;
             case N_BRANCHING:
                 s = QString::fromUtf8("<branching>");
                 break;
+
             default:
                 s = QString::number(token);
                 break;

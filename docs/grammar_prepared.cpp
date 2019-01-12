@@ -1,52 +1,80 @@
 <program> ::= <program_element>
 <program> ::= <program><program_element>
 <program_element> ::= <class>
-<program_element> ::= <class_method_impl>
-<program_element> ::= <vars_declaration>
-<program_element> ::= <function>
-<class> ::= class <id>"{}";
+<program_element> ::= <vars_or_function>
+<class> ::= class <id>"{""}";
 <class> ::= class <id>"{"<class_body>"}";
 <class_body> ::= <class_element>
-<class_body> ::= <access_spec>:<class_element>
 <class_body> ::= <class_body><class_element>
-<class_body> ::= <class_body><access_spec>:<class_element>
-<class_element> ::= <class_props_declaration>
-<class_element> ::= <class_method>
-<class_element> ::= <class_element><class_props_declaration>
-<class_element> ::= <class_element><class_method>
+<class_element> ::= <vars_or_function>
+<class_element> ::= <access_spec>:<vars_or_function>
 <access_spec> ::= public
 <access_spec> ::= private
-<class_method> ::= <id>"()"<block>
-<class_method> ::= <id>"("<arguments_list>")"<block>
-<class_method> ::= <var_type> <id>"()"<block>
-<class_method> ::= <var_type> <id>"("<arguments_list>")"<block>
-<class_method> ::= void <id>"()"<block>
-<class_method> ::= void <id>"("<arguments_list>")"<block>
-<class_method> ::= ~<id>"()"<block>
-<class_method> ::= ~<id>"("<arguments_list>")"<block>
-<class_method_impl> ::= <id>::<id>"()"<block>
-<class_method_impl> ::= <id>::<id>"("<arguments_list>")"<block>
-<class_method_impl> ::= <var_type> <id>::<id>"()"<block>
-<class_method_impl> ::= <var_type> <id>::<id>"("<arguments_list>")"<block>
-<class_method_impl> ::= void <id>::<id>"()"<block>
-<class_method_impl> ::= void <id>::<id>"("<arguments_list>")"<block>
-<class_method_impl> ::= <id>::~<id>"()"<block>
-<class_method_impl> ::= <id>::~<id>"("<arguments_list>")"<block>
-<function> ::= <var_type> <id>"()"<block>
-<function> ::= <var_type> <id>"("<arguments_list>")"<block>
-<function> ::= void <id>"()"<block>
-<function> ::= void <id>"("<arguments_list>")"<block>
-<arguments_list> ::= <argument>
-<arguments_list> ::= <arguments_list>,<argument>
+<vars_or_function> ::= <vars>
+<vars_or_function> ::= <var_type> <id><function>
+<vars_or_function> ::= <var_type> <id>::<id><function>
+<vars_or_function> ::= void <id><function>
+<vars_or_function> ::= void <id>::<id><function>
+<vars_or_function> ::= <id><function>
+<vars_or_function> ::= <id>::<id><function>
+<vars_or_function> ::= ~<id><function>
+<vars_or_function> ::= <id>::~<id><function>
+<vars> ::= <var_type> <id>;
+<vars> ::= <var_type> <id><more_vars>;
+<vars> ::= <var_type> <id>=<operator_2>;
+<vars> ::= <var_type> <id>=<operator_2><more_vars>;
+<vars> ::= <var_type>*<id>;
+<vars> ::= <var_type>*<id><more_vars>;
+<vars> ::= <var_type>*<id>=<operator_2>;
+<vars> ::= <var_type>*<id>=<operator_2><more_vars>;
+<vars> ::= const <var_type> <id>;
+<vars> ::= const <var_type> <id><more_vars>;
+<vars> ::= const <var_type> <id>=<operator_2>;
+<vars> ::= const <var_type> <id>=<operator_2><more_vars>;
+<vars> ::= const <var_type>*<id>;
+<vars> ::= const <var_type>*<id><more_vars>;
+<vars> ::= const <var_type>*<id>=<operator_2>;
+<vars> ::= const <var_type>*<id>=<operator_2><more_vars>;
+<var_type> ::= int
+<var_type> ::= double
+<var_type> ::= char
+<var_type> ::= bool
+<var_type> ::= <id>
+<more_vars> ::= ,<id>
+<more_vars> ::= ,<id>=<operator_2>
+<more_vars> ::= ,*<id>
+<more_vars> ::= ,*<id>=<operator_2>
+<more_vars> ::= <more_vars>,<id>
+<more_vars> ::= <more_vars>,<id>=<operator_2>
+<more_vars> ::= <more_vars>,*<id>
+<more_vars> ::= <more_vars>,*<id>=<operator_2>
+<function> ::= "("")";
+<function> ::= "("")"<block>
+<function> ::= "("<arguments>")";
+<function> ::= "("<arguments>")"<block>
+<arguments> ::= <argument>
+<arguments> ::= <arguments>,<argument>
+<argument> ::= <var_type>
+<argument> ::= <var_type>=<literal>
 <argument> ::= <var_type> <id>
-<argument> ::= const <var_type> <id>
+<argument> ::= <var_type> <id>=<literal>
+<argument> ::= <var_type>&
+<argument> ::= <var_type>&=<literal>
 <argument> ::= <var_type>&<id>
+<argument> ::= <var_type>&<id>=<literal>
+<argument> ::= const <var_type>
+<argument> ::= const <var_type>=<literal>
+<argument> ::= const <var_type> <id>
+<argument> ::= const <var_type> <id>=<literal>
+<argument> ::= const <var_type>&
+<argument> ::= const <var_type>&=<literal>
 <argument> ::= const <var_type>&<id>
-<block> ::= "{}"
+<argument> ::= const <var_type>&<id>=<literal>
+<block> ::= "{""}"
 <block> ::= "{"<block_body>"}"
 <block_body> ::= <block_element>
 <block_body> ::= <block_body><block_element>
-<block_element> ::= <vars_declaration>
+<block_element> ::= <vars>
 <block_element> ::= ;
 <block_element> ::= <expression>;
 <block_element> ::= <return>;
@@ -101,31 +129,12 @@
 <object> ::= <id>
 <object> ::= <id>.<id>
 <object> ::= <id>-">"<id>
-<class_props_declaration> ::= <var_type> <class_props_list>;
-<class_props_declaration> ::= const <var_type> <class_props_list>;
-<vars_declaration> ::= <var_type> <vars_list>;
-<vars_declaration> ::= <var_type>*<vars_list>;
-<vars_declaration> ::= const <var_type> <vars_list>;
-<vars_declaration> ::= const <var_type>*<vars_list>;
-<var_type> ::= int
-<var_type> ::= double
-<var_type> ::= char
-<var_type> ::= bool
-<var_type> ::= <id>
-<class_props_list> ::= <id>
-<class_props_list> ::= <class_props_list>,<id>
-<vars_list> ::= <id>
-<vars_list> ::= <vars_list>,<id>
-<vars_list> ::= <vars_list>,*<id>
-<vars_list> ::= <id>=<operator_1>
-<vars_list> ::= <vars_list>,<id>=<operator_1>
-<vars_list> ::= <vars_list>,*<id>=<operator_1>
-<loop> ::= <while-loop>
-<loop> ::= <do-while-loop>
-<loop> ::= <for-loop>
-<while-loop> ::= while"("<expression>")"<block>
-<do-while-loop> ::= do<block>while"("<expression>")";
-<for-loop> ::= for"("<expression>;<expression>;<expression>")"<block>
+<loop> ::= <while_loop>
+<loop> ::= <do_while_loop>
+<loop> ::= <for_loop>
+<while_loop> ::= while"("<expression>")"<block>
+<do_while_loop> ::= do<block>while"("<expression>")";
+<for_loop> ::= for"("<expression>;<expression>;<expression>")"<block>
 <branching> ::= if"("<expression>")"<block>
 <branching> ::= if"("<expression>")"<block>else<block>
 
