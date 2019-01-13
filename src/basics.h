@@ -446,7 +446,7 @@ static QList<GrammarRule> initGrammarFullRules()
       << GrammarRule(N_OP_8, EmptyTokenList() << S_DECREMENT << N_OBJECT)
       //<< GrammarRule(N_OP_8, EmptyTokenList() << S_AMP << N_OBJECT)
 
-      << GrammarRule(N_OP_9, EmptyTokenList() << S_ROUND_OPEN << N_EXPRESSION << S_ROUND_CLOSE)
+      << GrammarRule(N_OP_9, EmptyTokenList() << S_ROUND_OPEN << N_OP_2 << S_ROUND_CLOSE)
       << GrammarRule(N_OP_9, EmptyTokenList() << T_CONST) << GrammarRule(N_OP_9, EmptyTokenList() << N_OBJECT)
       << GrammarRule(N_OP_9, EmptyTokenList() << N_OBJECT << S_INCREMENT)
       << GrammarRule(N_OP_9, EmptyTokenList() << N_OBJECT << S_DECREMENT)

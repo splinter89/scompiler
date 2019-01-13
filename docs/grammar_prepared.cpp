@@ -118,7 +118,7 @@
 <operator_8> ::= ++<object>
 <operator_8> ::= --<object>
 <operator_8> ::= &<object>
-<operator_9> ::= "("<expression>")"
+<operator_9> ::= "("<operator_2>")"
 <operator_9> ::= <literal>
 <operator_9> ::= <object>
 <operator_9> ::= <object>++

@@ -20,7 +20,7 @@
 <operator_6> ::= [<operator_6>(+|-)]<operator_7>
 <operator_7> ::= [<operator_7>(*|/|%)]<operator_8>
 <operator_8> ::= ([(+|-|!|*)]<operator_9>|(++|--|&)<object>)
-<operator_9> ::= ("("<expression>")"|<literal>|<object>[(++|--)]|<function_call>)
+<operator_9> ::= ("("<operator_2>")"|<literal>|<object>[(++|--)]|<function_call>)
 <function_call> ::= <object>"("[<expression>]")"
 <object> ::= [<id>(.|-">")]<id>
 <loop> ::= (<while_loop>|<do_while_loop>|<for_loop>)
