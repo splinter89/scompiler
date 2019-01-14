@@ -18,14 +18,13 @@ void SSyntacticAnalyzer::setGrammar(QList<GrammarRule> grammar, const QString ca
     QTime timer;
     timer.start();
     bool use_cache = (grammar_.length() > 1);
-    if (!use_cache || !readFromCache(cache_filename, true)) {
-        if (!generateSetOfSituations()) return;
-
-        if (use_cache) writeToCache(cache_filename);
-    }
     if (!use_cache || !readFromCache(cache_filename, false)) {
-        if (!generateActionGotoTables()) return;
+        if (!use_cache || !readFromCache(cache_filename, true)) {
+            if (!generateSetOfSituations()) return;
+            if (use_cache) writeToCache(cache_filename);
+        }
 
+        if (!generateActionGotoTables()) return;
         if (use_cache) writeToCache(cache_filename);
     }
     qDebug() << QString("grammar updated: %1 sec").arg(QString::number(timer.elapsed() / 1000., 'f', 3));
