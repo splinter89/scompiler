@@ -495,36 +495,26 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     QList<int> declared_symbols_indexes;
     QList<int> declared_arg_symbols_indexes;
     int symbol_index;
-    int object_symbol_id;
+    int object_symbol_id = -1;
     DataType expr_type;
     bool is_const;
     DataType rvalue_type;
+    int temp_class_index;  // for class search
     // symbol params
     QList<int> args_indexes;
     ArgType arg_type;
     DataType data_type;
-    int decl_vars_count;
-    int class_index;
-    AccessSpecifier access_type;
+    int decl_vars_count = 0;
+    int class_index = -1;
+    AccessSpecifier access_type = ACCESS_PUBLIC;
     QList<int> members_indexes;
 
-    states_stack.clear();
-    tokens_stack.clear();
-    ids_stack.clear();
     states_stack << 0;  // initial state
 
     symbol_table_.clear();
     block_table_.clear();
 
     block_index = addEmptyBlock(-1);  // global context
-    declared_symbols_indexes.clear();
-    declared_arg_symbols_indexes.clear();
-    object_symbol_id = -1;
-    args_indexes.clear();
-    decl_vars_count = 0;
-    class_index = -1;
-    access_type = ACCESS_PRIVATE;
-    members_indexes.clear();
 
     while (!tokens_accepted && (i < tokens.length())) {
         int state = states_stack.last();
@@ -581,44 +571,92 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                 // full grammar because we logic depends on the indices
                 int rule_index_full = indexOfGrammarRule(rule.left_token, rule.right_side, Grammar_full);
 
-                int temp_class_index;  // for class search
-
                 // filling up the symbol table
                 switch (rule_index_full) {
-                    case 7:
-                    case 8:
-                        if (rule_index_full == 7) members_indexes.clear();
+                    case 3:
+                    case 4:
+                        // <program_element>
+                        members_indexes.clear();
+                        break;
+
+                    case 5:
+                    case 6:
+                        // <class>
+                        if (rule_index_full == 5) Q_ASSERT(members_indexes.isEmpty());
+
                         declared_symbols_indexes
                           << addSymbolClass(table_ids.at(ids_stack.last().index).name, members_indexes);
-                        if (rule_index_full == 8) members_indexes.clear();
                         ids_stack.removeLast();
                         break;
 
-                    case 10:
-                    case 12:
-                        // <class_body> with <access_spec>
-                        // access_type = ...
-                        break;
-                    case 17:
+                    case 11:
                         access_type = ACCESS_PUBLIC;
                         break;
-                    case 18:
+                    case 12:
                         access_type = ACCESS_PRIVATE;
                         break;
 
-                    case 21:
-                    case 22:
-                    case 23:
-                    case 24:
-                        // <class_method>
-                        if ((rule_index_full == 21 || (rule_index_full == 23))) args_indexes.clear();
-                        if ((rule_index_full == 23 || (rule_index_full == 24))) data_type = TYPE_VOID;
+                    case 14:
+                    case 16:
+                        // <vars_or_function>, function
+                        if (rule_index_full == 16) data_type = TYPE_VOID;
                         symbol_index =
                           addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
                         declared_symbols_indexes << symbol_index;
                         members_indexes << symbol_index;
-                        setSymbolClassMemberAccessType(symbol_index, access_type);
-                        if ((rule_index_full == 22 || (rule_index_full == 24))) args_indexes.clear();
+                        //setSymbolClassMemberAccessType(symbol_index, access_type); :TODO: in/out of class?
+                        args_indexes.clear();
+                        ids_stack.removeLast();
+                        break;
+
+                    case 22:
+                    case 23:
+                    case 24:
+                    case 25:
+                    case 26:
+                    case 27:
+                    case 28:
+                    case 29:
+                        // <vars>
+                        is_const = (rule_index_full >= 26) && (rule_index_full <= 29);
+                        decl_vars_count++;
+                        while (decl_vars_count) {
+                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name, data_type,
+                                                             class_index, is_const);
+                            declared_symbols_indexes << symbol_index;
+                            members_indexes << symbol_index;
+                            //setSymbolClassMemberAccessType(symbol_index, access_type); :TODO: in/out of class?
+                            ids_stack.removeLast();
+                            decl_vars_count--;
+                        }
+                        break;
+
+                    case 30:
+                        data_type = TYPE_INT;
+                        break;
+                    case 31:
+                        data_type = TYPE_DOUBLE;
+                        break;
+                    case 32:
+                        data_type = TYPE_CHAR;
+                        break;
+                    case 33:
+                        data_type = TYPE_BOOL;
+                        break;
+                    case 34:
+                        // <var_type> ::= <id>
+                        temp_class_index =
+                          indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name, SYM_CLASS, 0);
+                        if (temp_class_index > -1) {
+                            data_type = TYPE_OBJECT;
+                            class_index = temp_class_index;
+                        } else {
+                            emit semantic_error(-1, QString("(%1) %2")
+                                                      .arg(table_ids.at(ids_stack.last().index).name)
+                                                      .arg(error_msg(E_INVALID_OBJECT_TYPE)));
+                            result.clear();
+                            return result;
+                        }
                         ids_stack.removeLast();
                         break;
 
@@ -626,23 +664,30 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     case 36:
                     case 37:
                     case 38:
-                        // <function>
-                        if ((rule_index_full == 35 || (rule_index_full == 37))) args_indexes.clear();
-                        if ((rule_index_full == 37 || (rule_index_full == 38))) data_type = TYPE_VOID;
-                        declared_symbols_indexes
-                          << addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
-                        if ((rule_index_full == 36 || (rule_index_full == 38))) args_indexes.clear();
-                        ids_stack.removeLast();
+                        // <more_vars>
+                        decl_vars_count++;
                         break;
 
-                    case 41:
-                    case 42:
-                    case 43:
-                    case 44:
+                    case 39:
+                    case 40:
+                        // <function> without arguments
+                        Q_ASSERT(args_indexes.isEmpty());
+                        break;
+
+                    case 47:
+                    case 48:
+                    case 51:
+                    case 52:
+                    case 55:
+                    case 56:
+                    case 59:
+                    case 60:
                         // <argument>
-                        is_const = ((rule_index_full == 42) || (rule_index_full == 44));
-                        arg_type =
-                          ((rule_index_full == 41) || (rule_index_full == 42)) ? ARG_BY_VALUE : ARG_BY_REFERENCE;
+                        is_const = (rule_index_full >= 53) && (rule_index_full <= 60);
+                        arg_type = (((rule_index_full >= 45) && (rule_index_full <= 48))
+                                    || ((rule_index_full >= 53) && (rule_index_full <= 56)))
+                                     ? ARG_BY_VALUE
+                                     : ARG_BY_REFERENCE;
                         symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name, data_type,
                                                          class_index, arg_type, is_const);
                         args_indexes << symbol_index;
@@ -650,42 +695,23 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         ids_stack.removeLast();
                         break;
 
-                    case 60:
-                    case 61:
-                    case 62:
-                    case 63:
-                    case 64:
-                    case 65:
-                        // <operator_1> with assignment
-                    case 120:
-                    case 121:
-                        // <vars_list> with assignment
-                        rvalue_type = ((rule_index_full == 120) || (rule_index_full == 121)) ? expr_type : data_type;
-                        //qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
-                        if (symbol_table_.at(object_symbol_id).data_type != rvalue_type) {
-                            emit semantic_error(
-                              -1, QString("(%1 and %2) %3")
-                                    .arg(dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index))
-                                    .arg(dataTypeToString(rvalue_type, class_index))
-                                    .arg(error_msg(E_TYPES_MISMATCH)));
-                        }
-                        break;
-
-                    case 94:
-                        // <operator_9> ::= <literal>
+                    case 108:
+                        // <operator_9>, assign const
                         expr_type = table_consts.at(tokens.at(i - 1).index).type;
                         // :TODO: need to use token_stack - not tokens (??? - check)
                         // tokens only work for "a = 12" but not for "a = 12 + d"
                         break;
-                    case 95:
-                    case 98:
+                    case 109:
+                    case 110:
+                    case 111:
+                        // <operator_9>, assign object or function call
                         expr_type = symbol_table_.at(object_symbol_id).data_type;
                         //qDebug() << dataTypeToString(expr_type, class_index) << "expr_type";
                         // :TODO: use expr_type_stack to check compatibility in rules that combine two operands
                         break;
 
-                    case 99:
-                    case 100:
+                    case 113:
+                    case 114:
                         // <function_call>
                         if (symbol_table_.at(object_symbol_id).type != SYM_FUNCTION) {
                             emit semantic_error(-1, QString("(Call to %1) %2")
@@ -696,7 +722,7 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         }
                         break;
 
-                    case 101:
+                    case 115:
                         // <object> ::= <id>
                         object_symbol_id = indexOfSymbolInCurrentBlock(
                           table_ids.at(ids_stack.last().index).name, SYM_ARGUMENT, block_index,
@@ -720,7 +746,7 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         }
                         ids_stack.removeLast();
                         break;
-                    case 102:
+                    case 116:
                         // <object> ::= <id>.<id>
                         temp_class_index = indexOfSymbolInCurrentBlock(
                           table_ids.at(ids_stack.at(ids_stack.length() - 2).index).name, SYM_CLASS, block_index,
@@ -752,87 +778,46 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         ids_stack.removeLast();
                         ids_stack.removeLast();
                         break;
-                    case 103:
+                    case 117:
                         // <object> ::= <id>-">"<id>
                         // :TODO:
                         ids_stack.removeLast();
                         ids_stack.removeLast();
                         break;
 
-                    case 104:
-                    case 105:
-                        // <class_props_declaration>
-                        is_const = (rule_index_full == 105);
-                        while (decl_vars_count) {
-                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name, data_type,
-                                                             class_index, is_const);
-                            declared_symbols_indexes << symbol_index;
-                            members_indexes << symbol_index;
-                            setSymbolClassMemberAccessType(symbol_index, access_type);
-                            ids_stack.removeLast();
-                            decl_vars_count--;
-                        }
-                        break;
-
-                    case 106:
-                    //case 107:
-                    case 108:
-                        //case 109:
-                        // <vars_declaration>
-                        is_const = ((rule_index_full == 108) || (rule_index_full == 109));
-                        while (decl_vars_count) {
-                            declared_symbols_indexes << addSymbolVariable(table_ids.at(ids_stack.last().index).name,
-                                                                          data_type, class_index, is_const);
-                            ids_stack.removeLast();
-                            decl_vars_count--;
-                        }
-                        break;
-
-                    case 110:
-                        data_type = TYPE_INT;
-                        break;
-                    case 111:
-                        data_type = TYPE_DOUBLE;
-                        break;
-                    case 112:
-                        data_type = TYPE_CHAR;
-                        break;
-                    case 113:
-                        data_type = TYPE_BOOL;
-                        break;
-                    case 114:
-                        temp_class_index =
-                          indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name, SYM_CLASS, 0);
-                        if (temp_class_index > -1) {
-                            data_type = TYPE_OBJECT;
-                            class_index = temp_class_index;
-                        } else {
-                            emit semantic_error(-1, QString("(%1) %2")
-                                                      .arg(table_ids.at(ids_stack.last().index).name)
-                                                      .arg(error_msg(E_INVALID_OBJECT_TYPE)));
-                            result.clear();
-                            return result;
-                        }
-                        ids_stack.removeLast();
-                        break;
-
-                    case 115:
-                    case 116:
-                        // <class_props_list>
-                    case 117:
-                    case 118:
-                        // vars_list
-                        decl_vars_count++;
-                        break;
-
-                        //case 120:
-                        //case 121:
-                        // see 60
-
                     default:
                         //args_indexes.clear();
                         //addSymbolFunction(table_ids.at(ids_stack.last().index).name, TYPE_VOID, args_indexes);
                         //ids_stack.removeLast();
+                        break;
+                }
+
+                // perform extra checks
+                switch (rule_index_full) {
+                    case 24:
+                    case 25:
+                    case 28:
+                    case 29:
+                        // <vars> with assignment
+                    case 36:
+                    case 38:
+                        // <more_vars> with assignment
+                    case 76:
+                    case 77:
+                    case 78:
+                    case 79:
+                    case 80:
+                    case 81:
+                        // <operator_1> with assignment
+                        rvalue_type = expr_type;  // :TODO: data_type? smth else?
+                        //qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
+                        if (symbol_table_.at(object_symbol_id).data_type != rvalue_type) {
+                            emit semantic_error(
+                              -1, QString("(%1 and %2) %3")
+                                    .arg(dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index))
+                                    .arg(dataTypeToString(rvalue_type, class_index))
+                                    .arg(error_msg(E_TYPES_MISMATCH)));
+                        }
                         break;
                 }
 
