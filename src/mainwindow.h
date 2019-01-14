@@ -68,6 +68,7 @@ private:
     QString base_window_title_;
     QString file_dialog_dir_;
     const QString cache_filename_ = ":/cache.dat";
+    const bool allow_custom_grammars_ = false;
 
     void initInterface();
     void initLogic();

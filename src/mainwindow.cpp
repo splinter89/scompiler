@@ -169,7 +169,9 @@ void MainWindow::initInterface()
     grid_synt_4->addWidget(table_synt_4_);
     tab_synt_4->setLayout(grid_synt_4);
     // ////
-    tab_synt_main_->addTab(tab_synt_5, trUtf8("set grammar"));
+    if (allow_custom_grammars_) {
+        tab_synt_main_->addTab(tab_synt_5, trUtf8("set grammar"));
+    }
     // //// ////
     QGridLayout* grid_synt_5 = new QGridLayout();
     table_synt_5_ = new QTableWidget(0, 2);
@@ -267,7 +269,10 @@ void MainWindow::initLogic()
     grammar_ = setGrammarRules(grammar_active_rules_);
 
     updateSyntTables();  // init checkboxes
-    updateGrammar();     // generate stuff
+    if (!allow_custom_grammars_) {
+        setCheckedAllRules(1);
+    }
+    updateGrammar();  // generate stuff
 }
 
 void MainWindow::displayError(int pos, QString msg)
@@ -725,8 +730,9 @@ void MainWindow::run()
             int rule_index_full =
               indexOfGrammarRule(grammar_.at(rule_index).left_token, grammar_.at(rule_index).right_side, Grammar_full);
             text_rule_first << QString::number(rule_index);
-            text_rule_second << (QString("#%1 (%2)\n\t").arg(rule_index).arg(rule_index_full)
-                                 + grammar_.at(rule_index).toString());
+            text_rule_second << (allow_custom_grammars_ ? QString("#%1 (%2)\n\t").arg(rule_index).arg(rule_index_full)
+                                                        : QString("#%1\n\t").arg(rule_index))
+                                  + grammar_.at(rule_index).toString();
         }
         text_rules = text_rule_first.join(" ") + "\n\n"
                      + trUtf8("Details:\n=========================================\n")
