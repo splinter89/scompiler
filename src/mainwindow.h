@@ -67,7 +67,7 @@ private:
 
     QString base_window_title_;
     QString file_dialog_dir_;
-    QString cache_filename_ = "scompiler_cache.dat";
+    const QString cache_filename_ = ":/cache.dat";
 
     void initInterface();
     void initLogic();

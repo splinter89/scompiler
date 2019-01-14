@@ -23,11 +23,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainW
     }
     //setFixedSize(width(), height());
 
-    initInterface();  // >:[]
-    initLogic();
-
     base_window_title_ = windowTitle();
     file_dialog_dir_ = QDir::currentPath();  // QCoreApplication::applicationDirPath()
+
+    initInterface();  // >:[]
+    initLogic();
     openFile();
     setStatusMsg("ok");
 }

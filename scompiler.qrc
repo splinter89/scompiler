@@ -5,4 +5,7 @@
         <file>icons/run.png</file>
         <file>icons/save.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>cache.dat</file>
+    </qresource>
 </RCC>
