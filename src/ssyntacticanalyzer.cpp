@@ -339,6 +339,27 @@ int SSyntacticAnalyzer::indexOfSymbolInCurrentBlock(QString name,
     return res;
 }
 
+bool SSyntacticAnalyzer::checkIfTypesMatch(const int object_symbol_id,
+                                           const DataType rvalue_type,
+                                           const int class_index)
+{
+    if (object_symbol_id == -1) return false;
+
+    // :TODO: expr_type --- data_type? smth else?
+    // :TODO: multiple class indeces?
+    //qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
+    Symbol symbol = symbol_table_.at(object_symbol_id);
+    if (symbol.data_type != rvalue_type) {
+        emit semantic_error(-1, QString("(%1 and %2) %3")
+                                  .arg(dataTypeToString(symbol.data_type, class_index))
+                                  .arg(dataTypeToString(rvalue_type, class_index))
+                                  .arg(error_msg(E_TYPES_MISMATCH)));
+        return false;
+    }
+
+    return true;
+}
+
 bool SSyntacticAnalyzer::generateSetOfSituations()
 {
     if (grammar_.isEmpty()) {
@@ -498,7 +519,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     int object_symbol_id = -1;
     DataType expr_type;
     bool is_const;
-    DataType rvalue_type;
     int temp_class_index;  // for class search
     // symbol params
     QList<int> args_indexes;
@@ -506,7 +526,7 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     QList<DataType> data_types_stack;
     DataType temp_data_type;  // for list of vars
     int decl_vars_count = 0;
-    int class_index = -1;  // for data_types_stack
+    int class_index = -1;  // for var_type
     AccessSpecifier access_type = ACCESS_PUBLIC;
     QList<int> members_indexes;
 
@@ -528,8 +548,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
 
         if (!action_table_.at(state).contains(token)) {
             // action not defined
-            result.clear();
             emit syntax_error(-1, error_msg(E_INTERNAL_ACTION_UNDEFINED));
+            result.clear();
             return result;
         }
 
@@ -564,8 +584,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                 if ((states_stack.length() <= rule.right_side.length())
                     || (tokens_stack.length() < rule.right_side.length())) {
                     // stacks have too few items
-                    result.clear();
                     emit syntax_error(-1, error_msg(E_INTERNAL_STATES_STACK_EMPTY));
+                    result.clear();
                     return result;
                 }
 
@@ -631,6 +651,15 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                             ids_stack.removeLast();
                             decl_vars_count--;
                         }
+
+                        if ((rule_index_full == 24) || (rule_index_full == 25) || (rule_index_full == 28)
+                            || (rule_index_full == 29)) {
+                            // <vars> with assignment
+                            if (!checkIfTypesMatch(symbol_index, expr_type, class_index)) {
+                                result.clear();
+                                return result;
+                            }
+                        }
                         break;
 
                     case 30:
@@ -649,16 +678,16 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         // <var_type> ::= <id>
                         temp_class_index =
                           indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name, SYM_CLASS, 0);
-                        if (temp_class_index > -1) {
-                            data_types_stack << TYPE_OBJECT;
-                            class_index = temp_class_index;
-                        } else {
+                        if (temp_class_index == -1) {
                             emit semantic_error(-1, QString("(%1) %2")
                                                       .arg(table_ids.at(ids_stack.last().index).name)
                                                       .arg(error_msg(E_INVALID_OBJECT_TYPE)));
                             result.clear();
                             return result;
                         }
+
+                        data_types_stack << TYPE_OBJECT;
+                        class_index = temp_class_index;
                         ids_stack.removeLast();
                         break;
 
@@ -668,6 +697,15 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     case 38:
                         // <more_vars>
                         decl_vars_count++;
+
+                        if ((rule_index_full == 36) || (rule_index_full == 38)) {
+                            // <more_vars> with assignment
+                            // :TODO: object_symbol_id --- symbols will be inserted later in while-loop
+                            //if (!checkIfTypesMatch(object_symbol_id, expr_type, class_index)) {
+                            //    result.clear();
+                            //    return result;
+                            //}
+                        }
                         break;
 
                     case 39:
@@ -695,6 +733,19 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         args_indexes << symbol_index;
                         declared_arg_symbols_indexes << symbol_index;
                         ids_stack.removeLast();
+                        break;
+
+                    case 76:
+                    case 77:
+                    case 78:
+                    case 79:
+                    case 80:
+                    case 81:
+                        // <operator_1> with assignment
+                        if (!checkIfTypesMatch(object_symbol_id, expr_type, class_index)) {
+                            result.clear();
+                            return result;
+                        }
                         break;
 
                     case 108:
@@ -794,35 +845,6 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         break;
                 }
 
-                // perform extra checks
-                switch (rule_index_full) {
-                    case 24:
-                    case 25:
-                    case 28:
-                    case 29:
-                        // <vars> with assignment
-                    case 36:
-                    case 38:
-                        // <more_vars> with assignment
-                    case 76:
-                    case 77:
-                    case 78:
-                    case 79:
-                    case 80:
-                    case 81:
-                        // <operator_1> with assignment
-                        rvalue_type = expr_type;  // :TODO: data_type? smth else?
-                        //qDebug() << dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index) << "lvalue_type";
-                        if (symbol_table_.at(object_symbol_id).data_type != rvalue_type) {
-                            emit semantic_error(
-                              -1, QString("(%1 and %2) %3")
-                                    .arg(dataTypeToString(symbol_table_.at(object_symbol_id).data_type, class_index))
-                                    .arg(dataTypeToString(rvalue_type, class_index))
-                                    .arg(error_msg(E_TYPES_MISMATCH)));
-                        }
-                        break;
-                }
-
                 // ...back to our finite-state machine
                 for (int num = 0; num < rule.right_side.length(); num++) {
                     states_stack.removeLast();
@@ -836,8 +858,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     result << action.index;
                 } else {
                     // goto not defined
-                    result.clear();
                     emit syntax_error(-1, error_msg(E_INTERNAL_GOTO_UNDEFINED));
+                    result.clear();
                     return result;
                 }
                 break;
@@ -856,8 +878,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     }
     if (i >= tokens.length()) {
         // tokens not accepted
-        result.clear();
         emit syntax_error(-1, error_msg(E_CHAIN_REJECTED));
+        result.clear();
         return result;
     }
 

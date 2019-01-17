@@ -64,6 +64,7 @@ private:
                                     SymbolType type,
                                     int block_index,
                                     QList<int> declared_but_not_in_block_indexes);
+    bool checkIfTypesMatch(const int object_symbol_id, const DataType rvalue_type, const int class_index);
 
 signals:
     void syntax_error(int pos, QString msg);
