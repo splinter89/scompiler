@@ -503,9 +503,10 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
     // symbol params
     QList<int> args_indexes;
     ArgType arg_type;
-    DataType data_type;
+    QList<DataType> data_types_stack;
+    DataType temp_data_type;  // for list of vars
     int decl_vars_count = 0;
-    int class_index = -1;
+    int class_index = -1;  // for data_types_stack
     AccessSpecifier access_type = ACCESS_PUBLIC;
     QList<int> members_indexes;
 
@@ -599,9 +600,9 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     case 14:
                     case 16:
                         // <vars_or_function>, function
-                        if (rule_index_full == 16) data_type = TYPE_VOID;
-                        symbol_index =
-                          addSymbolFunction(table_ids.at(ids_stack.last().index).name, data_type, args_indexes);
+                        if (rule_index_full == 16) data_types_stack << TYPE_VOID;
+                        symbol_index = addSymbolFunction(table_ids.at(ids_stack.last().index).name,
+                                                         data_types_stack.takeLast(), args_indexes);
                         declared_symbols_indexes << symbol_index;
                         members_indexes << symbol_index;
                         //setSymbolClassMemberAccessType(symbol_index, access_type); :TODO: in/out of class?
@@ -619,9 +620,10 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                     case 29:
                         // <vars>
                         is_const = (rule_index_full >= 26) && (rule_index_full <= 29);
+                        temp_data_type = data_types_stack.takeLast();
                         decl_vars_count++;
                         while (decl_vars_count) {
-                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name, data_type,
+                            symbol_index = addSymbolVariable(table_ids.at(ids_stack.last().index).name, temp_data_type,
                                                              class_index, is_const);
                             declared_symbols_indexes << symbol_index;
                             members_indexes << symbol_index;
@@ -632,23 +634,23 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                         break;
 
                     case 30:
-                        data_type = TYPE_INT;
+                        data_types_stack << TYPE_INT;
                         break;
                     case 31:
-                        data_type = TYPE_DOUBLE;
+                        data_types_stack << TYPE_DOUBLE;
                         break;
                     case 32:
-                        data_type = TYPE_CHAR;
+                        data_types_stack << TYPE_CHAR;
                         break;
                     case 33:
-                        data_type = TYPE_BOOL;
+                        data_types_stack << TYPE_BOOL;
                         break;
                     case 34:
                         // <var_type> ::= <id>
                         temp_class_index =
                           indexOfSymbolDeclaredInBlock(table_ids.at(ids_stack.last().index).name, SYM_CLASS, 0);
                         if (temp_class_index > -1) {
-                            data_type = TYPE_OBJECT;
+                            data_types_stack << TYPE_OBJECT;
                             class_index = temp_class_index;
                         } else {
                             emit semantic_error(-1, QString("(%1) %2")
@@ -688,8 +690,8 @@ QList<int> SSyntacticAnalyzer::process(QList<TokenPointer> tokens,
                                     || ((rule_index_full >= 53) && (rule_index_full <= 56)))
                                      ? ARG_BY_VALUE
                                      : ARG_BY_REFERENCE;
-                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name, data_type,
-                                                         class_index, arg_type, is_const);
+                        symbol_index = addSymbolArgument(table_ids.at(ids_stack.last().index).name,
+                                                         data_types_stack.takeLast(), class_index, arg_type, is_const);
                         args_indexes << symbol_index;
                         declared_arg_symbols_indexes << symbol_index;
                         ids_stack.removeLast();
